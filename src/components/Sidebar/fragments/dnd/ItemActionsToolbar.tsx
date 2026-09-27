@@ -11,8 +11,6 @@ interface IItemActionsToolbarProps {
 
 export const ItemActionsToolbar = ({ isActive, isSelected, children }: IItemActionsToolbarProps) => (
   <div
-    onClick={(event) => event.stopPropagation()}
-    onPointerDown={(event) => event.stopPropagation()}
     className={clsx(
       'pointer-events-none absolute top-1/2 right-1 z-10 flex -translate-y-1/2 items-center gap-0.5 rounded-lg py-0.5 pr-0.5 pl-5 opacity-0 ring-1 backdrop-blur-md transition-opacity duration-200 ease-out motion-reduce:transition-none',
       '[mask-image:linear-gradient(to_right,transparent_0px,black_20px,black_100%)] [-webkit-mask-image:linear-gradient(to_right,transparent_0px,black_20px,black_100%)]',

@@ -19,7 +19,10 @@ const BOOTSTRAP_CONFIG = {
 };
 
 const escapeForInlineScript = (json: string) =>
-  json.replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
+  json
+    .replaceAll('<', String.raw`\u003c`)
+    .replaceAll('>', String.raw`\u003e`)
+    .replaceAll('&', String.raw`\u0026`);
 
 export const THEME_BOOTSTRAP = `
 (() => {

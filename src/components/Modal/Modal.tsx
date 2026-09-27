@@ -2,7 +2,7 @@
 
 import { clsx } from 'clsx';
 import { X } from 'lucide-react';
-import { type MouseEvent, type ReactNode, type TransitionEvent, useEffect, useRef, useState } from 'react';
+import { type ReactNode, type TransitionEvent, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useFocusTrap } from '@hooks';
@@ -30,8 +30,7 @@ export const Modal = ({
   layerClassName = 'z-50',
 }: IModalProps) => {
   const t = useTranslations();
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDialogElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
   const onCloseRef = useRef(onClose);
 
@@ -74,12 +73,6 @@ export const Modal = ({
     return null;
   }
 
-  const handleBackdropClick = (e: MouseEvent) => {
-    if (e.target === overlayRef.current) {
-      onClose();
-    }
-  };
-
   const handleTransitionEnd = (e: TransitionEvent) => {
     if (e.target === e.currentTarget && !open) {
       setShowing(false);
@@ -88,18 +81,24 @@ export const Modal = ({
 
   return createPortal(
     <div
-      ref={overlayRef}
-      onClick={handleBackdropClick}
       onTransitionEnd={handleTransitionEnd}
       className={clsx(
-        'fixed inset-0 flex items-center justify-center bg-[color:var(--scrim)] transition-opacity duration-200 ease-out starting:opacity-0',
+        'fixed inset-0 flex items-center justify-center transition-opacity duration-200 ease-out starting:opacity-0',
         layerClassName,
         open ? 'opacity-100' : 'pointer-events-none opacity-0',
       )}
     >
-      <div
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label={t.common.close}
+        onClick={onClose}
+        className="absolute inset-0 bg-[color:var(--scrim)]"
+      />
+
+      <dialog
+        open
         ref={panelRef}
-        role="dialog"
         aria-modal="true"
         tabIndex={-1}
         className={clsx(
@@ -121,7 +120,7 @@ export const Modal = ({
           </button>
         )}
         {children}
-      </div>
+      </dialog>
     </div>,
     document.body,
   );

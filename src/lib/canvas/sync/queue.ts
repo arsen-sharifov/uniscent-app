@@ -15,7 +15,14 @@ import {
 } from '@api/client';
 import { event } from '@/lib/events';
 
-import { FLUSH_DEBOUNCE_MS, INITIAL_SAVE_STATE, MAX_RETRIES, OFFLINE_POLL_INTERVAL_MS, RETRY_BASE_MS } from './consts';
+import {
+  CREATE_TYPES_BY_DELETE,
+  FLUSH_DEBOUNCE_MS,
+  INITIAL_SAVE_STATE,
+  MAX_RETRIES,
+  OFFLINE_POLL_INTERVAL_MS,
+  RETRY_BASE_MS,
+} from './consts';
 
 type TSaveStatusListener = (state: ISaveState) => void;
 
@@ -113,7 +120,7 @@ const isNodeUpdate = (
   operation: TCanvasOperation,
 ): operation is TCanvasOperation & {
   type: (typeof NODE_UPDATE_TYPES)[number];
-} => NODE_UPDATE_TYPES.some((type) => type === operation.type);
+} => NODE_UPDATE_TYPES.includes(operation.type as (typeof NODE_UPDATE_TYPES)[number]);
 
 const rebuildLastIndex = (operations: TCanvasOperation[], lastIndex: Map<string, number>) => {
   lastIndex.clear();
@@ -130,46 +137,49 @@ const dropDependentOperations = (result: TCanvasOperation[], nodeId: string) => 
   result.push(...remaining);
 };
 
+const cancelCreate = (result: TCanvasOperation[], lastIndex: Map<string, number>, operation: TCanvasOperation) => {
+  const createTypes = CREATE_TYPES_BY_DELETE[operation.type];
+  if (!createTypes) return false;
+
+  const createIndex = result.findIndex(
+    (existing) => createTypes.includes(existing.type) && existing.id === operation.id,
+  );
+  if (createIndex === -1) return false;
+
+  result.splice(createIndex, 1);
+  rebuildLastIndex(result, lastIndex);
+
+  return true;
+};
+
+const overrideUpdate = (result: TCanvasOperation[], lastIndex: Map<string, number>, operation: TCanvasOperation) => {
+  if (!isNodeUpdate(operation)) return false;
+
+  const key = `${operation.type}:${operation.id}`;
+  const existingIndex = lastIndex.get(key);
+  if (existingIndex === undefined) {
+    lastIndex.set(key, result.length);
+
+    return false;
+  }
+
+  result[existingIndex] = operation;
+
+  return true;
+};
+
 const coalesce = (operations: TCanvasOperation[]): TCanvasOperation[] => {
   const result: TCanvasOperation[] = [];
   const lastIndex = new Map<string, number>();
 
-  const overrideKey = (operation: TCanvasOperation): string | null =>
-    isNodeUpdate(operation) ? `${operation.type}:${operation.id}` : null;
-
-  const cancelCreate = (createType: TCanvasOperation['type'] | TCanvasOperation['type'][], id: string): boolean => {
-    const types = Array.isArray(createType) ? createType : [createType];
-    const createIndex = result.findIndex((existing) => types.includes(existing.type) && existing.id === id);
-    if (createIndex === -1) return false;
-    result.splice(createIndex, 1);
-    rebuildLastIndex(result, lastIndex);
-
-    return true;
-  };
-
-  for (const operation of operations) {
-    if (operation.type === 'deleteNode') {
-      dropDependentOperations(result, operation.id);
-      if (cancelCreate(['createCanvasNode', 'createReferenceNode'], operation.id)) continue;
-      rebuildLastIndex(result, lastIndex);
-    } else if (operation.type === 'deleteEdge') {
-      if (cancelCreate('createEdge', operation.id)) continue;
-    } else if (operation.type === 'deleteComment') {
-      if (cancelCreate('createComment', operation.id)) continue;
-    }
-
-    const key = overrideKey(operation);
-    if (key !== null) {
-      const existingIndex = lastIndex.get(key);
-      if (existingIndex !== undefined) {
-        result[existingIndex] = operation;
-        continue;
-      }
-      lastIndex.set(key, result.length);
-    }
+  operations.forEach((operation) => {
+    if (operation.type === 'deleteNode') dropDependentOperations(result, operation.id);
+    if (cancelCreate(result, lastIndex, operation)) return;
+    if (operation.type === 'deleteNode') rebuildLastIndex(result, lastIndex);
+    if (overrideUpdate(result, lastIndex, operation)) return;
 
     result.push(operation);
-  }
+  });
 
   return result;
 };

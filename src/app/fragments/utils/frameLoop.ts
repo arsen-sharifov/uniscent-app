@@ -18,7 +18,7 @@ export const createFrameLoop = (
 
   return {
     start: () => {
-      if (frame === null) frame = requestAnimationFrame(tick);
+      frame ??= requestAnimationFrame(tick);
     },
     stop: () => {
       if (frame !== null) cancelAnimationFrame(frame);

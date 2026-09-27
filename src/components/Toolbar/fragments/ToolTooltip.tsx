@@ -28,9 +28,9 @@ export const ToolTooltip = ({ tool, top, visible }: IToolTooltipProps) => {
 
         {tool?.shortcut && (
           <div className="flex shrink-0 items-center gap-1 border-l border-[color:var(--surface)]/20 pl-2">
-            {renderShortcut(tool.shortcut).map((token, idx) => (
+            {renderShortcut(tool.shortcut).map((token) => (
               <kbd
-                key={idx}
+                key={token}
                 className="flex h-[18px] min-w-[18px] items-center justify-center rounded-md border border-[color:var(--surface)]/20 bg-[color:var(--surface)]/12 px-1.5 font-mono-ui text-[10px] font-medium text-[color:var(--surface)]"
               >
                 {token}

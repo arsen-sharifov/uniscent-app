@@ -26,7 +26,7 @@ export interface IToolGroup {
 
 export interface IToolbarModel {
   groups: IToolGroup[];
-  pendingGroupSizes: number[];
+  pendingGroups: IToolGroup[];
   activeTool: string;
   handleToolClick: (id: string) => void;
 }

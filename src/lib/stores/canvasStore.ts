@@ -275,7 +275,7 @@ const sameComments = (a: IComment[], b: IComment[]): boolean =>
   a.every((comment, index) => {
     const other = b[index];
 
-    return other !== undefined && comment.id === other.id && comment.text === other.text;
+    return comment.id === other?.id && comment.text === other.text;
   });
 
 const sameNodeContent = (a: Node, b: Node): boolean => {
@@ -322,7 +322,7 @@ export const useCanvasStore = create<ICanvasStore>()(
       let dragOrigin: Node[] | null = null;
 
       const appendNode = (node: TCanvasNode | TReferenceNode, extra?: Partial<{ referenceSearchPosition: null }>) => {
-        set({ nodes: [...get().nodes, node], ...(extra ?? {}) });
+        set({ nodes: [...get().nodes, node], ...extra });
       };
 
       const replayDiff = (before: IPersistedSnapshot) => {
@@ -415,7 +415,7 @@ export const useCanvasStore = create<ICanvasStore>()(
           const temporalApi = useCanvasStore.temporal.getState();
 
           if (isDragging) {
-            if (dragOrigin === null) dragOrigin = prev;
+            dragOrigin ??= prev;
             temporalApi.pause();
             set({ nodes: next });
 
@@ -646,7 +646,7 @@ export const useCanvasStore = create<ICanvasStore>()(
 
           const currentNodes = get().nodes;
           const target = currentNodes.find((node) => node.id === id);
-          if (!target || target.type !== ECanvasNodeType.Canvas || !isCanvasNodeData(target.data)) return;
+          if (target?.type !== ECanvasNodeType.Canvas || !isCanvasNodeData(target.data)) return;
 
           const nextValue = !target.data.isAnswer;
           if (nextValue && !hasValidatedParent(id, currentNodes, get().edges)) return;
@@ -708,7 +708,7 @@ export const useCanvasStore = create<ICanvasStore>()(
           if (!access.canEditCanvas) return;
 
           const source = nodes.find((node) => node.id === id);
-          if (!source || source.type !== ECanvasNodeType.Canvas) return;
+          if (source?.type !== ECanvasNodeType.Canvas) return;
           if (!isCanvasNodeData(source.data)) return;
 
           const newNodeId = crypto.randomUUID();
@@ -780,7 +780,7 @@ export const useCanvasStore = create<ICanvasStore>()(
           const target = get().nodes.find((node) => node.id === nodeId);
           const comment =
             target && isCanvasNodeData(target.data) ? target.data.comments.find((c) => c.id === commentId) : null;
-          if (!comment || comment.authorId !== userId) return;
+          if (comment?.authorId !== userId) return;
 
           set({
             nodes: get().nodes.map((node) => {

@@ -50,7 +50,7 @@ export const RoleSelect = ({ value, roles, onChange, ariaLabel, className }: IRo
 
     const options = menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]');
     const selectedIndex = roles.findIndex((role) => role.id === value);
-    options?.[selectedIndex >= 0 ? selectedIndex : 0]?.focus();
+    options?.[Math.max(selectedIndex, 0)]?.focus();
 
     return () => {
       document.removeEventListener('mousedown', onPointerDown);
@@ -69,7 +69,7 @@ export const RoleSelect = ({ value, roles, onChange, ariaLabel, className }: IRo
 
     if (options.length === 0) return;
 
-    const currentIndex = options.findIndex((option) => option === document.activeElement);
+    const currentIndex = options.indexOf(document.activeElement as HTMLButtonElement);
 
     if (event.key === 'ArrowDown') {
       event.preventDefault();
@@ -113,9 +113,10 @@ export const RoleSelect = ({ value, roles, onChange, ariaLabel, className }: IRo
         <div
           ref={menuRef}
           role="listbox"
+          tabIndex={-1}
           aria-label={ariaLabel}
           onKeyDown={handleMenuKeyDown}
-          className="absolute top-full left-0 z-20 mt-1 max-h-56 min-w-full overflow-y-auto rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] p-1 shadow-[var(--shadow-modal)]"
+          className="absolute top-full left-0 z-20 mt-1 max-h-56 min-w-full overflow-y-auto rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] p-1 shadow-[var(--shadow-modal)] outline-none"
         >
           {roles.map((role) => {
             const isSelected = role.id === value;

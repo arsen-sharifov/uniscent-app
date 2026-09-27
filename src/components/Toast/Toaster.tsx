@@ -19,15 +19,14 @@ export const Toaster = () => {
   }
 
   return createPortal(
-    <div
-      role="region"
+    <section
       aria-label={t.common.notifications}
       className="pointer-events-none fixed top-4 right-[var(--toast-safe-right)] z-90 flex w-[min(24rem,calc(100vw-var(--toast-safe-right)-1rem))] flex-col gap-2"
     >
       {[...toasts].reverse().map((toast) => (
         <ToastItem key={toast.id} toast={toast} onDismiss={dismiss} />
       ))}
-    </div>,
+    </section>,
     document.body,
   );
 };

@@ -54,7 +54,7 @@ const WorkspaceLayout = ({ children }: { children: ReactNode }) => {
     loading,
   } = useWorkspaceManager();
 
-  const { groups, pendingGroupSizes, activeTool, handleToolClick } = useToolbar(loading);
+  const { groups, pendingGroups, activeTool, handleToolClick } = useToolbar(loading);
 
   const workspaceSettingsTarget = workspaces.find((workspace) => workspace.id === workspaceSettingsId);
 
@@ -117,7 +117,7 @@ const WorkspaceLayout = ({ children }: { children: ReactNode }) => {
         threadId={activeThreadId ?? undefined}
         threadName={activeThreadName ?? undefined}
         groups={groups}
-        pendingGroupSizes={pendingGroupSizes}
+        pendingGroups={pendingGroups}
         activeTool={activeTool}
         onToolClick={handleToolClick}
       />

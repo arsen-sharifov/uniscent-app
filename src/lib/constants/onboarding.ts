@@ -80,7 +80,9 @@ export const ANCHOR_SEPARATOR = '|';
 
 const TOUR_CARD_ATTRIBUTE = 'data-tour-card';
 
-export const TOUR_OVERLAY_SELECTOR = `[role="dialog"]:not([${TOUR_CARD_ATTRIBUTE}]), [role="menu"]`;
+const TOUR_HINT_ATTRIBUTE = 'data-tour-hint';
+
+export const TOUR_OVERLAY_SELECTOR = `dialog:not([${TOUR_CARD_ATTRIBUTE}]):not([${TOUR_HINT_ATTRIBUTE}]), [role="dialog"], [role="menu"]`;
 
 const TOUR_SCRIM_ATTRIBUTE = 'data-tour-scrim';
 

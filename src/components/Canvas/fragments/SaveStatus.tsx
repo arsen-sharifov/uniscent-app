@@ -26,8 +26,8 @@ export const SaveStatus = ({ state }: ISaveStatusProps) => {
   }
 
   return (
-    <div
-      role={state.status === 'error' ? 'alert' : 'status'}
+    <output
+      role={state.status === 'error' ? 'alert' : undefined}
       aria-live={state.status === 'error' ? 'assertive' : 'polite'}
       aria-label={t.platform.canvas.save[ARIA_LABEL_KEY_BY_STATUS[state.status]]}
       className={clsx(
@@ -98,6 +98,6 @@ export const SaveStatus = ({ state }: ISaveStatusProps) => {
           </span>
         </>
       )}
-    </div>
+    </output>
   );
 };

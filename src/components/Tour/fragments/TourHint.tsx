@@ -47,6 +47,7 @@ export const TourHint = ({ hint }: ITourHintProps) => {
       <dialog
         open
         ref={cardRef}
+        data-tour-hint
         aria-label={copy.title}
         style={{ top, left, visibility: measured && ring ? undefined : 'hidden' }}
         className="fixed inset-auto z-70 m-0 flex items-end gap-1 border-0 bg-transparent p-0 text-inherit"

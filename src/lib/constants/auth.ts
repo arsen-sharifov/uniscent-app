@@ -5,4 +5,4 @@ export const MIN_PASSWORD_LENGTH = 8;
 
 export const MAX_NAME_LENGTH = 60;
 
-export const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL_PATTERN = /^[^\s@]+@[^\s@][^\s@.]*\.[^\s@]+$/;

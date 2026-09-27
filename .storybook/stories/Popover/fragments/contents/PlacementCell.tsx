@@ -1,18 +1,18 @@
 import { type ReactNode, useState } from 'react';
 
-import type { TPopoverPlacement } from '@interfaces';
+import type { IPopoverTrigger, TPopoverPlacement } from '@interfaces';
 
 import { Popover } from '@/components';
 
 interface IPlacementCellProps {
   placement: TPopoverPlacement;
   label: string;
-  trigger: ReactNode;
+  renderTrigger: (trigger: IPopoverTrigger) => ReactNode;
   content: ReactNode;
   onOpenChange?: (open: boolean) => void;
 }
 
-export const PlacementCell = ({ placement, label, trigger, content, onOpenChange }: IPlacementCellProps) => {
+export const PlacementCell = ({ placement, label, renderTrigger, content, onOpenChange }: IPlacementCellProps) => {
   const [open, setOpen] = useState(false);
 
   return (
@@ -24,7 +24,7 @@ export const PlacementCell = ({ placement, label, trigger, content, onOpenChange
         open={open}
         placement={placement}
         offset={8}
-        trigger={trigger}
+        renderTrigger={renderTrigger}
         onOpenChange={(next) => {
           onOpenChange?.(next);
           setOpen(next);

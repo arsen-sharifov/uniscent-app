@@ -16,15 +16,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import type { IProjection, TDropZone, TNavItem, TNavItemType } from '@interfaces';
 
-import {
-  AUTO_EXPAND_DELAY_MS,
-  DROP_ZONE_HYSTERESIS_PX,
-  FOLDER_INSIDE_THRESHOLD,
-  KEYBOARD_SENSOR_OPTIONS,
-  LEAF_SPLIT_THRESHOLD,
-  POINTER_SENSOR_OPTIONS,
-} from '../consts';
-import { flattenTree, getProjection, removeChildrenOf } from '../utils';
+import { AUTO_EXPAND_DELAY_MS, KEYBOARD_SENSOR_OPTIONS, POINTER_SENSOR_OPTIONS } from '../consts';
+import { flattenTree, getDropPosition, getProjection, removeChildrenOf, resolveDropZone } from '../utils';
 
 interface IUseDndTreeOptions {
   items: TNavItem[];
@@ -33,33 +26,6 @@ interface IUseDndTreeOptions {
   editingId?: string | null;
   selectedIds?: Set<string>;
 }
-
-const findAnchorAtParent = <T extends { id: string; parentId: string | null }>(
-  items: T[],
-  id: string,
-  targetParentId: string | null,
-): string | null => {
-  const node = items.find((item) => item.id === id);
-  if (!node) return null;
-  if (node.parentId === targetParentId) return node.id;
-
-  return node.parentId ? findAnchorAtParent(items, node.parentId, targetParentId) : null;
-};
-
-const resolveFolderZone = (ratio: number, prev: TDropZone, sameTarget: boolean, buffer: number): TDropZone => {
-  if (!sameTarget) return ratio < FOLDER_INSIDE_THRESHOLD ? 'before' : 'inside';
-  if (prev === 'before') return ratio > FOLDER_INSIDE_THRESHOLD + buffer ? 'inside' : 'before';
-  if (prev === 'inside') return ratio < FOLDER_INSIDE_THRESHOLD - buffer ? 'before' : 'inside';
-
-  return ratio < FOLDER_INSIDE_THRESHOLD ? 'before' : 'inside';
-};
-
-const resolveLeafZone = (ratio: number, prev: TDropZone, sameTarget: boolean, buffer: number): TDropZone => {
-  if (!sameTarget) return ratio < LEAF_SPLIT_THRESHOLD ? 'before' : 'after';
-  if (prev === 'before') return ratio > LEAF_SPLIT_THRESHOLD + buffer ? 'after' : 'before';
-
-  return ratio < LEAF_SPLIT_THRESHOLD - buffer ? 'before' : 'after';
-};
 
 export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedIds }: IUseDndTreeOptions) => {
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
@@ -116,22 +82,14 @@ export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedI
     const result: IProjection = isPastLast ? { depth: 0, parentId: null, zone: 'after' } : base;
 
     const activeItem = sortableItems.find((item) => item.id === activeId);
-    if (!activeItem || activeItem.parentId !== result.parentId) return result;
+    if (activeItem?.parentId !== result.parentId) return result;
 
-    const siblings = sortableItems.filter((item) => item.parentId === result.parentId);
-    const activeIdx = siblings.findIndex((item) => item.id === activeId);
+    const activeIdx = sortableItems
+      .filter((item) => item.parentId === result.parentId)
+      .findIndex((item) => item.id === activeId);
     if (activeIdx === -1) return result;
 
-    const targetIdx = (() => {
-      if (result.zone === 'inside') return 0;
-      const anchorId = findAnchorAtParent(sortableItems, overId, result.parentId);
-      const siblingsSansActive = siblings.filter((item) => item.id !== activeId);
-      const anchorIdx = anchorId ? siblingsSansActive.findIndex((item) => item.id === anchorId) : -1;
-
-      return anchorIdx === -1 ? siblingsSansActive.length : anchorIdx + (result.zone === 'after' ? 1 : 0);
-    })();
-
-    if (targetIdx === activeIdx) return null;
+    if (getDropPosition(sortableItems, activeId, overId, result) === activeIdx) return null;
 
     return result;
   }, [sortableItems, activeId, overId, dropZone, isPastLast]);
@@ -196,27 +154,53 @@ export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedI
     [flattenedItems, collapsedIds, editingId, selectedIds],
   );
 
+  const commitZone = useCallback((zone: TDropZone) => {
+    if (zoneRef.current === zone) return;
+    zoneRef.current = zone;
+    setDropZone(zone);
+  }, []);
+
+  const cancelAutoExpand = useCallback(() => {
+    clearExpandTimer();
+    expandTargetRef.current = null;
+  }, [clearExpandTimer]);
+
+  const armAutoExpand = useCallback(
+    (id: string) => {
+      if (expandTargetRef.current === id) return;
+      clearExpandTimer();
+      expandTargetRef.current = id;
+      expandTimerRef.current = setTimeout(() => {
+        expandForDrop(id);
+        expandTargetRef.current = null;
+      }, AUTO_EXPAND_DELAY_MS);
+    },
+    [clearExpandTimer, expandForDrop],
+  );
+
+  const trackPastLast = useCallback(
+    (pointerY: number | null) => {
+      const lastItem = sortableItems.at(-1);
+      const lastBottom = lastItem
+        ? document.querySelector(`[data-item-id="${lastItem.id}"]`)?.getBoundingClientRect().bottom
+        : undefined;
+      const nextPastLast = pointerY !== null && lastBottom !== undefined && pointerY > lastBottom;
+      setIsPastLast((prev) => (prev === nextPastLast ? prev : nextPastLast));
+    },
+    [sortableItems],
+  );
+
   const handleDragMove = useCallback(
     ({ activatorEvent, delta, over }: DragMoveEvent) => {
       const curOverId = (over?.id as string) ?? null;
       setOverId((prev) => (prev === curOverId ? prev : curOverId));
 
-      const hasPointer = 'clientY' in activatorEvent;
-      const pointerY = hasPointer ? (activatorEvent as PointerEvent).clientY + delta.y : null;
-
-      const lastItem = sortableItems[sortableItems.length - 1];
-      const lastEl = lastItem ? document.querySelector(`[data-item-id="${lastItem.id}"]`) : null;
-      const lastBottom = lastEl?.getBoundingClientRect().bottom;
-      const nextPastLast = pointerY !== null && lastBottom !== undefined && pointerY > lastBottom;
-      setIsPastLast((prev) => (prev === nextPastLast ? prev : nextPastLast));
+      const pointerY = 'clientY' in activatorEvent ? (activatorEvent as PointerEvent).clientY + delta.y : null;
+      trackPastLast(pointerY);
 
       if (!curOverId || curOverId === activeId) {
-        if (zoneRef.current !== 'after') {
-          zoneRef.current = 'after';
-          setDropZone('after');
-        }
-        clearExpandTimer();
-        expandTargetRef.current = null;
+        commitZone('after');
+        cancelAutoExpand();
 
         return;
       }
@@ -229,38 +213,17 @@ export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedI
       const rect = el.getBoundingClientRect();
       const ratio = Math.max(0, Math.min(1, (pointerY - rect.top) / rect.height));
 
-      const overItem = sortableItems.find((item) => item.id === curOverId);
-      const isFolder = overItem?.type === 'folder';
+      const isFolder = sortableItems.find((item) => item.id === curOverId)?.type === 'folder';
       const sameTarget = curOverId === prevMoveOverIdRef.current;
       prevMoveOverIdRef.current = curOverId;
 
-      const buffer = sameTarget ? DROP_ZONE_HYSTERESIS_PX / rect.height : 0;
-      const prev = zoneRef.current;
+      const zone = resolveDropZone(isFolder, ratio, zoneRef.current, sameTarget, rect.height);
+      commitZone(zone);
 
-      const zone = isFolder
-        ? resolveFolderZone(ratio, prev, sameTarget, buffer)
-        : resolveLeafZone(ratio, prev, sameTarget, buffer);
-
-      if (zone !== zoneRef.current) {
-        zoneRef.current = zone;
-        setDropZone(zone);
-      }
-
-      if (zone === 'inside' && overItem?.type === 'folder' && collapsedIds.has(curOverId)) {
-        if (expandTargetRef.current !== curOverId) {
-          clearExpandTimer();
-          expandTargetRef.current = curOverId;
-          expandTimerRef.current = setTimeout(() => {
-            expandForDrop(curOverId);
-            expandTargetRef.current = null;
-          }, AUTO_EXPAND_DELAY_MS);
-        }
-      } else if (expandTargetRef.current) {
-        clearExpandTimer();
-        expandTargetRef.current = null;
-      }
+      if (zone === 'inside' && isFolder && collapsedIds.has(curOverId)) armAutoExpand(curOverId);
+      else cancelAutoExpand();
     },
-    [activeId, sortableItems, collapsedIds, clearExpandTimer, expandForDrop],
+    [activeId, sortableItems, collapsedIds, trackPastLast, commitZone, cancelAutoExpand, armAutoExpand],
   );
 
   const handleDragEnd = useCallback(
@@ -298,17 +261,7 @@ export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedI
       }
 
       const activeItem = sortableItems[activeIndex] as (typeof sortableItems)[number];
-
-      const getPosition = () => {
-        if (projected.zone === 'inside') return 0;
-        const siblings = sortableItems.filter((item) => item.id !== draggedId && item.parentId === projected.parentId);
-        const anchorId = findAnchorAtParent(sortableItems, endOverId, projected.parentId);
-        const anchor = anchorId ? siblings.findIndex((item) => item.id === anchorId) : -1;
-        if (anchor === -1) return siblings.length;
-
-        return anchor + (projected.zone === 'after' ? 1 : 0);
-      };
-      const position = getPosition();
+      const position = getDropPosition(sortableItems, draggedId, endOverId, projected);
 
       if (isBulkDragRef.current && selectedIds && selectedIds.size > 1) {
         onBulkMove?.(selectedIds, projected.parentId, position);

@@ -3,11 +3,19 @@ import { describe, expect, test } from 'vitest';
 import type { IFlattenedItem } from '@interfaces';
 
 import { folderItem, threadItem } from '@mocks/sidebar';
-import { flattenTree, getProjection, removeChildrenOf } from '@/components/Sidebar/utils';
+import {
+  flattenTree,
+  getDropPosition,
+  getProjection,
+  removeChildrenOf,
+  resolveDropZone,
+} from '@/components/Sidebar/utils';
 
 const TREE = [folderItem('f1', [folderItem('f2', [threadItem('t1')]), threadItem('t2')]), threadItem('t3')];
 
 const FLAT = flattenTree(TREE, new Set());
+
+const ROW_HEIGHT = 32;
 
 describe('flattenTree', () => {
   describe('GIVEN a fully expanded nested tree', () => {
@@ -153,6 +161,99 @@ describe('removeChildrenOf', () => {
     describe('WHEN no ids are excluded', () => {
       test('THEN everything survives', () => {
         expect(removeChildrenOf(FLAT, new Set())).toEqual(FLAT);
+      });
+    });
+  });
+});
+
+describe('getDropPosition', () => {
+  describe('GIVEN a projection inside a folder', () => {
+    describe('WHEN the drop position is computed', () => {
+      test('THEN the item lands in the first slot', () => {
+        expect(getDropPosition(FLAT, 't3', 'f2', { depth: 2, parentId: 'f2', zone: 'inside' })).toBe(0);
+      });
+    });
+  });
+
+  describe('GIVEN a projection after a root row', () => {
+    describe('WHEN the drop position is computed', () => {
+      test('THEN the slot follows that row among the siblings without the dragged item', () => {
+        expect(getDropPosition(FLAT, 't1', 't3', { depth: 0, parentId: null, zone: 'after' })).toBe(2);
+      });
+    });
+  });
+
+  describe('GIVEN a projection before a deeply nested row', () => {
+    describe('WHEN the drop position is computed', () => {
+      test('THEN the ancestor at the target level anchors the slot', () => {
+        expect(getDropPosition(FLAT, 't3', 't1', { depth: 1, parentId: 'f1', zone: 'before' })).toBe(0);
+      });
+    });
+  });
+
+  describe('GIVEN a hovered row outside the target level', () => {
+    describe('WHEN the drop position is computed', () => {
+      test('THEN the item lands at the end of that level', () => {
+        expect(getDropPosition(FLAT, 't1', 't3', { depth: 1, parentId: 'f1', zone: 'after' })).toBe(2);
+      });
+    });
+  });
+});
+
+describe('resolveDropZone', () => {
+  describe('GIVEN a folder row entered fresh', () => {
+    describe('WHEN the pointer is placed on it', () => {
+      test('THEN the top edge drops before and the body drops inside', () => {
+        expect(resolveDropZone(true, 0.2, 'after', false, ROW_HEIGHT)).toBe('before');
+        expect(resolveDropZone(true, 0.5, 'after', false, ROW_HEIGHT)).toBe('inside');
+      });
+    });
+  });
+
+  describe('GIVEN a folder row already targeted', () => {
+    describe('WHEN the pointer drifts within the hysteresis buffer', () => {
+      test('THEN the previous zone holds', () => {
+        expect(resolveDropZone(true, 0.3, 'before', true, ROW_HEIGHT)).toBe('before');
+        expect(resolveDropZone(true, 0.2, 'inside', true, ROW_HEIGHT)).toBe('inside');
+      });
+    });
+
+    describe('WHEN the pointer clears the buffer', () => {
+      test('THEN the zone flips', () => {
+        expect(resolveDropZone(true, 0.5, 'before', true, ROW_HEIGHT)).toBe('inside');
+        expect(resolveDropZone(true, 0.05, 'inside', true, ROW_HEIGHT)).toBe('before');
+      });
+    });
+
+    describe('WHEN the previous zone came from a leaf row', () => {
+      test('THEN the plain folder threshold decides', () => {
+        expect(resolveDropZone(true, 0.2, 'after', true, ROW_HEIGHT)).toBe('before');
+        expect(resolveDropZone(true, 0.3, 'after', true, ROW_HEIGHT)).toBe('inside');
+      });
+    });
+  });
+
+  describe('GIVEN a leaf row entered fresh', () => {
+    describe('WHEN the pointer is placed on it', () => {
+      test('THEN the halves split the row without a buffer', () => {
+        expect(resolveDropZone(false, 0.45, 'after', false, ROW_HEIGHT)).toBe('before');
+        expect(resolveDropZone(false, 0.55, 'before', false, ROW_HEIGHT)).toBe('after');
+      });
+    });
+  });
+
+  describe('GIVEN a leaf row already targeted', () => {
+    describe('WHEN the pointer drifts within the hysteresis buffer', () => {
+      test('THEN the previous zone holds', () => {
+        expect(resolveDropZone(false, 0.6, 'before', true, ROW_HEIGHT)).toBe('before');
+        expect(resolveDropZone(false, 0.4, 'after', true, ROW_HEIGHT)).toBe('after');
+      });
+    });
+
+    describe('WHEN the pointer clears the buffer', () => {
+      test('THEN the zone flips', () => {
+        expect(resolveDropZone(false, 0.75, 'before', true, ROW_HEIGHT)).toBe('after');
+        expect(resolveDropZone(false, 0.25, 'after', true, ROW_HEIGHT)).toBe('before');
       });
     });
   });

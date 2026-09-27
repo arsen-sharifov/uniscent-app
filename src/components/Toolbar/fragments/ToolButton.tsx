@@ -1,13 +1,15 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useRef } from 'react';
 
 import type { IToolItem } from '@interfaces';
 
 import { isCanvasTool } from '@/components/tools';
 
-import { FLASH_DURATION_MS, ICON_STROKE, TOOL_ANCHORS, TOOL_TONES } from '../consts';
+import { ToolSelectionMark } from './ToolSelectionMark';
+import { ICON_STROKE, TOOL_ANCHORS, TOOL_TONES } from '../consts';
+import { useFlash } from '../hooks';
 import { toAriaShortcut } from '../utils';
 
 interface IToolButtonProps {
@@ -20,8 +22,7 @@ interface IToolButtonProps {
 
 export const ToolButton = ({ tool, active, onClick, onPointerEnter, onPointerLeave }: IToolButtonProps) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const flashTimerRef = useRef<number | null>(null);
-  const [flash, setFlash] = useState(false);
+  const { flash, triggerFlash } = useFlash();
   const isAction = tool.kind === 'action';
   const isSelected = active && !isAction && !tool.disabled;
   const Icon = tool.icon;
@@ -30,32 +31,14 @@ export const ToolButton = ({ tool, active, onClick, onPointerEnter, onPointerLea
     ? { color: tone.ink, backgroundColor: isSelected || flash ? tone.fill : undefined }
     : undefined;
 
-  useEffect(
-    () => () => {
-      if (flashTimerRef.current !== null) {
-        window.clearTimeout(flashTimerRef.current);
-      }
-    },
-    [],
-  );
-
   const handleClick = useCallback(() => {
     if (tool.disabled) return;
 
     onClick(tool.id);
     if (!isAction) return;
 
-    setFlash(true);
-
-    if (flashTimerRef.current !== null) {
-      window.clearTimeout(flashTimerRef.current);
-    }
-
-    flashTimerRef.current = window.setTimeout(() => {
-      flashTimerRef.current = null;
-      setFlash(false);
-    }, FLASH_DURATION_MS);
-  }, [tool.id, tool.disabled, isAction, onClick]);
+    triggerFlash();
+  }, [tool.id, tool.disabled, isAction, onClick, triggerFlash]);
 
   const handleEnter = useCallback(() => {
     if (!buttonRef.current || !onPointerEnter) return;
@@ -104,16 +87,7 @@ export const ToolButton = ({ tool, active, onClick, onPointerEnter, onPointerLea
         <Icon className="h-[17px] w-[17px]" strokeWidth={ICON_STROKE} />
       </button>
 
-      <span
-        aria-hidden
-        style={tone ? { backgroundColor: tone.ink } : undefined}
-        className={clsx(
-          'pointer-events-none absolute top-1/2 right-0 h-6 w-[3px] -translate-y-1/2 rounded-l-full',
-          !tone && 'bg-[color:var(--accent)]',
-          'transition-opacity duration-200 ease-out motion-reduce:transition-none',
-          isSelected ? 'opacity-100' : 'opacity-0',
-        )}
-      />
+      <ToolSelectionMark ink={tone?.ink} isSelected={isSelected} />
     </div>
   );
 };

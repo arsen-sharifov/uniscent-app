@@ -1,43 +1,40 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { useCallback, useEffect, useLayoutEffect, useRef, type KeyboardEvent, type ReactNode } from 'react';
+import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import type { TPopoverPlacement } from '@interfaces';
+import type { IPopoverTrigger, TPopoverPlacement } from '@interfaces';
 import { useEscapeKey, useMounted, useViewportChange } from '@hooks';
 
 export interface IPopoverProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  trigger: ReactNode;
+  renderTrigger: (trigger: IPopoverTrigger) => ReactNode;
   placement?: TPopoverPlacement;
   offset?: number;
   panelClassName?: string;
-  triggerClassName?: string;
   children: ReactNode;
 }
 
 export const Popover = ({
   open,
   onOpenChange,
-  trigger,
+  renderTrigger,
   placement = 'bottom-start',
   offset = 8,
   panelClassName,
-  triggerClassName,
   children,
 }: IPopoverProps) => {
-  const triggerRef = useRef<HTMLDivElement | null>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const [triggerElement, setTriggerElement] = useState<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDialogElement>(null);
 
   const mounted = useMounted();
 
   const place = useCallback(() => {
-    const triggerEl = triggerRef.current;
     const panelEl = panelRef.current;
-    if (!triggerEl || !panelEl) return;
-    const rect = triggerEl.getBoundingClientRect();
+    if (!triggerElement || !panelEl) return;
+    const rect = triggerElement.getBoundingClientRect();
     const panelWidth = panelEl.offsetWidth || rect.width;
 
     panelEl.style.position = 'fixed';
@@ -56,7 +53,7 @@ export const Popover = ({
     } else {
       panelEl.style.left = `${Math.max(8, rect.right - panelWidth)}px`;
     }
-  }, [placement, offset]);
+  }, [triggerElement, placement, offset]);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -70,13 +67,13 @@ export const Popover = ({
     const onDocClick = (event: MouseEvent) => {
       const target = event.target as Node;
       if (panelRef.current?.contains(target)) return;
-      if (triggerRef.current?.contains(target)) return;
+      if (triggerElement?.contains(target)) return;
       onOpenChange(false);
     };
     document.addEventListener('mousedown', onDocClick);
 
     return () => document.removeEventListener('mousedown', onDocClick);
-  }, [open, onOpenChange]);
+  }, [open, onOpenChange, triggerElement]);
 
   useEscapeKey(dismiss, open);
   useViewportChange({ onScroll: place, onResize: dismiss, enabled: open, capture: true });
@@ -86,45 +83,29 @@ export const Popover = ({
     panelRef.current?.focus();
   }, [open]);
 
-  const handleTriggerKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      onOpenChange(!open);
-    }
-  };
-
   return (
     <>
-      <div
-        ref={triggerRef}
-        role="button"
-        tabIndex={0}
-        aria-expanded={open}
-        aria-haspopup="dialog"
-        className={clsx(
-          'rounded-lg focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none',
-          triggerClassName,
-        )}
-        onClick={() => onOpenChange(!open)}
-        onKeyDown={handleTriggerKeyDown}
-      >
-        {trigger}
-      </div>
+      {renderTrigger({
+        ref: setTriggerElement,
+        onClick: () => onOpenChange(!open),
+        'aria-expanded': open,
+        'aria-haspopup': 'dialog',
+      })}
       {mounted &&
         open &&
         createPortal(
-          <div
+          <dialog
+            open
             ref={panelRef}
-            role="dialog"
             aria-modal="false"
             tabIndex={-1}
             className={clsx(
-              'overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--text)] shadow-[var(--shadow-modal)] outline-none',
+              'inset-auto overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--text)] shadow-[var(--shadow-modal)] outline-none',
               panelClassName,
             )}
           >
             {children}
-          </div>,
+          </dialog>,
           document.body,
         )}
     </>

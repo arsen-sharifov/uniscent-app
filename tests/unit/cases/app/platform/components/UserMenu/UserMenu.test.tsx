@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { TRANSLATIONS } from '@mocks/i18n';
@@ -22,10 +22,8 @@ describe('UserMenu', () => {
 
     describe('WHEN the user opens the menu after loading settles', () => {
       beforeEach(async () => {
-        await act(async () => {
-          render(<UserMenu />);
-        });
-        fireEvent.click(screen.getByText(TRANSLATIONS.common.userAvatar));
+        render(<UserMenu />);
+        fireEvent.click(await screen.findByText(TRANSLATIONS.common.userAvatar));
       });
 
       test('THEN settings and sign out remain available', () => {
@@ -42,10 +40,8 @@ describe('UserMenu', () => {
 
     describe('WHEN the user opens the menu', () => {
       beforeEach(async () => {
-        await act(async () => {
-          render(<UserMenu />);
-        });
-        fireEvent.click(screen.getByText(TRANSLATIONS.common.userAvatar));
+        render(<UserMenu />);
+        fireEvent.click(await screen.findByText(TRANSLATIONS.common.userAvatar));
       });
 
       test('THEN sign out remains available', () => {
@@ -63,13 +59,10 @@ describe('UserMenu', () => {
     describe('WHEN the user signs out', () => {
       beforeEach(async () => {
         signOut.mockResolvedValue(undefined);
-        await act(async () => {
-          render(<UserMenu />);
-        });
-        fireEvent.click(screen.getByText(TRANSLATIONS.common.userAvatar));
-        await act(async () => {
-          fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.sidebar.signOut }));
-        });
+        render(<UserMenu />);
+        fireEvent.click(await screen.findByText(TRANSLATIONS.common.userAvatar));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.sidebar.signOut }));
+        await vi.waitUntil(() => router.push.mock.calls.length > 0);
       });
 
       test('THEN the progress is forgotten before the sign-in page opens', () => {
@@ -81,13 +74,10 @@ describe('UserMenu', () => {
     describe('WHEN signing out fails on the api', () => {
       beforeEach(async () => {
         signOut.mockRejectedValue(new Error('network down'));
-        await act(async () => {
-          render(<UserMenu />);
-        });
-        fireEvent.click(screen.getByText(TRANSLATIONS.common.userAvatar));
-        await act(async () => {
-          fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.sidebar.signOut }));
-        });
+        render(<UserMenu />);
+        fireEvent.click(await screen.findByText(TRANSLATIONS.common.userAvatar));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.sidebar.signOut }));
+        await vi.waitUntil(() => router.push.mock.calls.length > 0);
       });
 
       test('THEN the progress is forgotten all the same', () => {

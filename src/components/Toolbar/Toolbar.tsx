@@ -24,14 +24,14 @@ export interface IToolbarProps {
   threadId?: string;
   threadName?: string;
   groups?: IToolGroup[];
-  pendingGroupSizes?: number[];
+  pendingGroups?: IToolGroup[];
   activeTool?: string;
   onToolClick?: (id: string) => void;
 }
 
 export const Toolbar = ({
   groups = [],
-  pendingGroupSizes = [],
+  pendingGroups = [],
   activeTool,
   onToolClick,
   threadId,
@@ -40,7 +40,7 @@ export const Toolbar = ({
   useToolbarShortcuts();
 
   const t = useTranslations();
-  const pending = pendingGroupSizes.length > 0;
+  const pending = pendingGroups.length > 0;
   const [hover, setHover] = useState<IToolHoverState | null>(null);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
 
@@ -108,16 +108,15 @@ export const Toolbar = ({
         onMouseLeave={hideHover}
         className="app-glass relative z-40 flex h-full w-14 shrink-0 flex-col items-stretch rounded-2xl border border-[color:var(--border)] transition-[background-color,border-color] duration-200 ease-out select-none motion-reduce:transition-none"
       >
-        {pending && <ToolbarSkeleton groupSizes={pendingGroupSizes} />}
+        {pending && <ToolbarSkeleton groups={pendingGroups} />}
 
         <div hidden={pending} className="flex flex-1 flex-col items-stretch px-2 pt-1">
           {groups.map((group, index) => (
-            <div
+            <fieldset
               key={group.id}
-              role="group"
               aria-label={group.label}
               className={clsx(
-                'flex flex-col items-stretch gap-1 py-2',
+                'flex min-w-0 flex-col items-stretch gap-1 py-2',
                 index > 0 && 'border-t border-[color:var(--border)]',
               )}
             >
@@ -131,7 +130,7 @@ export const Toolbar = ({
                   onPointerLeave={hideHover}
                 />
               ))}
-            </div>
+            </fieldset>
           ))}
         </div>
 

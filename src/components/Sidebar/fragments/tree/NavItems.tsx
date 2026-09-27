@@ -119,10 +119,7 @@ export const NavItems = ({
 
   const isDragActive = activeId !== null;
 
-  const visualOverId =
-    isPastLast && flattenedItems.length > 0
-      ? (flattenedItems[flattenedItems.length - 1] as (typeof flattenedItems)[number]).id
-      : overId;
+  const visualOverId = isPastLast ? (flattenedItems.at(-1)?.id ?? overId) : overId;
 
   const getDropIndicator = (itemId: string): TDropZone | null => {
     if (!activeId || !visualOverId || itemId !== visualOverId) return null;

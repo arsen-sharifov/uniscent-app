@@ -61,6 +61,28 @@ export const usePreferences = () => {
 
   useEffect(() => () => clearTimeout(debounceRef.current), []);
 
+  const revertPreference: TPreferenceUpdater = (key, value) =>
+    setPreferences((current) => {
+      if (current[key] !== value) {
+        return current;
+      }
+
+      const reverted = { ...current, [key]: lastSyncedRef.current[key] };
+      writeToStorage(reverted);
+
+      return reverted;
+    });
+
+  const savePreference = <Key extends keyof IPreferences>(next: IPreferences, key: Key, value: IPreferences[Key]) =>
+    upsertPreferences(next)
+      .then(() => {
+        lastSyncedRef.current = next;
+      })
+      .catch((error) => {
+        revertPreference(key, value);
+        event.error(error, { title: t.common.errorTitles.saveFailed, context: 'preferences.save' });
+      });
+
   const updatePreference: TPreferenceUpdater = (key, value) => {
     const signal = PREFERENCE_SIGNALS[key];
     if (signal && preferences[key] !== value) useOnboardingStore.getState().markSignal(signal);
@@ -73,25 +95,7 @@ export const usePreferences = () => {
       const next = { ...prev, [key]: value };
       writeToStorage(next);
       clearTimeout(debounceRef.current);
-      debounceRef.current = setTimeout(() => {
-        upsertPreferences(next)
-          .then(() => {
-            lastSyncedRef.current = next;
-          })
-          .catch((error) => {
-            setPreferences((current) => {
-              if (current[key] !== value) {
-                return current;
-              }
-
-              const reverted = { ...current, [key]: lastSyncedRef.current[key] };
-              writeToStorage(reverted);
-
-              return reverted;
-            });
-            event.error(error, { title: t.common.errorTitles.saveFailed, context: 'preferences.save' });
-          });
-      }, PREFERENCES_DEBOUNCE_MS);
+      debounceRef.current = setTimeout(() => savePreference(next, key, value), PREFERENCES_DEBOUNCE_MS);
 
       return next;
     });

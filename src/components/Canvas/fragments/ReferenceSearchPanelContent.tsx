@@ -30,7 +30,7 @@ export const ReferenceSearchPanelContent = ({
   const t = useTranslations();
   const [query, setQuery] = useState('');
   const [rawCursorIndex, setRawCursorIndex] = useState(0);
-  const panelRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDialogElement>(null);
   const listboxId = useId();
   const optionIdPrefix = useId();
 
@@ -102,14 +102,14 @@ export const ReferenceSearchPanelContent = ({
   const activeOptionId = filtered.length > 0 ? `${optionIdPrefix}-${cursorIndex}` : undefined;
 
   return (
-    <div
+    <dialog
+      open
       ref={panelRef}
-      role="dialog"
       aria-modal="true"
       data-tour="canvasReferenceSearch"
       aria-label={t.platform.canvas.referenceSearch.placeholder}
       style={{ left: screenPos.x, top: screenPos.y }}
-      className="fixed z-50 flex w-80 animate-rise-up flex-col overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] font-grotesk text-[color:var(--text)] shadow-[var(--shadow-modal)] motion-reduce:animate-none"
+      className="fixed inset-auto z-50 flex w-80 animate-rise-up flex-col overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] font-grotesk text-[color:var(--text)] shadow-[var(--shadow-modal)] motion-reduce:animate-none"
     >
       <div className="flex items-center gap-2 border-b border-[color:var(--border)] px-2.5 py-2.5">
         <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-[color:var(--accent-soft)] text-[color:var(--accent-text)]">
@@ -171,6 +171,6 @@ export const ReferenceSearchPanelContent = ({
           </span>
         </div>
       )}
-    </div>
+    </dialog>
   );
 };

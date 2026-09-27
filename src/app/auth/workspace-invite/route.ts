@@ -1,3 +1,1 @@
-import { handleWorkspaceInvite } from '@api/server';
-
-export const POST = handleWorkspaceInvite;
+export { handleWorkspaceInvite as POST } from '@api/server';

@@ -17,13 +17,13 @@ export const VISUAL_CONFIG: IVisualConfig = {
       padding: 28,
       includeDescendants: true,
     },
-    dialog: { mode: 'region', selectors: ['[role="dialog"]'], padding: 32 },
+    dialog: { mode: 'region', selectors: ['dialog'], padding: 32 },
     fullPage: { mode: 'full-page' },
     fullTarget: { mode: 'element', selector: VISUAL_TARGET_SELECTOR },
     menu: { mode: 'region', selectors: ['[role="menu"]'], padding: 32 },
     popover: {
       mode: 'region',
-      selectors: ['[aria-haspopup="dialog"]', '[role="dialog"]'],
+      selectors: ['[aria-haspopup="dialog"]', 'dialog'],
       padding: 32,
     },
     resolvedCanvas: {
@@ -31,7 +31,7 @@ export const VISUAL_CONFIG: IVisualConfig = {
       selectors: [CANVAS_NODE_SELECTOR, RESOLUTION_BAR_SELECTOR],
       padding: 72,
     },
-    stepper: { mode: 'region', selectors: ['[role="list"]'], padding: 24 },
+    stepper: { mode: 'region', selectors: ['ol'], padding: 24 },
     target: {
       mode: 'region',
       selectors: [VISUAL_TARGET_SELECTOR],

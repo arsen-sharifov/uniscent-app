@@ -51,6 +51,15 @@
   --hero-card-shadow: 0 14px 36px -18px rgba(0, 0, 0, 0.6);
   --hero-panel-shadow: 0 32px 80px -32px rgba(0, 0, 0, 0.85);
   --hero-stream-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.8);
+  --hero-counter-valid: var(--hero-lime-strong);
+  --hero-counter-valid-rim: rgba(74, 222, 128, 0.4);
+  --hero-counter-valid-tint: rgba(74, 222, 128, 0.1);
+  --hero-counter-refuted: #fca5a5;
+  --hero-counter-refuted-rim: rgba(248, 113, 113, 0.4);
+  --hero-counter-refuted-tint: rgba(248, 113, 113, 0.1);
+  --hero-counter-affected: #fcd34d;
+  --hero-counter-affected-rim: rgba(251, 191, 36, 0.38);
+  --hero-counter-affected-tint: rgba(251, 191, 36, 0.09);
   color-scheme: dark;
   background-color: var(--hero-ground);
 }
@@ -304,21 +313,21 @@
 }
 
 .hero-counter[data-tone='valid'] {
-  color: var(--hero-lime-strong);
-  border-color: rgba(74, 222, 128, 0.4);
-  background-color: rgba(74, 222, 128, 0.1);
+  color: var(--hero-counter-valid);
+  border-color: var(--hero-counter-valid-rim);
+  background-color: var(--hero-counter-valid-tint);
 }
 
 .hero-counter[data-tone='refuted'] {
-  color: #fca5a5;
-  border-color: rgba(248, 113, 113, 0.4);
-  background-color: rgba(248, 113, 113, 0.1);
+  color: var(--hero-counter-refuted);
+  border-color: var(--hero-counter-refuted-rim);
+  background-color: var(--hero-counter-refuted-tint);
 }
 
 .hero-counter[data-tone='affected'] {
-  color: #fcd34d;
-  border-color: rgba(251, 191, 36, 0.38);
-  background-color: rgba(251, 191, 36, 0.09);
+  color: var(--hero-counter-affected);
+  border-color: var(--hero-counter-affected-rim);
+  background-color: var(--hero-counter-affected-tint);
 }
 
 .hero-stage[data-phase='repaired'] .hero-claim[data-status='answer'] {
@@ -458,6 +467,15 @@
     --hero-stream-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 2px 5px rgba(13, 19, 16, 0.06),
       0 28px 64px -26px rgba(13, 19, 16, 0.22);
+    --hero-counter-valid: #15803d;
+    --hero-counter-valid-rim: rgba(22, 163, 74, 0.45);
+    --hero-counter-valid-tint: rgba(22, 163, 74, 0.1);
+    --hero-counter-refuted: #dc2626;
+    --hero-counter-refuted-rim: rgba(220, 38, 38, 0.4);
+    --hero-counter-refuted-tint: rgba(220, 38, 38, 0.08);
+    --hero-counter-affected: #b45309;
+    --hero-counter-affected-rim: rgba(217, 119, 6, 0.4);
+    --hero-counter-affected-tint: rgba(217, 119, 6, 0.08);
     color-scheme: light;
   }
 
@@ -479,24 +497,6 @@
   .hero-counter {
     border-color: rgba(13, 19, 16, 0.14);
     background-color: rgba(13, 19, 16, 0.04);
-  }
-
-  .hero-counter[data-tone='valid'] {
-    color: #15803d;
-    border-color: rgba(22, 163, 74, 0.45);
-    background-color: rgba(22, 163, 74, 0.1);
-  }
-
-  .hero-counter[data-tone='refuted'] {
-    color: #dc2626;
-    border-color: rgba(220, 38, 38, 0.4);
-    background-color: rgba(220, 38, 38, 0.08);
-  }
-
-  .hero-counter[data-tone='affected'] {
-    color: #b45309;
-    border-color: rgba(217, 119, 6, 0.4);
-    background-color: rgba(217, 119, 6, 0.08);
   }
 
   .stream-prompt {

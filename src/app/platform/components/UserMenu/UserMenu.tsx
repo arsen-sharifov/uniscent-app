@@ -84,9 +84,10 @@ export const UserMenu = ({ onSettingsClick }: IUserMenuProps) => {
       placement="top-start"
       offset={6}
       panelClassName="w-[var(--ws-popover-w,15rem)]"
-      trigger={
+      renderTrigger={(trigger) => (
         <button
           type="button"
+          {...trigger}
           data-tour="sidebarUserMenu"
           className={clsx(
             'group flex w-full min-w-0 items-center gap-2 rounded-xl px-2 py-1.5 text-left transition-colors',
@@ -100,7 +101,7 @@ export const UserMenu = ({ onSettingsClick }: IUserMenuProps) => {
           </span>
           <ChevronsUpDown className="h-3.5 w-3.5 shrink-0 text-[color:var(--text-subtle)] transition-colors group-hover:text-[color:var(--text)]" />
         </button>
-      }
+      )}
     >
       <div className="flex items-center gap-3 border-b border-[color:var(--border)] px-3 py-3">
         <Avatar name={displayName} icon={avatarIcon} size="md" />

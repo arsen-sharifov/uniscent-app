@@ -1,4 +1,5 @@
 import type { Edge, Node } from '@xyflow/react';
+import type { CSSProperties } from 'react';
 
 import {
   ECanvasNodeType,
@@ -6,7 +7,10 @@ import {
   type IReferenceNodeData,
   type TEdgeTone,
   type TEffectiveStatus,
+  type TNodeBandTone,
 } from '@interfaces';
+
+import { NODE_ALARM_WASHES } from '../consts';
 
 export const isCanvasNodeData = (data: Record<string, unknown>): data is ICanvasNodeData =>
   typeof data.label === 'string' &&
@@ -36,6 +40,15 @@ export const collectStatusTargetIds = (nodes: Node[], clickedId: string): string
 
 export const isAffected = (status: TEffectiveStatus | undefined): boolean =>
   status === 'tainted' || status === 'tainted-valid';
+
+export const resolveNodeWashStyle = (
+  tone: TNodeBandTone | undefined,
+  isEditing: boolean,
+): CSSProperties | undefined => {
+  const wash = tone && !isEditing ? NODE_ALARM_WASHES[tone] : undefined;
+
+  return wash ? { backgroundImage: `linear-gradient(${wash}, ${wash})` } : undefined;
+};
 
 const isMarkedValid = (status: TEffectiveStatus | undefined): boolean => status === 'valid' || isAffected(status);
 

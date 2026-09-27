@@ -1,6 +1,8 @@
 import { type MeasuringConfiguration, MeasuringStrategy } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 
+import type { TItemActionTone } from '@interfaces';
+
 export const MAX_DEPTH = 2;
 export const INDENTATION_WIDTH = 20;
 
@@ -24,3 +26,12 @@ export const DND_MEASURING: MeasuringConfiguration = {
 };
 
 export const SKELETON_ROW_WIDTHS: readonly string[] = ['w-40', 'w-28', 'w-36', 'w-24', 'w-32', 'w-20'];
+
+export const ITEM_ACTION_TONES: Record<TItemActionTone, string> = {
+  accent:
+    'cursor-pointer hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--accent-text)] active:bg-[color:var(--accent-soft)] active:text-[color:var(--accent-text)]',
+  neutral:
+    'cursor-pointer hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)] active:bg-[color:var(--surface-overlay)] active:text-[color:var(--text-strong)]',
+  danger:
+    'cursor-pointer hover:bg-[color:var(--status-error-bg)] hover:text-[color:var(--status-error)] active:bg-[color:var(--status-error-soft)] active:text-[color:var(--status-error)]',
+};

@@ -4,7 +4,7 @@ import { LOCALES } from '@/i18n';
 import { isDefaultZoom } from '@/lib/utils';
 
 const isOneOf = <T extends string>(values: readonly T[], candidate: unknown): candidate is T =>
-  typeof candidate === 'string' && values.some((value) => value === candidate);
+  typeof candidate === 'string' && values.includes(candidate as T);
 
 const isBoolean = (candidate: unknown): candidate is boolean => typeof candidate === 'boolean';
 

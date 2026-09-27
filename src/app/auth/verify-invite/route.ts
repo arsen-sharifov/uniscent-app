@@ -1,3 +1,1 @@
-import { handleVerifyInvite } from '@api/server';
-
-export const POST = handleVerifyInvite;
+export { handleVerifyInvite as POST } from '@api/server';

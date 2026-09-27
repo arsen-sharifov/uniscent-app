@@ -87,11 +87,8 @@ export const useDragSelect = ({ containerRef, onSelectionChange, enabled = true 
       const start = startPos.current;
       if (!start) return;
 
-      const dx = event.clientX - start.x;
-      const dy = event.clientY - start.y;
-
       if (!isActive.current) {
-        if (Math.sqrt(dx * dx + dy * dy) < DRAG_SELECT_ACTIVATION_PX) return;
+        if (Math.hypot(event.clientX - start.x, event.clientY - start.y) < DRAG_SELECT_ACTIVATION_PX) return;
         isActive.current = true;
       }
 

@@ -70,8 +70,8 @@ const meta: Meta<typeof Popover> = {
       description: 'Pixels between trigger and panel.',
       table: { category: ARG_CATEGORIES.APPEARANCE },
     },
-    trigger: {
-      description: 'Element that toggles the popover when clicked.',
+    renderTrigger: {
+      description: 'Render function for the toggle button. Spread the given trigger props onto a `<button>`.',
       table: { category: ARG_CATEGORIES.CONTENT },
     },
     children: {
@@ -103,7 +103,7 @@ const renderPopover = (): NonNullable<Story['render']> =>
 
 export const Default: Story = {
   args: {
-    trigger: <TriggerExample />,
+    renderTrigger: (trigger) => <TriggerExample {...trigger} />,
     children: <MenuExample onSelect={fn()} />,
   },
   decorators: [WithPad],
@@ -112,7 +112,7 @@ export const Default: Story = {
 
 export const IconAnchor: Story = {
   args: {
-    trigger: <IconTriggerExample />,
+    renderTrigger: (trigger) => <IconTriggerExample {...trigger} />,
     children: <MenuExample onSelect={fn()} />,
   },
   decorators: [WithPad],
@@ -129,7 +129,7 @@ export const ReferencePicker: Story = {
     },
   },
   args: {
-    trigger: <TriggerExample />,
+    renderTrigger: (trigger) => <TriggerExample {...trigger} />,
     children: <ReferencesExample onSelect={fn()} />,
   },
   decorators: [WithPad],
@@ -153,7 +153,7 @@ export const Placements: Story = {
           key={id}
           placement={id}
           label={label}
-          trigger={<TriggerExample />}
+          renderTrigger={(trigger) => <TriggerExample {...trigger} />}
           content={<MenuExample onSelect={fn()} />}
           onOpenChange={placementChangeHandler}
         />
@@ -174,7 +174,7 @@ export const OpenedByDefault: Story = {
   },
   args: {
     open: true,
-    trigger: <TriggerExample />,
+    renderTrigger: (trigger) => <TriggerExample {...trigger} />,
     children: <MenuExample onSelect={fn()} />,
   },
   decorators: [WithPad],
@@ -192,7 +192,7 @@ export const WithSearchableList: Story = {
     },
   },
   args: {
-    trigger: <TriggerExample />,
+    renderTrigger: (trigger) => <TriggerExample {...trigger} />,
     children: <SearchableReferencesExample onSelect={fn()} />,
   },
   decorators: [WithPad],
@@ -210,7 +210,7 @@ export const ViewportClamping: Story = {
   },
   args: {
     placement: 'bottom-end',
-    trigger: <TriggerExample />,
+    renderTrigger: (trigger) => <TriggerExample {...trigger} />,
     children: <MenuExample onSelect={fn()} />,
   },
   decorators: [WithBottomRightCorner],

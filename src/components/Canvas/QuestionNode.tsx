@@ -2,8 +2,7 @@
 
 import { Handle, type NodeProps } from '@xyflow/react';
 import { clsx } from 'clsx';
-import { ChevronDown } from 'lucide-react';
-import { type FocusEvent, type KeyboardEvent, useCallback, useEffect, useRef, useState } from 'react';
+import { type FocusEvent, type KeyboardEvent, useEffect, useRef } from 'react';
 
 import type { TCanvasNode } from '@interfaces';
 
@@ -12,7 +11,8 @@ import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
 import { canEditNode } from '@/lib/utils';
 
 import { HANDLE_POSITIONS } from './consts';
-import { NodeBand } from './fragments';
+import { ExpandToggle, NodeBand } from './fragments';
+import { useExpandableLabel } from './hooks';
 
 export const QuestionNode = ({ id, data, selected }: NodeProps<TCanvasNode>) => {
   const t = useTranslations();
@@ -31,11 +31,9 @@ export const QuestionNode = ({ id, data, selected }: NodeProps<TCanvasNode>) => 
   const isEditing = editingNodeId === id && canEdit;
   const hasLabel = label.trim().length > 0;
 
-  const [expanded, setExpanded] = useState(false);
-  const [overflows, setOverflows] = useState(false);
+  const { labelRefCallback, expanded, expandable, toggleExpanded } = useExpandableLabel(hasLabel);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const observerRef = useRef<ResizeObserver | null>(null);
 
   useEffect(() => {
     if (!isEditing) return;
@@ -46,27 +44,6 @@ export const QuestionNode = ({ id, data, selected }: NodeProps<TCanvasNode>) => 
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
   }, [isEditing]);
-
-  useEffect(
-    () => () => {
-      observerRef.current?.disconnect();
-      observerRef.current = null;
-    },
-    [],
-  );
-
-  const labelRefCallback = useCallback((node: HTMLParagraphElement | null) => {
-    observerRef.current?.disconnect();
-    observerRef.current = null;
-    if (!node) return;
-
-    const measure = () => setOverflows(node.scrollHeight - node.clientHeight > 1);
-    measure();
-
-    const observer = new ResizeObserver(measure);
-    observer.observe(node);
-    observerRef.current = observer;
-  }, []);
 
   const commit = (value: string) => {
     updateNodeLabel(id, value.trim() || label);
@@ -129,7 +106,7 @@ export const QuestionNode = ({ id, data, selected }: NodeProps<TCanvasNode>) => 
           />
         ) : (
           <p
-            ref={hasLabel ? labelRefCallback : undefined}
+            ref={labelRefCallback}
             className={clsx(
               'font-grotesk text-[17px] leading-[1.45] font-semibold tracking-tight break-words whitespace-pre-wrap select-none',
               hasLabel ? 'text-[color:var(--text-strong)]' : 'text-[color:var(--text-subtle)]',
@@ -140,24 +117,7 @@ export const QuestionNode = ({ id, data, selected }: NodeProps<TCanvasNode>) => 
           </p>
         )}
 
-        {!isEditing && hasLabel && (overflows || expanded) && (
-          <button
-            data-export-omit
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              setExpanded((prev) => !prev);
-            }}
-            onMouseDown={(event) => event.stopPropagation()}
-            className="nodrag inline-flex w-fit items-center gap-1 rounded-md font-mono-ui text-[10px] tracking-[0.04em] text-[color:var(--text-muted)] transition-colors duration-150 hover:text-[color:var(--accent-text)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none motion-reduce:transition-none"
-          >
-            <ChevronDown
-              className={clsx('h-3 w-3 transition-transform duration-200', expanded && 'rotate-180')}
-              strokeWidth={2.25}
-            />
-            {expanded ? t.platform.canvas.node.showLess : t.platform.canvas.node.showMore}
-          </button>
-        )}
+        {!isEditing && expandable && <ExpandToggle expanded={expanded} onToggle={toggleExpanded} />}
       </div>
     </div>
   );

@@ -21,7 +21,7 @@ interface IShortcutsHelpProps {
 
 export const ShortcutsHelp = ({ open, groups, activeTool, onClose }: IShortcutsHelpProps) => {
   const t = useTranslations();
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDialogElement>(null);
 
   useEscapeKey(onClose, open);
   useFocusTrap(dialogRef, open);
@@ -29,16 +29,21 @@ export const ShortcutsHelp = ({ open, groups, activeTool, onClose }: IShortcutsH
   if (!open || typeof window === 'undefined') return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4" onClick={onClose}>
-      <div aria-hidden className="absolute inset-0 bg-[color:var(--scrim)] backdrop-blur-sm" />
+    <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label={t.common.close}
+        onClick={onClose}
+        className="absolute inset-0 bg-[color:var(--scrim)] backdrop-blur-sm"
+      />
 
-      <div
+      <dialog
+        open
         data-tour="shortcutsSheet"
         ref={dialogRef}
-        role="dialog"
         aria-modal="true"
         aria-label={t.platform.canvas.shortcuts.ariaLabel}
-        onClick={(event) => event.stopPropagation()}
         className={clsx(
           'relative w-full max-w-[640px] overflow-hidden rounded-xl',
           'app-panel border border-[color:var(--border)]',
@@ -137,9 +142,9 @@ export const ShortcutsHelp = ({ open, groups, activeTool, onClose }: IShortcutsH
 
                       {tool.shortcut && (
                         <div className="mt-px flex shrink-0 items-center gap-1">
-                          {renderShortcut(tool.shortcut).map((token, i) => (
+                          {renderShortcut(tool.shortcut).map((token) => (
                             <kbd
-                              key={i}
+                              key={token}
                               className="flex h-5 min-w-[20px] items-center justify-center rounded-md border border-[color:var(--border-strong)] bg-[color:var(--surface-overlay)] px-1.5 font-mono-ui text-[10px] font-medium text-[color:var(--text)]"
                             >
                               {token}
@@ -166,7 +171,7 @@ export const ShortcutsHelp = ({ open, groups, activeTool, onClose }: IShortcutsH
             {t.platform.canvas.shortcuts.closeHint}
           </span>
         </div>
-      </div>
+      </dialog>
     </div>,
     document.body,
   );

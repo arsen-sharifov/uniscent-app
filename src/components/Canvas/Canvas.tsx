@@ -329,7 +329,7 @@ export const Canvas = ({
             stroke: edgePalette[tone].stroke,
             strokeWidth: EDGE_DEFAULT_STROKE_WIDTH,
           },
-          data: { ...(edge.data ?? {}), tone, bidirectional },
+          data: { ...edge.data, tone, bidirectional },
         },
       ];
     });

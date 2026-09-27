@@ -33,7 +33,7 @@ const getReferenceTargetsByIds = async (nodeIds: string[]): Promise<Record<strin
 
 const groupCommentsByNode = (comments: INodeCommentRow[]): Record<string, INodeCommentRow[]> =>
   comments.reduce<Record<string, INodeCommentRow[]>>((acc, comment) => {
-    (acc[comment.node_id] ??= []).push(comment);
+    acc[comment.node_id] = [...(acc[comment.node_id] ?? []), comment];
 
     return acc;
   }, {});

@@ -177,6 +177,41 @@ describe('dismissOverlays', () => {
       });
     });
   });
+
+  describe('GIVEN a native app dialog left open', () => {
+    beforeEach(() => {
+      mount('<dialog open><p>settings</p></dialog>');
+      document.addEventListener('keydown', onKeyDown);
+    });
+
+    describe('WHEN the tour takes over the screen', () => {
+      beforeEach(() => {
+        dismissOverlays();
+      });
+
+      test('THEN it asks the app to close it', () => {
+        expect(onKeyDown).toHaveBeenCalledOnce();
+        expect(onKeyDown.mock.calls[0]?.[0]).toMatchObject({ key: 'Escape' });
+      });
+    });
+  });
+
+  describe("GIVEN only the tour's step card and continue hint", () => {
+    beforeEach(() => {
+      mount('<dialog open data-tour-card></dialog><dialog open data-tour-hint></dialog>');
+      document.addEventListener('keydown', onKeyDown);
+    });
+
+    describe('WHEN the tour takes over the screen', () => {
+      beforeEach(() => {
+        dismissOverlays();
+      });
+
+      test('THEN nothing is closed', () => {
+        expect(onKeyDown).not.toHaveBeenCalled();
+      });
+    });
+  });
 });
 
 describe('readTourGeometry', () => {

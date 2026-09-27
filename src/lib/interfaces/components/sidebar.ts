@@ -4,6 +4,8 @@ export type TWorkspaceDropZone = 'before' | 'after';
 
 export type TSingleDeleteTitleKey = 'deleteWorkspaceTitle' | 'deleteFolderTitle' | 'deleteThreadTitle';
 
+export type TItemActionTone = 'accent' | 'neutral' | 'danger';
+
 export interface IThreadItem {
   type: 'thread';
   id: string;

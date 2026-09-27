@@ -14,8 +14,7 @@ export const findParentId = (
   id: string,
   parentId: string | null = null,
 ): string | null | undefined => {
-  const matched = items.find((item) => item.id === id);
-  if (matched) return parentId;
+  if (items.some((item) => item.id === id)) return parentId;
 
   return items
     .filter((item) => item.type === 'folder')

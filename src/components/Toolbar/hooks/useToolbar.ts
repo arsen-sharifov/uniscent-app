@@ -41,8 +41,8 @@ export const useToolbar = (workspaceLoading = false): IToolbarModel => {
     [baseGroups, canUndo, canRedo, canEditCanvas],
   );
 
-  const pendingGroupSizes = useMemo(
-    () => (workspaceLoading || grantsPending ? baseGroups.map((group) => group.tools.length) : []),
+  const pendingGroups = useMemo(
+    () => (workspaceLoading || grantsPending ? baseGroups : []),
     [baseGroups, workspaceLoading, grantsPending],
   );
 
@@ -64,5 +64,5 @@ export const useToolbar = (workspaceLoading = false): IToolbarModel => {
     store.setActiveTool(id);
   }, []);
 
-  return { groups, pendingGroupSizes, activeTool, handleToolClick };
+  return { groups, pendingGroups, activeTool, handleToolClick };
 };

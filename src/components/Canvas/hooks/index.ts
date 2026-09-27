@@ -2,6 +2,8 @@ export * from './useCanvasPattern';
 export * from './useCanvasSync';
 export * from './useCanvasTools';
 export * from './useEdgePalette';
+export * from './useExpandableLabel';
+export * from './useLabelEditing';
 export * from './useMiddlePan';
 export * from './useReferenceSearch';
 export * from './useThemeToken';

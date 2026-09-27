@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { TRANSLATIONS } from '@mocks/i18n';
@@ -66,7 +66,7 @@ describe('TourOffer', () => {
     describe('WHEN the offer is closed without a choice', () => {
       beforeEach(() => {
         render(<TourOffer />);
-        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.common.close }));
+        fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: TRANSLATIONS.common.close }));
       });
 
       test('THEN it counts as declined', () => {

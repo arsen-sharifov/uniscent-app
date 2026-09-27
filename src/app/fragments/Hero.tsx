@@ -78,8 +78,7 @@ export const Hero = () => {
           </div>
         </div>
 
-        <div
-          role="group"
+        <section
           aria-label={t.landing.hero.demo.ariaDemo}
           onMouseMove={(event) => {
             const light = lightRef.current;
@@ -132,7 +131,7 @@ export const Hero = () => {
             aria-hidden
             className="panel-light pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/panel:opacity-100"
           />
-        </div>
+        </section>
       </div>
     </section>
   );

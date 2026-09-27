@@ -40,12 +40,15 @@ export const OwnershipTransferDialog = ({ member, onConfirm, onCancel }: IOwners
   const displayName = member.name || member.email;
 
   return createPortal(
-    <div
-      onClick={(clickEvent) => {
-        if (clickEvent.target === clickEvent.currentTarget) onCancel();
-      }}
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-[color:var(--scrim)] p-4 backdrop-blur-sm transition-opacity duration-200 ease-out motion-reduce:transition-none starting:opacity-0"
-    >
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 transition-opacity duration-200 ease-out motion-reduce:transition-none starting:opacity-0">
+      <button
+        type="button"
+        tabIndex={-1}
+        aria-label={t.common.close}
+        onClick={onCancel}
+        className="absolute inset-0 bg-[color:var(--scrim)] backdrop-blur-sm"
+      />
+
       <div
         ref={panelRef}
         role="alertdialog"
@@ -53,7 +56,7 @@ export const OwnershipTransferDialog = ({ member, onConfirm, onCancel }: IOwners
         aria-labelledby={titleId}
         aria-describedby={descId}
         tabIndex={-1}
-        className="app-panel w-full max-w-md rounded-xl border border-[color:var(--border)] p-6 font-grotesk text-[color:var(--text)] transition-all duration-200 ease-out outline-none motion-reduce:transition-none starting:translate-y-2 starting:scale-95 starting:opacity-0"
+        className="app-panel relative w-full max-w-md rounded-xl border border-[color:var(--border)] p-6 font-grotesk text-[color:var(--text)] transition-all duration-200 ease-out outline-none motion-reduce:transition-none starting:translate-y-2 starting:scale-95 starting:opacity-0"
       >
         <div className="flex items-center gap-3">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-[color:var(--status-warning-border)] bg-[color:var(--status-warning-bg)] text-[color:var(--status-warning)]">

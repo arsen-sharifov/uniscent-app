@@ -51,7 +51,6 @@ export const useCanvasSync = (threadId: string): IUseCanvasSyncResult => {
       const { pendingCount, failedCount } = getSaveState();
       if (pendingCount === 0 && failedCount === 0) return;
       beforeUnloadEvent.preventDefault();
-      beforeUnloadEvent.returnValue = '';
     };
 
     window.addEventListener('beforeunload', onBeforeUnload);

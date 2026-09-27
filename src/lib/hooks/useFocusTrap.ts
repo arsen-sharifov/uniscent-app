@@ -27,7 +27,7 @@ export const useFocusTrap = (containerRef: RefObject<HTMLElement | null>, active
       }
 
       const first = focusable[0]!;
-      const last = focusable[focusable.length - 1]!;
+      const last = focusable.at(-1)!;
       const current = document.activeElement;
 
       if (event.shiftKey && current === first) {

@@ -8,7 +8,7 @@ interface IStepperProps {
 
 export const Stepper = ({ steps, currentStep }: IStepperProps) => {
   return (
-    <div role="list" className="flex items-center">
+    <ol className="flex items-center">
       {steps.map((label, i) => {
         const num = i + 1;
         const isActive = currentStep >= num;
@@ -17,9 +17,8 @@ export const Stepper = ({ steps, currentStep }: IStepperProps) => {
         const isLast = i === steps.length - 1;
 
         return (
-          <div
+          <li
             key={label}
-            role="listitem"
             aria-current={isCurrent ? 'step' : undefined}
             className={clsx('flex items-center', !isLast && 'flex-1')}
           >
@@ -58,9 +57,9 @@ export const Stepper = ({ steps, currentStep }: IStepperProps) => {
                 )}
               />
             )}
-          </div>
+          </li>
         );
       })}
-    </div>
+    </ol>
   );
 };

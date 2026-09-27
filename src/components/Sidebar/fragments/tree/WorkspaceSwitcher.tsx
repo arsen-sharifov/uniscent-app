@@ -81,9 +81,10 @@ export const WorkspaceSwitcher = ({
       placement="bottom-start"
       offset={6}
       panelClassName="w-60 max-h-[60vh] overflow-y-auto [scrollbar-width:thin]"
-      trigger={
+      renderTrigger={(trigger) => (
         <button
           type="button"
+          {...trigger}
           data-tour="sidebarWorkspaceSwitcher"
           className={clsx(
             'group flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--accent-soft)] motion-reduce:transition-none',
@@ -114,7 +115,7 @@ export const WorkspaceSwitcher = ({
             )}
           />
         </button>
-      }
+      )}
     >
       {invitations.length > 0 && (
         <div className="border-b border-[color:var(--border)] px-2 py-2">
