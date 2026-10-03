@@ -5,13 +5,14 @@ import {
   createCanvasNode,
   deleteCanvasNode,
   getCanvasNodes,
+  ROWS_PER_PAGE,
   updateCanvasNodeAnswer,
   updateCanvasNodeLabel,
   updateCanvasNodePositions,
   updateCanvasNodeStatus,
 } from '@api/client';
 import { canvasNodeRow } from '@mocks/rows';
-import { primeSupabase } from '@mocks/supabase';
+import { NO_ROW_ERROR, primeSupabase } from '@mocks/supabase';
 
 vi.mock('@/lib/supabase', () => import('@mocks/supabase'));
 
@@ -151,6 +152,17 @@ describe('updateCanvasNodeLabel', () => {
       });
     });
   });
+
+  describe('GIVEN a label update the database applies to no row', () => {
+    describe('WHEN the label is updated', () => {
+      test('THEN the missing row is reported instead of a silent success', async () => {
+        const { queries } = primeSupabase([{ data: [] }]);
+        vi.spyOn(queries[0]!, 'single').mockResolvedValue({ data: null, error: NO_ROW_ERROR, count: null });
+
+        await expect(updateCanvasNodeLabel('n1', 'Renamed')).rejects.toMatchObject({ code: 'PGRST116' });
+      });
+    });
+  });
 });
 
 describe('updateCanvasNodeStatus', () => {
@@ -236,12 +248,42 @@ describe('deleteCanvasNode', () => {
 });
 
 describe('getCanvasNodes', () => {
-  describe('GIVEN stored nodes for the thread', () => {
-    describe('WHEN the nodes are fetched', () => {
-      test('THEN the rows are returned as is', async () => {
-        primeSupabase([{ data: [canvasNodeRow()] }]);
+  describe('GIVEN stored nodes for two threads', () => {
+    describe('WHEN the nodes of both threads are fetched', () => {
+      test('THEN one query in a stable order reads both threads and returns the rows as is', async () => {
+        const rows = [canvasNodeRow(), canvasNodeRow({ id: 'n2', thread_id: 'th-2' })];
+        const { client, queries } = primeSupabase([{ data: rows }]);
+        const threadFilter = vi.spyOn(queries[0]!, 'in');
+        const order = vi.spyOn(queries[0]!, 'order');
 
-        await expect(getCanvasNodes('th-1')).resolves.toEqual([canvasNodeRow()]);
+        await expect(getCanvasNodes(['th-1', 'th-2'])).resolves.toEqual(rows);
+        expect(client.from).toHaveBeenCalledExactlyOnceWith('canvas_nodes');
+        expect(threadFilter).toHaveBeenCalledExactlyOnceWith('thread_id', ['th-1', 'th-2']);
+        expect(order.mock.calls).toEqual([['created_at'], ['id']]);
+      });
+    });
+  });
+
+  describe('GIVEN a canvas larger than one page', () => {
+    describe('WHEN the nodes are fetched', () => {
+      test('THEN the next page is read as well', async () => {
+        const firstPage = Array.from({ length: ROWS_PER_PAGE }, (_, index) => canvasNodeRow({ id: `n-${index}` }));
+        const { queries } = primeSupabase([{ data: firstPage }, { data: [canvasNodeRow({ id: 'n-last' })] }]);
+        const secondRange = vi.spyOn(queries[1]!, 'range');
+
+        await expect(getCanvasNodes(['th-1'])).resolves.toHaveLength(ROWS_PER_PAGE + 1);
+        expect(secondRange).toHaveBeenCalledExactlyOnceWith(ROWS_PER_PAGE, 2 * ROWS_PER_PAGE - 1);
+      });
+    });
+  });
+
+  describe('GIVEN no thread ids', () => {
+    describe('WHEN the nodes are fetched', () => {
+      test('THEN the query is skipped', async () => {
+        const { client } = primeSupabase([]);
+
+        await expect(getCanvasNodes([])).resolves.toEqual([]);
+        expect(client.from).not.toHaveBeenCalled();
       });
     });
   });
@@ -249,9 +291,9 @@ describe('getCanvasNodes', () => {
   describe('GIVEN no stored nodes', () => {
     describe('WHEN the nodes are fetched', () => {
       test('THEN an empty list is returned', async () => {
-        primeSupabase([{ data: null }]);
+        primeSupabase([{ data: [] }]);
 
-        await expect(getCanvasNodes('th-1')).resolves.toEqual([]);
+        await expect(getCanvasNodes(['th-1'])).resolves.toEqual([]);
       });
     });
   });
@@ -261,7 +303,7 @@ describe('getCanvasNodes', () => {
       test('THEN the error propagates', async () => {
         primeSupabase([{ error: new Error('db down') }]);
 
-        await expect(getCanvasNodes('th-1')).rejects.toThrow('db down');
+        await expect(getCanvasNodes(['th-1'])).rejects.toThrow('db down');
       });
     });
   });

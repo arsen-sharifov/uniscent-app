@@ -13,7 +13,7 @@ interface IReferenceSearchFlowProps {
 const DEFAULT_VIEWPORT = { x: 320, y: 200, zoom: 1 };
 
 export const ReferenceSearchFlow = ({ nodes }: IReferenceSearchFlowProps) => (
-  <ReactFlow nodes={[]} edges={[]} defaultViewport={DEFAULT_VIEWPORT} {...LOCKED_GESTURES} proOptions={PRO_OPTIONS}>
+  <ReactFlow nodes={[]} edges={[]} defaultViewport={DEFAULT_VIEWPORT} proOptions={PRO_OPTIONS} {...LOCKED_GESTURES}>
     <ReferenceSearchPanel nodes={nodes} />
   </ReactFlow>
 );

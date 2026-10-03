@@ -17,8 +17,8 @@ import {
   Target,
   Users,
   Zap,
+  type LucideIcon,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
 
 import type {
   IPermissionDefinition,

@@ -8,12 +8,13 @@ import { usePermissionsStore } from '@/lib/stores';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
 
-const { onboarding, sidebar } = TRANSLATIONS.platform;
-
 const onCreateThread = vi.fn();
 const onCreateWorkspace = vi.fn();
 
-let hasWorkspace: boolean;
+const renderEmptyCanvas = (hasWorkspace: boolean) =>
+  render(
+    <EmptyCanvas hasWorkspace={hasWorkspace} onCreateThread={onCreateThread} onCreateWorkspace={onCreateWorkspace} />,
+  );
 
 afterEach(() => {
   usePermissionsStore.getState().clearAccess();
@@ -22,38 +23,22 @@ afterEach(() => {
 
 describe('EmptyCanvas', () => {
   describe('GIVEN an account without a workspace', () => {
-    beforeEach(() => {
-      hasWorkspace = false;
-    });
-
     describe('WHEN the empty canvas renders', () => {
       beforeEach(() => {
-        render(
-          <EmptyCanvas
-            hasWorkspace={hasWorkspace}
-            onCreateThread={onCreateThread}
-            onCreateWorkspace={onCreateWorkspace}
-          />,
-        );
+        renderEmptyCanvas(false);
       });
 
       test('THEN it explains workspaces and offers to create the first one', () => {
-        expect(screen.getByText(onboarding.emptyWorkspaceTitle)).toBeInTheDocument();
-        expect(screen.getByText(onboarding.emptyWorkspaceBody)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: sidebar.newWorkspace })).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.emptyWorkspaceTitle)).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.emptyWorkspaceBody)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: TRANSLATIONS.platform.sidebar.newWorkspace })).toBeInTheDocument();
       });
     });
 
     describe('WHEN the create button is clicked', () => {
       beforeEach(() => {
-        render(
-          <EmptyCanvas
-            hasWorkspace={hasWorkspace}
-            onCreateThread={onCreateThread}
-            onCreateWorkspace={onCreateWorkspace}
-          />,
-        );
-        fireEvent.click(screen.getByRole('button', { name: sidebar.newWorkspace }));
+        renderEmptyCanvas(false);
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.sidebar.newWorkspace }));
       });
 
       test('THEN a workspace is created', () => {
@@ -65,38 +50,25 @@ describe('EmptyCanvas', () => {
 
   describe('GIVEN a workspace where the member may create threads', () => {
     beforeEach(() => {
-      hasWorkspace = true;
       usePermissionsStore.setState({ canManageStructure: true });
     });
 
     describe('WHEN the empty canvas renders', () => {
       beforeEach(() => {
-        render(
-          <EmptyCanvas
-            hasWorkspace={hasWorkspace}
-            onCreateThread={onCreateThread}
-            onCreateWorkspace={onCreateWorkspace}
-          />,
-        );
+        renderEmptyCanvas(true);
       });
 
       test('THEN it says no thread is open and offers a new one', () => {
-        expect(screen.getByText(onboarding.emptyPlatformTitle)).toBeInTheDocument();
-        expect(screen.getByText(onboarding.emptyPlatformBody)).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: sidebar.newThread })).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.emptyPlatformTitle)).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.emptyPlatformBody)).toBeInTheDocument();
+        expect(screen.getByRole('button', { name: TRANSLATIONS.platform.sidebar.newThread })).toBeInTheDocument();
       });
     });
 
     describe('WHEN the create button is clicked', () => {
       beforeEach(() => {
-        render(
-          <EmptyCanvas
-            hasWorkspace={hasWorkspace}
-            onCreateThread={onCreateThread}
-            onCreateWorkspace={onCreateWorkspace}
-          />,
-        );
-        fireEvent.click(screen.getByRole('button', { name: sidebar.newThread }));
+        renderEmptyCanvas(true);
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.sidebar.newThread }));
       });
 
       test('THEN a top-level thread is created without the click event passed as a folder', () => {
@@ -107,41 +79,30 @@ describe('EmptyCanvas', () => {
 
   describe('GIVEN a workspace where the member may not create threads', () => {
     beforeEach(() => {
-      hasWorkspace = true;
       usePermissionsStore.setState({ canManageStructure: false });
     });
 
     describe('WHEN the empty canvas renders', () => {
       beforeEach(() => {
-        render(
-          <EmptyCanvas
-            hasWorkspace={hasWorkspace}
-            onCreateThread={onCreateThread}
-            onCreateWorkspace={onCreateWorkspace}
-          />,
-        );
+        renderEmptyCanvas(true);
       });
 
       test('THEN it points to the existing threads instead of offering a new one', () => {
-        expect(screen.getByText(onboarding.emptyViewerBody)).toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: sidebar.newThread })).not.toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.emptyViewerBody)).toBeInTheDocument();
+        expect(screen.queryByRole('button', { name: TRANSLATIONS.platform.sidebar.newThread })).not.toBeInTheDocument();
       });
 
       test('THEN the tour stays one click away', () => {
-        expect(screen.getByRole('button', { name: onboarding.emptyPlatformAction })).toBeInTheDocument();
+        expect(
+          screen.getByRole('button', { name: TRANSLATIONS.platform.onboarding.emptyPlatformAction }),
+        ).toBeInTheDocument();
       });
     });
 
     describe('WHEN the tour link is clicked', () => {
       beforeEach(() => {
-        render(
-          <EmptyCanvas
-            hasWorkspace={hasWorkspace}
-            onCreateThread={onCreateThread}
-            onCreateWorkspace={onCreateWorkspace}
-          />,
-        );
-        fireEvent.click(screen.getByRole('button', { name: onboarding.emptyPlatformAction }));
+        renderEmptyCanvas(true);
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.onboarding.emptyPlatformAction }));
       });
 
       test('THEN the tour offer opens', () => {
@@ -152,23 +113,18 @@ describe('EmptyCanvas', () => {
 
   describe('GIVEN a guide already running', () => {
     beforeEach(() => {
-      hasWorkspace = true;
       useOnboardingStore.getState().startGuide('base');
     });
 
     describe('WHEN the empty canvas renders', () => {
       beforeEach(() => {
-        render(
-          <EmptyCanvas
-            hasWorkspace={hasWorkspace}
-            onCreateThread={onCreateThread}
-            onCreateWorkspace={onCreateWorkspace}
-          />,
-        );
+        renderEmptyCanvas(true);
       });
 
       test('THEN the tour link steps aside', () => {
-        expect(screen.queryByRole('button', { name: onboarding.emptyPlatformAction })).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole('button', { name: TRANSLATIONS.platform.onboarding.emptyPlatformAction }),
+        ).not.toBeInTheDocument();
       });
     });
   });

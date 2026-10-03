@@ -43,19 +43,16 @@ export const TourStepCard = ({
   onNext,
 }: ITourStepCardProps) => {
   const t = useTranslations();
-  const onboarding = t.platform.onboarding;
-  const copy = blocked
-    ? { title: onboarding.blockedTitle, body: onboarding.blockedBody }
-    : onboarding.steps[step.copyKey];
+  const title = blocked ? t.platform.onboarding.blockedTitle : t.platform.onboarding.steps[step.copyKey].title;
   const cardRef = useRef<HTMLDialogElement>(null);
   const { top, left, measured } = useCardPosition(cardRef, rect, blocked ? 'bottom' : step.placement);
 
   const readStatus = () => {
-    if (blocked) return { label: onboarding.blockedStatus, tone: 'var(--status-warning)' };
-    if (lost) return { label: onboarding.stepLostTarget, tone: 'var(--status-warning)' };
-    if (done) return { label: onboarding.stepDone, tone: 'var(--accent-text)' };
+    if (blocked) return { label: t.platform.onboarding.blockedStatus, tone: 'var(--status-warning)' };
+    if (lost) return { label: t.platform.onboarding.stepLostTarget, tone: 'var(--status-warning)' };
+    if (done) return { label: t.platform.onboarding.stepDone, tone: 'var(--accent-text)' };
 
-    return { label: onboarding.stepWaiting, tone: 'var(--text-muted)' };
+    return { label: t.platform.onboarding.stepWaiting, tone: 'var(--text-muted)' };
   };
 
   const status = readStatus();
@@ -68,7 +65,7 @@ export const TourStepCard = ({
       open
       ref={cardRef}
       data-tour-card
-      aria-label={copy.title}
+      aria-label={title}
       style={{ top, left, visibility: measured && !settling ? undefined : 'hidden' }}
       className={clsx(
         'fixed inset-auto z-70 m-0 flex items-end gap-1 border-0 bg-transparent p-0 text-inherit',
@@ -78,7 +75,7 @@ export const TourStepCard = ({
       <Mascot
         pose={lost || blocked ? 'think' : step.pose}
         character={step.speaker}
-        label={onboarding[speaker.alt]}
+        label={t.platform.onboarding[speaker.alt]}
         className={clsx('-mb-2', mirrored && '-scale-x-100')}
       />
 
@@ -89,8 +86,8 @@ export const TourStepCard = ({
         <button
           type="button"
           onClick={onQuit}
-          aria-label={onboarding.quit}
-          title={onboarding.quit}
+          aria-label={t.platform.onboarding.quit}
+          title={t.platform.onboarding.quit}
           className="absolute top-3 right-3 cursor-pointer rounded-lg p-1 text-[color:var(--text-subtle)] transition-colors duration-200 ease-out hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none motion-reduce:transition-none"
         >
           <X className="h-4 w-4" />
@@ -100,7 +97,7 @@ export const TourStepCard = ({
           {step.speaker && (
             <>
               <span style={{ color: speaker.tone }} className="normal-case">
-                {onboarding[speaker.name]}
+                {t.platform.onboarding[speaker.name]}
               </span>
               <span aria-hidden className="mx-1.5">
                 /
@@ -111,11 +108,11 @@ export const TourStepCard = ({
         </p>
 
         <h3 className="mt-2 font-grotesk text-[15.5px] leading-snug font-semibold tracking-tight text-[color:var(--text-strong)]">
-          {copy.title}
+          {title}
         </h3>
 
         <p className="mt-1.5 font-grotesk text-[13.5px] leading-relaxed text-pretty text-[color:var(--text-muted)]">
-          {copy.body}
+          {blocked ? t.platform.onboarding.blockedBody : t.platform.onboarding.steps[step.copyKey].body}
         </p>
 
         <div className="mt-4 h-[3px] overflow-hidden rounded-full bg-[color:var(--border-strong)]">
@@ -145,7 +142,7 @@ export const TourStepCard = ({
 
           {!actions && onNext && !blocked && (
             <TourButton variant="primary" onClick={onNext} disabled={busy} className="ml-auto shrink-0">
-              {onboarding.stepNext}
+              {t.platform.onboarding.stepNext}
             </TourButton>
           )}
         </div>

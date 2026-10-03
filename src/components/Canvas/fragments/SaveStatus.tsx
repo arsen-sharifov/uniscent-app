@@ -2,12 +2,11 @@
 
 import { clsx } from 'clsx';
 import { AlertCircle, CloudOff, Loader2, RotateCw } from 'lucide-react';
-import { useEffect, useState } from 'react';
 
 import type { ISaveState } from '@interfaces';
 
 import { useTranslations } from '@/i18n';
-import { discardFailed, retryFailed, subscribeFailedOperations } from '@/lib/canvas';
+import { discardFailed, retryFailed } from '@/lib/canvas';
 
 import { ARIA_LABEL_KEY_BY_STATUS } from '../consts';
 
@@ -17,9 +16,6 @@ interface ISaveStatusProps {
 
 export const SaveStatus = ({ state }: ISaveStatusProps) => {
   const t = useTranslations();
-  const [failedCount, setFailedCount] = useState(0);
-
-  useEffect(() => subscribeFailedOperations((operations) => setFailedCount(operations.length)), []);
 
   if (state.status === 'idle' || state.status === 'saving' || state.status === 'saved') {
     return null;
@@ -70,8 +66,8 @@ export const SaveStatus = ({ state }: ISaveStatusProps) => {
             <AlertCircle className="h-3 w-3" strokeWidth={2.25} />
             <span>
               {t.platform.canvas.save.errorTitle}
-              {failedCount > 0 && (
-                <span className="ml-1 opacity-70">{`· ${t('platform.canvas.save.errorChanges', { count: failedCount })}`}</span>
+              {state.failedCount > 0 && (
+                <span className="ml-1 opacity-70">{`· ${t('platform.canvas.save.errorChanges', { count: state.failedCount })}`}</span>
               )}
             </span>
           </span>

@@ -76,7 +76,7 @@ describe('upsertPreferences', () => {
     });
   });
 
-  describe('GIVEN a prefs object with an unknown extra key', () => {
+  describe('GIVEN a preferences object with an unknown extra key', () => {
     describe('WHEN preferences are saved', () => {
       test('THEN the extra key is filtered from the upsert payload', async () => {
         const { queries } = primeSupabase([{ data: null }]);

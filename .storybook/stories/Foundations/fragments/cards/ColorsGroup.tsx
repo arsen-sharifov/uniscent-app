@@ -14,7 +14,7 @@ interface IColorsGroupProps {
 }
 
 export const ColorsGroup = ({ id, index, title, description, tokens, query }: IColorsGroupProps) => {
-  const filtered = useFiltered(tokens, query, (t) => `${t.variable} ${t.label} ${t.role}`);
+  const filtered = useFiltered(tokens, query, (token) => `${token.variable} ${token.label} ${token.role}`);
 
   if (filtered.length === 0) {
     return null;

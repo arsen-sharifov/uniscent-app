@@ -1,7 +1,7 @@
 'use client';
 
 import { X } from 'lucide-react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 
 import type { TWorkspaceSettingsSection } from '@interfaces';
 
@@ -9,9 +9,14 @@ import { Modal } from '@/components';
 import { useTranslations } from '@/i18n';
 
 import { WORKSPACE_SECTION_ANCHORS } from './consts';
-import { GeneralSection, MembersSection, RolesSection, WorkspaceSettingsSkeleton } from './fragments';
+import {
+  GeneralSection,
+  MembersSection,
+  RolesSection,
+  WorkspaceSettingsSidebar,
+  WorkspaceSettingsSkeleton,
+} from './fragments';
 import { useWorkspaceSettings } from './hooks';
-import { WorkspaceSettingsSidebar } from './WorkspaceSettingsSidebar';
 
 interface IWorkspaceSettingsProps {
   workspaceId: string;
@@ -29,6 +34,7 @@ export const WorkspaceSettings = ({
   onClose,
 }: IWorkspaceSettingsProps) => {
   const t = useTranslations();
+  const titleId = useId();
   const [activeSection, setActiveSection] = useState<TWorkspaceSettingsSection>('general');
   const settings = useWorkspaceSettings(workspaceId, onWorkspacesChanged);
 
@@ -58,6 +64,7 @@ export const WorkspaceSettings = ({
           roles={settings.roles}
           invitations={settings.invitations}
           currentUserId={settings.currentUserId}
+          currentRole={settings.currentRole}
           canManageMembers={settings.canManageMembers}
           onAssignRole={settings.assignRole}
           onRemoveMember={settings.removeMember}
@@ -71,6 +78,8 @@ export const WorkspaceSettings = ({
     return (
       <RolesSection
         roles={settings.roles}
+        invitations={settings.invitations}
+        currentRole={settings.currentRole}
         canManageRoles={settings.canManageRoles}
         onCreateRole={settings.createRole}
         onUpdateRole={settings.updateRole}
@@ -80,7 +89,7 @@ export const WorkspaceSettings = ({
   };
 
   return (
-    <Modal open onClose={onClose} width="max-w-[960px]" overflowHidden>
+    <Modal open onClose={onClose} width="max-w-[960px]" overflowHidden labelledBy={titleId}>
       <div
         data-tour="workspaceSettingsModal"
         className="relative flex h-[86vh] rounded-2xl font-grotesk text-[color:var(--text)]"
@@ -97,7 +106,10 @@ export const WorkspaceSettings = ({
         </button>
 
         <div className="min-w-0 flex-1 [scrollbar-width:none] overflow-y-auto px-10 py-8 [&::-webkit-scrollbar]:hidden">
-          <h2 className="mb-6 font-grotesk text-lg font-semibold tracking-tight text-[color:var(--text-strong)]">
+          <h2
+            id={titleId}
+            className="mb-6 font-grotesk text-lg font-semibold tracking-tight text-[color:var(--text-strong)]"
+          >
             {t.platform.workspaceSettings.sections[activeSection]}
           </h2>
 

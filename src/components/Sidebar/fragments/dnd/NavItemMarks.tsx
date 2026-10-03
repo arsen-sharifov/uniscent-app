@@ -18,15 +18,15 @@ interface INavItemMarksProps {
 }
 
 export const NavItemMarks = ({ item, isActive, isSelected, isHighlighted, hidesOnHover }: INavItemMarksProps) => {
-  const translations = useTranslations();
+  const t = useTranslations();
 
   return (
     <>
-      {item.type === 'thread' && item.answered && !isSelected && (
+      {item.type === 'thread' && item.resolved && !isSelected && (
         <span
           data-tour={isActive ? 'sidebarThreadResolved' : undefined}
-          aria-label={translations.platform.sidebar.resolved}
-          title={translations.platform.sidebar.resolved}
+          aria-label={t.platform.sidebar.resolved}
+          title={t.platform.sidebar.resolved}
           className={clsx(
             'ml-auto flex shrink-0 items-center transition-opacity duration-150 motion-reduce:transition-none',
             hidesOnHover && 'group-hover/item:opacity-0',

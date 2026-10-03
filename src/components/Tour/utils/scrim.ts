@@ -5,14 +5,19 @@ const right = ({ left, width }: IAnchorRect) => left + width;
 
 const bottom = ({ top, height }: IAnchorRect) => top + height;
 
-const intersects = (a: IAnchorRect, b: IAnchorRect): boolean =>
-  a.left < right(b) && b.left < right(a) && a.top < bottom(b) && b.top < bottom(a);
+const intersects = (first: IAnchorRect, second: IAnchorRect): boolean =>
+  first.left < right(second) && second.left < right(first) && first.top < bottom(second) && second.top < bottom(first);
 
-const union = (a: IAnchorRect, b: IAnchorRect): IAnchorRect => {
-  const left = Math.min(a.left, b.left);
-  const top = Math.min(a.top, b.top);
+const union = (first: IAnchorRect, second: IAnchorRect): IAnchorRect => {
+  const left = Math.min(first.left, second.left);
+  const top = Math.min(first.top, second.top);
 
-  return { left, top, width: Math.max(right(a), right(b)) - left, height: Math.max(bottom(a), bottom(b)) - top };
+  return {
+    left,
+    top,
+    width: Math.max(right(first), right(second)) - left,
+    height: Math.max(bottom(first), bottom(second)) - top,
+  };
 };
 
 export const inflate = ({ top, left, width, height }: IAnchorRect): IAnchorRect => ({

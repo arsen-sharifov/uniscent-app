@@ -3,11 +3,23 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { PREFERENCES_STORAGE_KEY } from '@constants';
 import { THEME_BOOTSTRAP } from '@/app/themeBootstrap';
 
-const ATTRIBUTES = ['data-theme', 'data-canvas-pattern', 'data-default-zoom', 'data-snap-to-grid', 'data-smart-guides'];
+const DEFAULT_ATTRIBUTES = {
+  'data-scripted': '',
+  'data-theme': 'auto',
+  'data-canvas-pattern': 'dots',
+  'data-default-zoom': '100',
+  'data-snap-to-grid': 'false',
+  'data-smart-guides': 'true',
+};
+
+const readAttributes = () =>
+  Object.fromEntries(
+    Object.keys(DEFAULT_ATTRIBUTES).map((attribute) => [attribute, document.documentElement.getAttribute(attribute)]),
+  );
 
 afterEach(() => {
   localStorage.clear();
-  ATTRIBUTES.forEach((attribute) => document.documentElement.removeAttribute(attribute));
+  Object.keys(DEFAULT_ATTRIBUTES).forEach((attribute) => document.documentElement.removeAttribute(attribute));
 });
 
 describe('THEME_BOOTSTRAP', () => {
@@ -30,12 +42,15 @@ describe('THEME_BOOTSTRAP', () => {
         new Function(THEME_BOOTSTRAP)();
       });
 
-      test('THEN the html attributes mirror the stored preferences', () => {
-        expect(document.documentElement.getAttribute('data-theme')).toBe('eclipse');
-        expect(document.documentElement.getAttribute('data-canvas-pattern')).toBe('lines');
-        expect(document.documentElement.getAttribute('data-default-zoom')).toBe('125');
-        expect(document.documentElement.getAttribute('data-snap-to-grid')).toBe('true');
-        expect(document.documentElement.getAttribute('data-smart-guides')).toBe('false');
+      test('THEN the html attributes mirror the stored preferences and mark the page as scripted', () => {
+        expect(readAttributes()).toEqual({
+          'data-scripted': '',
+          'data-theme': 'eclipse',
+          'data-canvas-pattern': 'lines',
+          'data-default-zoom': '125',
+          'data-snap-to-grid': 'true',
+          'data-smart-guides': 'false',
+        });
       });
     });
   });
@@ -54,11 +69,7 @@ describe('THEME_BOOTSTRAP', () => {
       });
 
       test('THEN every attribute falls back to its default', () => {
-        expect(document.documentElement.getAttribute('data-theme')).toBe('auto');
-        expect(document.documentElement.getAttribute('data-canvas-pattern')).toBe('dots');
-        expect(document.documentElement.getAttribute('data-default-zoom')).toBe('100');
-        expect(document.documentElement.getAttribute('data-snap-to-grid')).toBe('false');
-        expect(document.documentElement.getAttribute('data-smart-guides')).toBe('true');
+        expect(readAttributes()).toEqual(DEFAULT_ATTRIBUTES);
       });
     });
   });
@@ -74,11 +85,7 @@ describe('THEME_BOOTSTRAP', () => {
       });
 
       test('THEN every attribute falls back to its default', () => {
-        expect(document.documentElement.getAttribute('data-theme')).toBe('auto');
-        expect(document.documentElement.getAttribute('data-canvas-pattern')).toBe('dots');
-        expect(document.documentElement.getAttribute('data-default-zoom')).toBe('100');
-        expect(document.documentElement.getAttribute('data-snap-to-grid')).toBe('false');
-        expect(document.documentElement.getAttribute('data-smart-guides')).toBe('true');
+        expect(readAttributes()).toEqual(DEFAULT_ATTRIBUTES);
       });
     });
   });
@@ -90,11 +97,7 @@ describe('THEME_BOOTSTRAP', () => {
       });
 
       test('THEN every attribute falls back to its default', () => {
-        expect(document.documentElement.getAttribute('data-theme')).toBe('auto');
-        expect(document.documentElement.getAttribute('data-canvas-pattern')).toBe('dots');
-        expect(document.documentElement.getAttribute('data-default-zoom')).toBe('100');
-        expect(document.documentElement.getAttribute('data-snap-to-grid')).toBe('false');
-        expect(document.documentElement.getAttribute('data-smart-guides')).toBe('true');
+        expect(readAttributes()).toEqual(DEFAULT_ATTRIBUTES);
       });
     });
   });

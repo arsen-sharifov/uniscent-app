@@ -9,6 +9,7 @@ import { useTranslations } from '@/i18n';
 import { formatPlanPrice, mergePlansWithTranslations } from '@/lib/pricing';
 
 import { AVAILABLE_PLAN_IDS } from '../consts';
+import { SectionHeader } from './SectionHeader';
 
 interface IPlanSectionProps {
   user: User | null;
@@ -17,28 +18,22 @@ interface IPlanSectionProps {
 export const PlanSection = ({ user }: IPlanSectionProps) => {
   const t = useTranslations();
   const plans = useMemo(() => mergePlansWithTranslations(t), [t]);
-  const planLabels = t.platform.settings.plan;
-  const periods = t.landing.pricing.periods;
   const currentPlanId = user?.user_metadata?.plan ?? 'beta';
 
   return (
     <div className="space-y-8">
       <section>
-        <header className="mb-1 flex items-baseline justify-between">
-          <h3 className="font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {planLabels.title}
-          </h3>
-          <span className="font-mono-ui text-[10px] tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {planLabels.caption}
-          </span>
-        </header>
-        <p className="mb-4 max-w-md text-[12.5px] leading-relaxed text-[color:var(--text-muted)]">{planLabels.blurb}</p>
+        <SectionHeader
+          title={t.platform.settings.plan.title}
+          caption={t.platform.settings.plan.caption}
+          description={t.platform.settings.plan.blurb}
+        />
 
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan) => {
             const isCurrent = (currentPlanId === 'beta' && plan.id === 'demo') || plan.id === currentPlanId;
             const isLocked = !AVAILABLE_PLAN_IDS.includes(plan.id);
-            const periodLabel = plan.period ? periods[plan.period] : null;
+            const periodLabel = plan.period ? t.landing.pricing.periods[plan.period] : null;
 
             return (
               <article
@@ -57,13 +52,13 @@ export const PlanSection = ({ user }: IPlanSectionProps) => {
                 {isCurrent && (
                   <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-[color:var(--accent)] px-2 py-0.5 font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--on-accent)] uppercase shadow-[0_4px_12px_-6px_var(--accent-glow)]">
                     <Sparkles className="h-2.5 w-2.5" strokeWidth={2.4} />
-                    {planLabels.current}
+                    {t.platform.settings.plan.current}
                   </span>
                 )}
                 {isLocked && !isCurrent && (
                   <span className="absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 rounded-md bg-[color:var(--surface-elevated)] px-2 py-0.5 font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase ring-1 ring-[color:var(--border-strong)]">
                     <Lock className="h-2.5 w-2.5" strokeWidth={2.4} />
-                    {planLabels.lockedBadge}
+                    {t.platform.settings.plan.lockedBadge}
                   </span>
                 )}
 
@@ -83,7 +78,7 @@ export const PlanSection = ({ user }: IPlanSectionProps) => {
                         isLocked && !isCurrent ? 'text-[color:var(--text-muted)]' : 'text-[color:var(--text-strong)]',
                       )}
                     >
-                      {formatPlanPrice(plan.price, planLabels.free)}
+                      {formatPlanPrice(plan.price, t.platform.settings.plan.free)}
                     </span>
                     {periodLabel && (
                       <span className="font-mono-ui text-[10px] tracking-[0.14em] text-[color:var(--text-label)] uppercase">
@@ -140,21 +135,15 @@ export const PlanSection = ({ user }: IPlanSectionProps) => {
       </section>
 
       <section className="border-t border-[color:var(--border)] pt-6">
-        <header className="mb-1 flex items-baseline justify-between">
-          <h3 className="font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {planLabels.billingTitle}
-          </h3>
-          <span className="font-mono-ui text-[10px] tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {planLabels.billingCaption}
-          </span>
-        </header>
-        <p className="mb-4 max-w-md text-[12.5px] leading-relaxed text-[color:var(--text-muted)]">
-          {planLabels.paidPlansNote}
-        </p>
+        <SectionHeader
+          title={t.platform.settings.plan.billingTitle}
+          caption={t.platform.settings.plan.billingCaption}
+          description={t.platform.settings.plan.paidPlansNote}
+        />
         <div className="rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-elevated)] px-4 py-3">
           <p className="text-[12.5px] leading-snug text-[color:var(--accent-text)]">
             <Sparkles className="mr-1 inline h-3 w-3" strokeWidth={2.4} aria-hidden />
-            {planLabels.earlyBirdNote}
+            {t.platform.settings.plan.earlyBirdNote}
           </p>
         </div>
       </section>

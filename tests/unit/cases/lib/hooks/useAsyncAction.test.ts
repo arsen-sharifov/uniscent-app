@@ -1,131 +1,162 @@
-import { act, renderHook } from '@testing-library/react';
+import { act, type RenderHookResult, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { SUCCESS_RESET_DELAY_MS } from '@constants';
 import { useAsyncAction } from '@hooks';
+import { event } from '@/lib/events';
+
+vi.mock('@/lib/events', () => import('@mocks/events'));
+
+const FAILURE = new Error('boom');
+
+let hook: RenderHookResult<ReturnType<typeof useAsyncAction>, unknown>;
+let pending: Promise<void>;
+let release: () => void;
 
 beforeEach(() => {
   vi.useFakeTimers();
+  hook = renderHook(() => useAsyncAction());
 });
 
 afterEach(() => {
   vi.useRealTimers();
-  vi.restoreAllMocks();
 });
 
 describe('useAsyncAction', () => {
-  describe('GIVEN a succeeding action', () => {
-    describe('WHEN it is still running', () => {
-      test('THEN loading is on', async () => {
-        const { result } = renderHook(() => useAsyncAction());
-        const gate = Promise.withResolvers<void>();
-        let pending: Promise<void> = Promise.resolve();
-
-        act(() => {
-          pending = result.current.run(() => gate.promise, 'failed');
-        });
-
-        expect(result.current).toMatchObject({ loading: true, success: false, error: null });
-
-        gate.resolve();
-        await act(async () => pending);
+  describe('GIVEN an action that has not settled yet', () => {
+    beforeEach(() => {
+      const gate = Promise.withResolvers<void>();
+      release = gate.resolve;
+      act(() => {
+        pending = hook.result.current.run(() => gate.promise, 'Save failed');
       });
     });
 
+    afterEach(async () => {
+      release();
+      await act(async () => pending);
+    });
+
+    describe('WHEN it is still running', () => {
+      test('THEN loading is on and nothing is reported yet', () => {
+        expect(hook.result.current).toMatchObject({ loading: true, success: false, error: null });
+      });
+    });
+  });
+
+  describe('GIVEN a succeeding action', () => {
     describe('WHEN it runs', () => {
-      test('THEN success turns on and loading settles', async () => {
-        const { result } = renderHook(() => useAsyncAction());
+      beforeEach(async () => {
+        await act(async () => hook.result.current.run(async () => {}, 'Save failed'));
+      });
 
-        await act(async () => result.current.run(async () => {}, 'failed'));
-
-        expect(result.current).toMatchObject({ loading: false, success: true, error: null });
+      test('THEN success turns on, loading settles and nothing is toasted', () => {
+        expect(hook.result.current).toMatchObject({ loading: false, success: true, error: null });
+        expect(event.error).not.toHaveBeenCalled();
       });
     });
 
     describe('WHEN the success reset delay elapses', () => {
-      test('THEN success turns off', async () => {
-        const { result } = renderHook(() => useAsyncAction());
+      beforeEach(async () => {
+        await act(async () => hook.result.current.run(async () => {}, 'Save failed'));
+        act(() => vi.advanceTimersByTime(SUCCESS_RESET_DELAY_MS));
+      });
 
-        await act(async () => result.current.run(async () => {}, 'failed'));
-        act(() => {
-          vi.advanceTimersByTime(SUCCESS_RESET_DELAY_MS);
-        });
-
-        expect(result.current.success).toBe(false);
+      test('THEN success turns off', () => {
+        expect(hook.result.current.success).toBe(false);
       });
     });
 
-    describe('WHEN it runs again before the success reset elapses', () => {
-      test('THEN the reset timer restarts', async () => {
-        const { result } = renderHook(() => useAsyncAction());
+    describe('WHEN it runs again just before the success reset elapses', () => {
+      beforeEach(async () => {
+        await act(async () => hook.result.current.run(async () => {}, 'Save failed'));
+        act(() => vi.advanceTimersByTime(SUCCESS_RESET_DELAY_MS - 1));
+        await act(async () => hook.result.current.run(async () => {}, 'Save failed'));
+        act(() => vi.advanceTimersByTime(SUCCESS_RESET_DELAY_MS - 1));
+      });
 
-        await act(async () => result.current.run(async () => {}, 'failed'));
-        act(() => {
-          vi.advanceTimersByTime(SUCCESS_RESET_DELAY_MS - 1);
-        });
-        await act(async () => result.current.run(async () => {}, 'failed'));
-        act(() => {
-          vi.advanceTimersByTime(SUCCESS_RESET_DELAY_MS - 1);
-        });
+      test('THEN the reset timer restarts', () => {
+        expect(hook.result.current.success).toBe(true);
+      });
+    });
 
-        expect(result.current.success).toBe(true);
+    describe('WHEN it runs again just before the success reset elapses and the restarted reset elapses', () => {
+      beforeEach(async () => {
+        await act(async () => hook.result.current.run(async () => {}, 'Save failed'));
+        act(() => vi.advanceTimersByTime(SUCCESS_RESET_DELAY_MS - 1));
+        await act(async () => hook.result.current.run(async () => {}, 'Save failed'));
+        act(() => vi.advanceTimersByTime(SUCCESS_RESET_DELAY_MS));
+      });
 
-        act(() => {
-          vi.advanceTimersByTime(1);
-        });
-
-        expect(result.current.success).toBe(false);
+      test('THEN success turns off', () => {
+        expect(hook.result.current.success).toBe(false);
       });
     });
 
     describe('WHEN the hook unmounts after the success', () => {
-      test('THEN the reset timer is cleared', async () => {
-        const view = renderHook(() => useAsyncAction());
+      beforeEach(async () => {
+        await act(async () => hook.result.current.run(async () => {}, 'Save failed'));
+        hook.unmount();
+      });
 
-        await act(async () => view.result.current.run(async () => {}, 'failed'));
-
-        expect(vi.getTimerCount()).toBe(1);
-
-        view.unmount();
-
+      test('THEN the reset timer is cleared', () => {
         expect(vi.getTimerCount()).toBe(0);
       });
     });
   });
 
-  describe('GIVEN a failing action', () => {
-    beforeEach(() => {
-      vi.spyOn(console, 'error').mockImplementation(() => {});
-    });
-
-    describe('WHEN it runs with a static message', () => {
-      test('THEN the message lands in the error state', async () => {
-        const { result } = renderHook(() => useAsyncAction());
-
+  describe('GIVEN an action that the backend rejects', () => {
+    describe('WHEN it runs', () => {
+      beforeEach(async () => {
         await act(async () =>
-          result.current.run(async () => {
-            throw new Error('boom');
-          }, 'Saving failed'),
+          hook.result.current.run(async () => {
+            throw FAILURE;
+          }, 'Save failed'),
         );
+      });
 
-        expect(result.current).toMatchObject({ loading: false, success: false, error: 'Saving failed' });
+      test('THEN the failure is toasted under the given title instead of shown inline', () => {
+        expect(event.error).toHaveBeenCalledExactlyOnceWith(FAILURE, { title: 'Save failed', context: 'asyncAction' });
+        expect(hook.result.current).toMatchObject({ loading: false, success: false, error: null });
       });
     });
+  });
 
-    describe('WHEN it runs with a message factory', () => {
-      test('THEN the factory receives the cause', async () => {
-        const { result } = renderHook(() => useAsyncAction());
-
+  describe('GIVEN an action that handles its own outcome inline', () => {
+    describe('WHEN it reports that it did not succeed', () => {
+      beforeEach(async () => {
         await act(async () =>
-          result.current.run(
-            async () => {
-              throw new Error('boom');
-            },
-            (cause) => `wrapped: ${(cause as Error).message}`,
-          ),
-        );
+          hook.result.current.run(async () => {
+            hook.result.current.setError('Current password is incorrect');
 
-        expect(result.current.error).toBe('wrapped: boom');
+            return false;
+          }, 'Update failed'),
+        );
+      });
+
+      test('THEN the inline message stays, nothing is toasted and success stays off', () => {
+        expect(hook.result.current).toMatchObject({
+          loading: false,
+          success: false,
+          error: 'Current password is incorrect',
+        });
+        expect(event.error).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('GIVEN a client-side validation message', () => {
+    beforeEach(() => {
+      act(() => hook.result.current.setError('Passwords do not match'));
+    });
+
+    describe('WHEN the action runs afterwards', () => {
+      beforeEach(async () => {
+        await act(async () => hook.result.current.run(async () => {}, 'Update failed'));
+      });
+
+      test('THEN the stale message is cleared', () => {
+        expect(hook.result.current.error).toBeNull();
       });
     });
   });

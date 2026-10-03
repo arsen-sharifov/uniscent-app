@@ -1,4 +1,4 @@
-import type { TTheme } from '@constants';
+import type { TTheme } from '@interfaces';
 import type { ILogoSize } from '@story-interfaces';
 
 export const SIZES: readonly ILogoSize[] = [

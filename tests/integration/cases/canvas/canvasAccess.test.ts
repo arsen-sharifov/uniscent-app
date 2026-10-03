@@ -12,8 +12,10 @@ import {
   getUserClient,
   readNode,
   seedAccount,
+  seedEdge,
   seedMember,
   seedNode,
+  seedNodeComment,
   seedThread,
   seedWorkspace,
   uniqueLabel,
@@ -23,19 +25,22 @@ let owner: IIntegrationAccount;
 let author: IIntegrationAccount;
 let editor: IIntegrationAccount;
 let viewer: IIntegrationAccount;
+let outsider: IIntegrationAccount;
 let ownerClient: SupabaseClient;
 let authorClient: SupabaseClient;
 let editorClient: SupabaseClient;
 let viewerClient: SupabaseClient;
+let outsiderClient: SupabaseClient;
 let workspace: IIntegrationWorkspace;
 let thread: IIntegrationThread;
 
 beforeAll(async () => {
-  [owner, author, editor, viewer] = await Promise.all([
+  [owner, author, editor, viewer, outsider] = await Promise.all([
     seedAccount('owner'),
     seedAccount('author'),
     seedAccount('editor'),
     seedAccount('viewer'),
+    seedAccount('outsider'),
   ]);
   workspace = await seedWorkspace(owner.id, uniqueLabel('canvas-access'));
   await Promise.all([
@@ -44,16 +49,17 @@ beforeAll(async () => {
     seedMember(workspace.id, viewer.id, 'viewer'),
   ]);
   thread = await seedThread(workspace.id, owner.id);
-  [ownerClient, authorClient, editorClient, viewerClient] = await Promise.all([
+  [ownerClient, authorClient, editorClient, viewerClient, outsiderClient] = await Promise.all([
     getUserClient(owner),
     getUserClient(author),
     getUserClient(editor),
     getUserClient(viewer),
+    getUserClient(outsider),
   ]);
 });
 
 afterAll(async () => {
-  await deleteAccounts(viewer, editor, author, owner);
+  await deleteAccounts(outsider, viewer, editor, author, owner);
 });
 
 describe('canvas_nodes', () => {
@@ -100,6 +106,21 @@ describe('canvas_nodes', () => {
       test('THEN the membership still grants read access', () => {
         expect(response.error).toBeNull();
         expect(response.data!.length).toBeGreaterThan(0);
+      });
+    });
+  });
+
+  describe('GIVEN a signed-in outsider', () => {
+    describe('WHEN they read the thread nodes', () => {
+      let response: IIntegrationResponse<unknown[]>;
+
+      beforeEach(async () => {
+        response = await outsiderClient.from('canvas_nodes').select('id').eq('thread_id', thread.id);
+      });
+
+      test('THEN nothing comes back', () => {
+        expect(response.error).toBeNull();
+        expect(response.data).toEqual([]);
       });
     });
   });
@@ -224,6 +245,41 @@ describe('canvas_edges', () => {
       });
     });
   });
+
+  describe('GIVEN an edge between two nodes of the thread', () => {
+    let edgeId: string;
+
+    beforeEach(async () => {
+      const [sourceId, targetId] = await Promise.all([seedNode(thread.id, editor.id), seedNode(thread.id, editor.id)]);
+      edgeId = await seedEdge(thread.id, sourceId, targetId, editor.id);
+    });
+
+    describe('WHEN a viewer reads the thread edges', () => {
+      let response: IIntegrationResponse<{ id: string }[]>;
+
+      beforeEach(async () => {
+        response = await viewerClient.from('canvas_edges').select('id').eq('thread_id', thread.id);
+      });
+
+      test('THEN the membership grants read access', () => {
+        expect(response.error).toBeNull();
+        expect(response.data!.map((row) => row.id)).toContain(edgeId);
+      });
+    });
+
+    describe('WHEN a signed-in outsider reads the thread edges', () => {
+      let response: IIntegrationResponse<unknown[]>;
+
+      beforeEach(async () => {
+        response = await outsiderClient.from('canvas_edges').select('id').eq('thread_id', thread.id);
+      });
+
+      test('THEN nothing comes back', () => {
+        expect(response.error).toBeNull();
+        expect(response.data).toEqual([]);
+      });
+    });
+  });
 });
 
 describe('node_comments', () => {
@@ -275,6 +331,40 @@ describe('node_comments', () => {
 
       test('THEN the insert is denied by row level security', () => {
         expect(response.error?.code).toBe('42501');
+      });
+    });
+  });
+
+  describe('GIVEN a comment on the node', () => {
+    let commentId: string;
+
+    beforeEach(async () => {
+      commentId = await seedNodeComment(nodeId, author.id, 'visible to members');
+    });
+
+    describe('WHEN a viewer reads the node comments', () => {
+      let response: IIntegrationResponse<{ id: string }[]>;
+
+      beforeEach(async () => {
+        response = await viewerClient.from('node_comments').select('id').eq('node_id', nodeId);
+      });
+
+      test('THEN the membership grants read access', () => {
+        expect(response.error).toBeNull();
+        expect(response.data!.map((row) => row.id)).toContain(commentId);
+      });
+    });
+
+    describe('WHEN a signed-in outsider reads the node comments', () => {
+      let response: IIntegrationResponse<unknown[]>;
+
+      beforeEach(async () => {
+        response = await outsiderClient.from('node_comments').select('id').eq('node_id', nodeId);
+      });
+
+      test('THEN nothing comes back', () => {
+        expect(response.error).toBeNull();
+        expect(response.data).toEqual([]);
       });
     });
   });

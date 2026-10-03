@@ -26,27 +26,28 @@ const escapeForInlineScript = (json: string) =>
 
 export const THEME_BOOTSTRAP = `
 (() => {
-  const c = ${escapeForInlineScript(JSON.stringify(BOOTSTRAP_CONFIG))};
-  const h = document.documentElement;
-  const set = (a, v) => h.setAttribute(a, v);
-  set('data-scripted', '');
-  const bool = (a, v, d) => set(a, typeof v === 'boolean' ? String(v) : String(d));
+  const config = ${escapeForInlineScript(JSON.stringify(BOOTSTRAP_CONFIG))};
+  const root = document.documentElement;
+  const setAttribute = (name, value) => root.setAttribute(name, value);
+  setAttribute('data-scripted', '');
+  const setBooleanAttribute = (name, value, fallback) =>
+    setAttribute(name, typeof value === 'boolean' ? String(value) : String(fallback));
   try {
-    const p = JSON.parse(localStorage.getItem(c.storageKey) || 'null');
-    const t = p && p.theme;
-    const x = p && p.canvasPattern;
-    const z = p && p.defaultZoom;
-    set('data-theme', c.themes.includes(t) ? t : c.defaultTheme);
-    set('data-canvas-pattern', c.patterns.includes(x) ? x : c.defaultPattern);
-    set('data-default-zoom', c.zooms.includes(z) ? String(z) : String(c.defaultZoom));
-    bool('data-snap-to-grid', p && p.snapToGrid, c.defaultSnap);
-    bool('data-smart-guides', p && p.smartGuides, c.defaultGuides);
+    const stored = JSON.parse(localStorage.getItem(config.storageKey) || 'null');
+    const theme = stored && stored.theme;
+    const pattern = stored && stored.canvasPattern;
+    const zoom = stored && stored.defaultZoom;
+    setAttribute('data-theme', config.themes.includes(theme) ? theme : config.defaultTheme);
+    setAttribute('data-canvas-pattern', config.patterns.includes(pattern) ? pattern : config.defaultPattern);
+    setAttribute('data-default-zoom', config.zooms.includes(zoom) ? String(zoom) : String(config.defaultZoom));
+    setBooleanAttribute('data-snap-to-grid', stored && stored.snapToGrid, config.defaultSnap);
+    setBooleanAttribute('data-smart-guides', stored && stored.smartGuides, config.defaultGuides);
   } catch {
-    set('data-theme', c.defaultTheme);
-    set('data-canvas-pattern', c.defaultPattern);
-    set('data-default-zoom', String(c.defaultZoom));
-    set('data-snap-to-grid', String(c.defaultSnap));
-    set('data-smart-guides', String(c.defaultGuides));
+    setAttribute('data-theme', config.defaultTheme);
+    setAttribute('data-canvas-pattern', config.defaultPattern);
+    setAttribute('data-default-zoom', String(config.defaultZoom));
+    setAttribute('data-snap-to-grid', String(config.defaultSnap));
+    setAttribute('data-smart-guides', String(config.defaultGuides));
   }
 })();
 `;

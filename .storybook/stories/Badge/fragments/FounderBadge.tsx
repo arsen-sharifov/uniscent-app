@@ -7,14 +7,19 @@ interface IFounderBadgeProps {
 }
 
 export const FounderBadge = ({ earned }: IFounderBadgeProps) => {
-  const { badges } = useTranslations().platform.settings.profile;
+  const t = useTranslations();
   const [founder] = BADGES;
 
   if (!founder) return null;
 
   return (
     <div className="w-36">
-      <Badge icon={founder.icon} label={badges[founder.labelKey]} unlock={badges[founder.unlockKey]} earned={earned} />
+      <Badge
+        icon={founder.icon}
+        label={t.platform.settings.profile.badges[founder.labelKey]}
+        unlock={t.platform.settings.profile.badges[founder.unlockKey]}
+        earned={earned}
+      />
     </div>
   );
 };

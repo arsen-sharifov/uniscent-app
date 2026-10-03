@@ -11,6 +11,21 @@ const mergeSpan = (existing: ISpan | undefined, start: number, end: number): ISp
   end: existing ? Math.max(existing.end, end) : end,
 });
 
+const matchLines = (
+  guides: Map<number, ISpan>,
+  draggedLines: readonly number[],
+  nodeLines: readonly number[],
+  span: ISpan,
+  threshold: number,
+): void =>
+  draggedLines.forEach((draggedLine) =>
+    nodeLines.forEach((nodeLine) => {
+      if (Math.abs(draggedLine - nodeLine) < threshold) {
+        guides.set(nodeLine, mergeSpan(guides.get(nodeLine), span.start, span.end));
+      }
+    }),
+  );
+
 const collectGuides = (positions: Map<number, ISpan>, direction: IAlignmentGuide['direction']): IAlignmentGuide[] =>
   Array.from(positions.entries()).map(([position, span]) => ({
     direction,
@@ -24,11 +39,9 @@ export const computeAlignmentGuides = (
   nodes: readonly Node[],
   threshold: number = ALIGN_GUIDE_THRESHOLD_PX,
 ): IAlignmentGuide[] => {
-  const draggedW = dragged.measured?.width ?? 0;
-  const draggedH = dragged.measured?.height ?? 0;
-  if (!draggedW || !draggedH) {
-    return [];
-  }
+  const draggedWidth = dragged.measured?.width ?? 0;
+  const draggedHeight = dragged.measured?.height ?? 0;
+  if (!draggedWidth || !draggedHeight) return [];
 
   const draggedX = dragged.position.x;
   const draggedY = dragged.position.y;
@@ -36,41 +49,29 @@ export const computeAlignmentGuides = (
   const verticals = new Map<number, ISpan>();
   const horizontals = new Map<number, ISpan>();
 
-  const draggedVerticalLines = sampleLines(draggedX, draggedW);
-  const draggedHorizontalLines = sampleLines(draggedY, draggedH);
+  const draggedVerticalLines = sampleLines(draggedX, draggedWidth);
+  const draggedHorizontalLines = sampleLines(draggedY, draggedHeight);
 
   nodes.forEach((node) => {
-    if (node.id === dragged.id) {
-      return;
-    }
+    if (node.id === dragged.id) return;
 
     const width = node.measured?.width ?? 0;
     const height = node.measured?.height ?? 0;
-    if (!width || !height) {
-      return;
-    }
+    if (!width || !height) return;
 
-    const nodeVerticalLines = sampleLines(node.position.x, width);
-    const nodeHorizontalLines = sampleLines(node.position.y, height);
-
-    draggedVerticalLines.forEach((draggedLine) =>
-      nodeVerticalLines.forEach((nodeLine) => {
-        if (Math.abs(draggedLine - nodeLine) < threshold) {
-          const start = Math.min(draggedY, node.position.y);
-          const end = Math.max(draggedY + draggedH, node.position.y + height);
-          verticals.set(nodeLine, mergeSpan(verticals.get(nodeLine), start, end));
-        }
-      }),
+    matchLines(
+      verticals,
+      draggedVerticalLines,
+      sampleLines(node.position.x, width),
+      { start: Math.min(draggedY, node.position.y), end: Math.max(draggedY + draggedHeight, node.position.y + height) },
+      threshold,
     );
-
-    draggedHorizontalLines.forEach((draggedLine) =>
-      nodeHorizontalLines.forEach((nodeLine) => {
-        if (Math.abs(draggedLine - nodeLine) < threshold) {
-          const start = Math.min(draggedX, node.position.x);
-          const end = Math.max(draggedX + draggedW, node.position.x + width);
-          horizontals.set(nodeLine, mergeSpan(horizontals.get(nodeLine), start, end));
-        }
-      }),
+    matchLines(
+      horizontals,
+      draggedHorizontalLines,
+      sampleLines(node.position.y, height),
+      { start: Math.min(draggedX, node.position.x), end: Math.max(draggedX + draggedWidth, node.position.x + width) },
+      threshold,
     );
   });
 

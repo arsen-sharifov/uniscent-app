@@ -14,9 +14,9 @@ interface ICommentsButtonProps {
 export const CommentsButton = ({ nodeId, count }: ICommentsButtonProps) => {
   const t = useTranslations();
 
-  const open = useCanvasStore((s) => s.openCommentsNodeId === nodeId);
-  const setOpenCommentsNodeId = useCanvasStore((s) => s.setOpenCommentsNodeId);
-  const canComment = usePermissionsStore((s) => s.canComment);
+  const open = useCanvasStore((state) => state.openCommentsNodeId === nodeId);
+  const setOpenCommentsNodeId = useCanvasStore((state) => state.setOpenCommentsNodeId);
+  const canComment = usePermissionsStore((state) => state.canComment);
 
   const hasComments = count > 0;
   if (!hasComments && !canComment) return null;

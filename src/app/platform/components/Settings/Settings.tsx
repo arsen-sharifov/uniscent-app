@@ -1,7 +1,7 @@
 'use client';
 
 import { X } from 'lucide-react';
-import { useCallback, useState } from 'react';
+import { useId, useState } from 'react';
 
 import type { IPreferences, TPreferenceUpdater, TSettingsSection } from '@interfaces';
 
@@ -17,27 +17,23 @@ import {
   PlanSection,
   ProfileSection,
   SecuritySection,
+  SettingsSidebar,
   SettingsSkeleton,
 } from './fragments';
 import { useSettings } from './hooks';
-import { SettingsSidebar } from './SettingsSidebar';
 
 interface ISettingsProps {
   onClose: () => void;
   preferences: IPreferences;
   updatePreference: TPreferenceUpdater;
-  defaultSection?: TSettingsSection;
 }
 
-export const Settings = ({ onClose, preferences, updatePreference, defaultSection = 'profile' }: ISettingsProps) => {
+export const Settings = ({ onClose, preferences, updatePreference }: ISettingsProps) => {
   const t = useTranslations();
-  const [activeSection, setActiveSection] = useState<TSettingsSection>(defaultSection);
-  const { user, loading, updateProfile, changeEmail, changePassword, deleteAccount } = useSettings();
-
-  const handleClose = useCallback(() => {
-    setActiveSection(defaultSection);
-    onClose();
-  }, [defaultSection, onClose]);
+  const titleId = useId();
+  const [activeSection, setActiveSection] = useState<TSettingsSection>('profile');
+  const { user, loading, updateProfile, changeEmail, changePassword, getMyOwnedSharedWorkspaces, deleteAccount } =
+    useSettings();
 
   const renderSection = () => {
     if (loading && (activeSection === 'profile' || activeSection === 'plan')) {
@@ -59,7 +55,13 @@ export const Settings = ({ onClose, preferences, updatePreference, defaultSectio
     }
 
     if (activeSection === 'security') {
-      return <SecuritySection onChangePassword={changePassword} onDeleteAccount={deleteAccount} />;
+      return (
+        <SecuritySection
+          onChangePassword={changePassword}
+          onCheckDeletion={getMyOwnedSharedWorkspaces}
+          onDeleteAccount={deleteAccount}
+        />
+      );
     }
 
     if (activeSection === 'notifications') {
@@ -78,7 +80,7 @@ export const Settings = ({ onClose, preferences, updatePreference, defaultSectio
   };
 
   return (
-    <Modal open onClose={handleClose} width="max-w-[1100px]" overflowHidden>
+    <Modal open onClose={onClose} width="max-w-[1100px]" overflowHidden labelledBy={titleId}>
       <div
         data-tour="settingsModal"
         data-theme={preferences.theme}
@@ -89,14 +91,17 @@ export const Settings = ({ onClose, preferences, updatePreference, defaultSectio
         <div className="relative flex-1 [scrollbar-width:none] overflow-y-auto px-10 py-5 [&::-webkit-scrollbar]:hidden">
           <button
             type="button"
-            onClick={handleClose}
+            onClick={onClose}
             aria-label={t.platform.settings.close}
             className="absolute top-4 right-4 z-10 cursor-pointer rounded-lg p-1.5 text-[color:var(--text-subtle)] transition-colors duration-200 ease-out hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--border)] motion-reduce:transition-none"
           >
             <X className="h-4 w-4" aria-hidden />
           </button>
 
-          <h2 className="mb-6 font-grotesk text-lg font-semibold tracking-tight text-[color:var(--text-strong)]">
+          <h2
+            id={titleId}
+            className="mb-6 font-grotesk text-lg font-semibold tracking-tight text-[color:var(--text-strong)]"
+          >
             {t.platform.settings.sections[activeSection]}
           </h2>
 

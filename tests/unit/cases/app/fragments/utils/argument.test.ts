@@ -49,7 +49,15 @@ describe('computeEdgeTones', () => {
     describe('WHEN the graph edges are coloured', () => {
       beforeEach(() => {
         tones = computeEdgeTones(
+          [
+            heroClaim('q', { kind: 'question', status: null }),
+            heroClaim('p1'),
+            heroClaim('p2', { status: null }),
+            heroClaim('c1'),
+            heroClaim('c2', { status: null }),
+          ],
           [heroEdge('p1', 'c1'), heroEdge('p1', 'c2'), heroEdge('c1', 'c2'), heroEdge('q', 'p2')],
+          new Set(['p1']),
           new Map([
             ['p1', 'invalid'],
             ['c1', 'tainted-valid'],
@@ -63,6 +71,53 @@ describe('computeEdgeTones', () => {
         expect(tones.get('p1-c2')).toBe('invalid');
         expect(tones.get('c1-c2')).toBe('tainted');
         expect(tones.get('q-p2')).toBe('default');
+      });
+    });
+  });
+
+  describe('GIVEN a question reaching a resolved answer through a valid premise', () => {
+    describe('WHEN the graph edges are coloured', () => {
+      beforeEach(() => {
+        const claims = [
+          heroClaim('q', { kind: 'question', status: null }),
+          heroClaim('p1'),
+          heroClaim('p3'),
+          heroClaim('c2', { status: null, isAnswer: true }),
+        ];
+        const edges = [heroEdge('q', 'p1'), heroEdge('p1', 'c2'), heroEdge('p3', 'c2')];
+        const refutedIds = new Set<string>();
+
+        tones = computeEdgeTones(claims, edges, refutedIds, computeClaimStatuses(claims, edges, refutedIds));
+      });
+
+      test('THEN the path from the question to the answer reads answer while a side support stays valid', () => {
+        expect(tones.get('q-p1')).toBe('answer');
+        expect(tones.get('p1-c2')).toBe('answer');
+        expect(tones.get('p3-c2')).toBe('valid');
+      });
+    });
+  });
+
+  describe('GIVEN an answer whose support chain starts at a refuted premise', () => {
+    describe('WHEN the graph edges are coloured', () => {
+      beforeEach(() => {
+        const claims = [
+          heroClaim('q', { kind: 'question', status: null }),
+          heroClaim('p1'),
+          heroClaim('c1'),
+          heroClaim('c2', { status: null, isAnswer: true }),
+        ];
+        const edges = [heroEdge('q', 'p1'), heroEdge('p1', 'c1'), heroEdge('c1', 'c2')];
+        const refutedIds = new Set(['p1']);
+
+        tones = computeEdgeTones(claims, edges, refutedIds, computeClaimStatuses(claims, edges, refutedIds));
+      });
+
+      test('THEN the edge into the false answer reads invalid and no edge reads answer', () => {
+        expect(tones.get('q-p1')).toBe('invalid');
+        expect(tones.get('p1-c1')).toBe('tainted');
+        expect(tones.get('c1-c2')).toBe('invalid');
+        expect([...tones.values()]).not.toContain('answer');
       });
     });
   });

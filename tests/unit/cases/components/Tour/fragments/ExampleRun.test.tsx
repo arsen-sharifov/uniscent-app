@@ -18,7 +18,6 @@ import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
 vi.mock('@/i18n', () => import('@mocks/i18n'));
 vi.mock('@/lib/events', () => import('@mocks/events'));
 
-const copy = TRANSLATIONS.platform.onboarding;
 const guide = findGuide(EXAMPLE_GUIDE_ID)!;
 const lastIndex = guide.steps.length - 1;
 const onCreateExample = vi.fn<(name: string) => Promise<string | null>>();
@@ -97,8 +96,8 @@ describe('ExampleRun', () => {
       });
 
       test('THEN the thread is created under the example name and next waits for it', () => {
-        expect(onCreateExample).toHaveBeenCalledExactlyOnceWith(copy.example.threadName);
-        expect(button(copy.stepNext)).toBeDisabled();
+        expect(onCreateExample).toHaveBeenCalledExactlyOnceWith(TRANSLATIONS.platform.onboarding.example.threadName);
+        expect(button(TRANSLATIONS.platform.onboarding.stepNext)).toBeDisabled();
       });
     });
 
@@ -111,8 +110,10 @@ describe('ExampleRun', () => {
       });
 
       test('THEN the opener writes the question and next is offered', () => {
-        expect(useCanvasStore.getState().nodes.at(0)?.data.label).toBe(copy.example.question);
-        expect(button(copy.stepNext)).toBeEnabled();
+        expect(useCanvasStore.getState().nodes.at(0)?.data.label).toBe(
+          TRANSLATIONS.platform.onboarding.example.question,
+        );
+        expect(button(TRANSLATIONS.platform.onboarding.stepNext)).toBeEnabled();
       });
     });
 
@@ -162,7 +163,10 @@ describe('ExampleRun', () => {
         const { nodes, edges } = useCanvasStore.getState();
 
         expect(nodes.map((node) => node.data.label)).toEqual(
-          expect.arrayContaining([copy.example.nodes.capsule, copy.example.nodes.oneButton]),
+          expect.arrayContaining([
+            TRANSLATIONS.platform.onboarding.example.nodes.capsule,
+            TRANSLATIONS.platform.onboarding.example.nodes.oneButton,
+          ]),
         );
         expect(edges).toHaveLength(2);
       });
@@ -210,16 +214,16 @@ describe('ExampleRun', () => {
       });
 
       test('THEN it offers to keep or delete it instead of next', () => {
-        expect(button(copy.example.keep)).toBeInTheDocument();
-        expect(button(copy.example.remove)).toBeInTheDocument();
-        expect(button(copy.stepNext)).not.toBeInTheDocument();
+        expect(button(TRANSLATIONS.platform.onboarding.example.keep)).toBeInTheDocument();
+        expect(button(TRANSLATIONS.platform.onboarding.example.remove)).toBeInTheDocument();
+        expect(button(TRANSLATIONS.platform.onboarding.stepNext)).not.toBeInTheDocument();
       });
     });
 
     describe('WHEN the user keeps the example', () => {
       beforeEach(() => {
         goTo(lastIndex);
-        fireEvent.click(button(copy.example.keep)!);
+        fireEvent.click(button(TRANSLATIONS.platform.onboarding.example.keep)!);
       });
 
       test('THEN the guide finishes and the thread stays', () => {
@@ -232,7 +236,7 @@ describe('ExampleRun', () => {
       beforeEach(async () => {
         onDeleteExample.mockImplementation(async () => useCanvasStore.getState().clearCanvas());
         goTo(lastIndex);
-        fireEvent.click(button(copy.example.remove)!);
+        fireEvent.click(button(TRANSLATIONS.platform.onboarding.example.remove)!);
         await settle();
       });
 
@@ -272,7 +276,7 @@ describe('ExampleRun', () => {
     describe('WHEN the user leaves it', () => {
       beforeEach(() => {
         renderAt('exampleIntro');
-        fireEvent.click(screen.getByTitle(copy.quit));
+        fireEvent.click(screen.getByTitle(TRANSLATIONS.platform.onboarding.quit));
       });
 
       test('THEN the run is dropped', () => {

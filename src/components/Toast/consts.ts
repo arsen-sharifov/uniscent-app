@@ -1,11 +1,8 @@
-import { CircleAlert, CircleCheck, Info, TriangleAlert, type LucideIcon } from 'lucide-react';
+import { CircleAlert, CircleCheck, Info, TriangleAlert } from 'lucide-react';
 
-import type { TToastType } from '@interfaces';
+import type { IToastVisual, TToastType } from '@interfaces';
 
-export const TOAST_VISUAL_BY_TYPE: Record<
-  TToastType,
-  { icon: LucideIcon; iconClassName: string; spineClassName: string }
-> = {
+export const TOAST_VISUAL_BY_TYPE: Record<TToastType, IToastVisual> = {
   success: {
     icon: CircleCheck,
     iconClassName: 'text-[color:var(--status-success)]',

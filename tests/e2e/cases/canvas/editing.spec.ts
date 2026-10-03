@@ -19,9 +19,6 @@ import {
   waitForCanvas,
 } from '../../utils';
 
-const { canvas } = COPY.platform;
-const { items: tools } = canvas.tools;
-
 test.describe('central question', () => {
   test.describe('GIVEN a thread that already carries a question', () => {
     test.beforeEach(async ({ page, workspace, account }) => {
@@ -74,7 +71,7 @@ test.describe('node building', () => {
       test.beforeEach(async ({ page }) => {
         await addNodeAt(page, 480, 480);
         await expect(getNodes(page)).toHaveCount(1);
-        await selectTool(page, tools.undo.label);
+        await selectTool(page, COPY.platform.canvas.tools.items.undo.label);
       });
 
       test('THEN the canvas is back to the question alone', async ({ page }) => {
@@ -87,9 +84,9 @@ test.describe('node building', () => {
       test.beforeEach(async ({ page }) => {
         await addNodeAt(page, 480, 480);
         await expect(getNodes(page)).toHaveCount(1);
-        await selectTool(page, tools.undo.label);
+        await selectTool(page, COPY.platform.canvas.tools.items.undo.label);
         await expect(getNodes(page)).toHaveCount(0);
-        await selectTool(page, tools.redo.label);
+        await selectTool(page, COPY.platform.canvas.tools.items.redo.label);
         await expectSaved(page);
       });
 
@@ -106,7 +103,7 @@ test.describe('node building', () => {
     test.describe('WHEN a node is added from the pane context menu', () => {
       test.beforeEach(async ({ page }) => {
         const menu = await openPaneMenu(page, { x: 300, y: 620 });
-        await menu.getByRole('menuitem', { name: canvas.context.addNode }).click();
+        await menu.getByRole('menuitem', { name: COPY.platform.canvas.context.addNode }).click();
         await expectSaved(page);
       });
 
@@ -137,7 +134,7 @@ test.describe('node wiring', () => {
 
     test.describe('WHEN the connect tool links them', () => {
       test.beforeEach(async ({ page }) => {
-        await selectTool(page, tools.connect.label);
+        await selectTool(page, COPY.platform.canvas.tools.items.connect.label);
         await getNode(page, 'Cause').click();
         await getNode(page, 'Effect').click();
         await expectSaved(page);
@@ -170,7 +167,7 @@ test.describe('node wiring', () => {
     test.describe('WHEN the edge is deleted from its context menu', () => {
       test.beforeEach(async ({ page }) => {
         const menu = await openEdgeMenu(page);
-        await menu.getByRole('menuitem', { name: canvas.context.deleteEdge }).click();
+        await menu.getByRole('menuitem', { name: COPY.platform.canvas.context.deleteEdge }).click();
         await expectSaved(page);
       });
 
@@ -194,7 +191,7 @@ test.describe('node dragging', () => {
       await seedNodes(thread.id, account.id, [{ label: 'Wanderer', x: 460, y: 440 }]);
       await page.goto(`/platform/${workspace.id}/${thread.id}`);
       await waitForCanvas(page);
-      await selectTool(page, tools.select.label);
+      await selectTool(page, COPY.platform.canvas.tools.items.select.label);
     });
 
     test.describe('WHEN the node is dragged to a new spot', () => {
@@ -239,7 +236,7 @@ test.describe('node context menu', () => {
     test.describe('WHEN the node is duplicated from its context menu', () => {
       test.beforeEach(async ({ page }) => {
         const menu = await openNodeMenu(page, getNode(page, 'Original idea'));
-        await menu.getByRole('menuitem', { name: canvas.context.duplicate }).click();
+        await menu.getByRole('menuitem', { name: COPY.platform.canvas.context.duplicate }).click();
         await expectSaved(page);
       });
 
@@ -257,11 +254,11 @@ test.describe('node context menu', () => {
       });
 
       test('THEN marking the node valid is refused with a hint', async ({ page }) => {
-        const menu = page.getByRole('menu', { name: canvas.context.ariaLabel });
-        const markValid = menu.getByRole('menuitem', { name: new RegExp(canvas.context.markValid) });
+        const menu = page.getByRole('menu', { name: COPY.platform.canvas.context.ariaLabel });
+        const markValid = menu.getByRole('menuitem', { name: new RegExp(COPY.platform.canvas.context.markValid) });
 
         await expect(markValid).toBeDisabled();
-        await expect(markValid).toContainText(canvas.context.needsValidParent);
+        await expect(markValid).toContainText(COPY.platform.canvas.context.needsValidParent);
       });
     });
   });

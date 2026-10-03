@@ -7,7 +7,6 @@ import Link from 'next/link';
 import type { IPricingPlan } from '@interfaces';
 
 import { useTranslations } from '@/i18n';
-import { formatPlanPrice } from '@/lib/pricing';
 
 import { TickerNumber } from './TickerNumber';
 
@@ -18,7 +17,6 @@ interface IPricingCardProps {
 export const PricingCard = ({ plan }: IPricingCardProps) => {
   const t = useTranslations();
   const isHighlighted = plan.highlighted === true;
-  const periodLabel = plan.period ? t.landing.pricing.periods[plan.period] : null;
 
   return (
     <div
@@ -42,7 +40,7 @@ export const PricingCard = ({ plan }: IPricingCardProps) => {
         <div className="flex items-baseline gap-1.5">
           <span className="font-mono-ui text-4xl font-bold tracking-tight text-[color:var(--hero-card-text)]">
             {plan.price === 'free' ? (
-              formatPlanPrice(plan.price, t.landing.pricing.free)
+              t.landing.pricing.free
             ) : (
               <>
                 $
@@ -50,8 +48,10 @@ export const PricingCard = ({ plan }: IPricingCardProps) => {
               </>
             )}
           </span>
-          {periodLabel && (
-            <span className="font-mono-ui text-[11px] text-[color:var(--hero-card-muted)]">/{periodLabel}</span>
+          {plan.period && (
+            <span className="font-mono-ui text-[11px] text-[color:var(--hero-card-muted)]">
+              /{t.landing.pricing.periods[plan.period]}
+            </span>
           )}
         </div>
         {plan.description && (

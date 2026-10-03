@@ -61,7 +61,7 @@ const meta: Meta<typeof Popover> = {
     },
     placement: {
       control: { type: 'inline-radio' },
-      options: PLACEMENTS.map((p) => p.id),
+      options: PLACEMENTS.map((placement) => placement.id),
       description: 'Anchor position relative to the trigger.',
       table: { category: ARG_CATEGORIES.APPEARANCE },
     },

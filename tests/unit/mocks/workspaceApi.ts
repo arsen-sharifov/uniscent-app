@@ -16,6 +16,7 @@ export const deleteWorkspaceRole = vi.fn();
 export const deleteWorkspaces = vi.fn();
 export const getFolders = vi.fn();
 export const getMyInvitations = vi.fn();
+export const getMyOwnedSharedWorkspaces = vi.fn();
 export const getMyWorkspacePermissions = vi.fn();
 export const getMyWorkspaces = vi.fn();
 export const getThreads = vi.fn();

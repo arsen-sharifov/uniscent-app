@@ -36,6 +36,6 @@ export const useExpandableLabel = (enabled = true) => {
     labelRefCallback,
     expanded,
     expandable: enabled && (overflows || expanded),
-    toggleExpanded: () => setExpanded((prev) => !prev),
+    toggleExpanded: () => setExpanded((previous) => !previous),
   };
 };

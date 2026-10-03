@@ -10,6 +10,7 @@ import { Avatar } from '@/components';
 import { useTranslations } from '@/i18n';
 import { roleLabel } from '@/lib/utils';
 
+import { InlineConfirm } from './InlineConfirm';
 import { RoleSelect } from './RoleSelect';
 
 interface IMemberRowProps {
@@ -34,7 +35,6 @@ export const MemberRow = ({
   onRequestTransfer,
 }: IMemberRowProps) => {
   const t = useTranslations();
-  const { members } = t.platform.workspaceSettings;
   const [confirmingRemove, setConfirmingRemove] = useState(false);
 
   const displayName = member.name || member.email;
@@ -76,26 +76,16 @@ export const MemberRow = ({
 
     if (confirmingRemove) {
       return (
-        <div className="flex items-center gap-2">
-          <span className="font-grotesk text-xs text-[color:var(--text-muted)]">{members.remove}?</span>
-          <button
-            type="button"
-            onClick={() => setConfirmingRemove(false)}
-            className="cursor-pointer rounded-lg border border-[color:var(--border-strong)] px-2.5 py-1 font-grotesk text-xs font-medium text-[color:var(--text-muted)] transition-[color,background-color,scale] duration-150 hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:scale-95 motion-reduce:transition-none"
-          >
-            {members.cancel}
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setConfirmingRemove(false);
-              onRemove(member.userId);
-            }}
-            className="cursor-pointer rounded-lg bg-[color:var(--status-error)] px-2.5 py-1 font-grotesk text-xs font-medium text-[color:var(--on-status)] transition-[opacity,scale] duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:scale-95 motion-reduce:transition-none"
-          >
-            {members.removeConfirm}
-          </button>
-        </div>
+        <InlineConfirm
+          prompt={`${t.platform.workspaceSettings.members.remove}?`}
+          cancelLabel={t.platform.workspaceSettings.members.cancel}
+          confirmLabel={t.platform.workspaceSettings.members.removeConfirm}
+          onCancel={() => setConfirmingRemove(false)}
+          onConfirm={() => {
+            setConfirmingRemove(false);
+            onRemove(member.userId);
+          }}
+        />
       );
     }
 
@@ -106,14 +96,14 @@ export const MemberRow = ({
           value={member.roleId}
           roles={roles}
           onChange={handleRoleChange}
-          ariaLabel={members.changeRole}
+          ariaLabel={t.platform.workspaceSettings.members.changeRole}
         />
         {!isSelf && (
           <button
             type="button"
             onClick={() => setConfirmingRemove(true)}
-            title={members.remove}
-            aria-label={members.remove}
+            title={t.platform.workspaceSettings.members.remove}
+            aria-label={t.platform.workspaceSettings.members.remove}
             className="cursor-pointer rounded-lg p-1.5 text-[color:var(--text-subtle)] opacity-0 transition-[color,background-color,opacity] duration-150 group-focus-within:opacity-100 group-hover:opacity-100 hover:bg-[color:var(--status-error-bg)] hover:text-[color:var(--status-error)] focus-visible:opacity-100 focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--status-error-soft)] active:text-[color:var(--status-error)] motion-reduce:transition-none"
           >
             <Trash2 className="h-3.5 w-3.5" aria-hidden />
@@ -131,7 +121,7 @@ export const MemberRow = ({
           <span className="truncate">{displayName}</span>
           {isSelf && (
             <span className="shrink-0 rounded-md bg-[color:var(--surface-overlay)] px-1.5 py-0.5 font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-muted)] uppercase">
-              {members.you}
+              {t.platform.workspaceSettings.members.you}
             </span>
           )}
         </p>

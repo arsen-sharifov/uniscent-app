@@ -21,7 +21,7 @@ export const SearchableReferencesExample = ({ onSelect }: ISearchableReferencesE
         <input
           type="text"
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(inputEvent) => setQuery(inputEvent.target.value)}
           placeholder="Filter references"
           className="w-full bg-transparent text-[12.5px] text-[color:var(--text-strong)] outline-none placeholder:text-[color:var(--text-faint)]"
         />

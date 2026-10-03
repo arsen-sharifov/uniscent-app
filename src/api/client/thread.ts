@@ -1,32 +1,52 @@
-import { ECanvasNodeType, type IThread, type IThreadRow } from '@interfaces';
+import { ECanvasNodeType, type ICanvasNodeRow, type IThread, type IThreadRow } from '@interfaces';
 
+import { isThreadResolved } from '@/lib/canvas/utils';
 import { event } from '@/lib/events';
 import { createClient } from '@/lib/supabase';
+import { groupBy } from '@/lib/utils';
 
-import { createCanvasNode } from './canvasNode';
-import { toThread } from './utils';
+import { getCanvasEdges } from './canvasEdge';
+import { createCanvasNode, getCanvasNodes } from './canvasNode';
+import { ANSWERED_THREAD_SELECT, THREAD_SELECT } from './consts';
+import { deleteRowsByIds, getNextPosition, readAllRows, rowToEdge, rowToNode, toThread } from './utils';
 
-const getAnsweredThreadIds = async (threadIds: string[]): Promise<Set<string>> => {
-  if (threadIds.length === 0) return new Set();
-
+const getAnsweredThreadIds = async (workspaceId: string): Promise<string[]> => {
   const supabase = createClient();
-  const { data, error } = await supabase
-    .from('canvas_nodes')
-    .select('thread_id')
-    .eq('is_answer', true)
-    .in('thread_id', threadIds)
-    .returns<{ thread_id: string }[]>();
+  const rows = await readAllRows((from, to) =>
+    supabase
+      .from('canvas_nodes')
+      .select(ANSWERED_THREAD_SELECT)
+      .eq('is_answer', true)
+      .eq('threads.workspace_id', workspaceId)
+      .order('id')
+      .range(from, to)
+      .returns<Pick<ICanvasNodeRow, 'thread_id'>[]>(),
+  );
 
-  if (error) throw error;
+  return [...new Set(rows.map((row) => row.thread_id))];
+};
 
-  return new Set((data ?? []).map((row) => row.thread_id));
+const getResolvedThreadIds = async (workspaceId: string): Promise<Set<string>> => {
+  const answeredIds = await getAnsweredThreadIds(workspaceId);
+  const [nodeRows, edgeRows] = await Promise.all([getCanvasNodes(answeredIds), getCanvasEdges(answeredIds)]);
+  const nodesByThread = groupBy(nodeRows, (row) => row.thread_id);
+  const edgesByThread = groupBy(edgeRows, (row) => row.thread_id);
+
+  return new Set(
+    answeredIds.filter((threadId) =>
+      isThreadResolved(
+        (nodesByThread.get(threadId) ?? []).map((row) => rowToNode(row)),
+        (edgesByThread.get(threadId) ?? []).map(rowToEdge),
+      ),
+    ),
+  );
 };
 
 export const getThreads = async (workspaceId: string): Promise<IThread[]> => {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('threads')
-    .select('id, workspace_id, folder_id, name, position')
+    .select(THREAD_SELECT)
     .eq('workspace_id', workspaceId)
     .order('position')
     .returns<IThreadRow[]>();
@@ -34,41 +54,30 @@ export const getThreads = async (workspaceId: string): Promise<IThread[]> => {
   if (error) throw error;
 
   const rows = data ?? [];
-  const answered = await getAnsweredThreadIds(rows.map((row) => row.id));
 
-  return rows.map((row) => ({ ...toThread(row), hasAnswer: answered.has(row.id) }));
+  if (rows.length === 0) return [];
+
+  const resolved = await getResolvedThreadIds(workspaceId);
+
+  return rows.map((row) => ({ ...toThread(row), resolved: resolved.has(row.id) }));
 };
 
 export const createThread = async (workspaceId: string, folderId?: string, name?: string): Promise<IThread | null> => {
+  const position = await getNextPosition(workspaceId, folderId);
   const supabase = createClient();
 
-  let countQuery = supabase
-    .from('threads')
-    .select('id', { count: 'exact', head: true })
-    .eq('workspace_id', workspaceId);
-
-  if (folderId) {
-    countQuery = countQuery.eq('folder_id', folderId);
-  } else {
-    countQuery = countQuery.is('folder_id', null);
-  }
-
-  const { count, error: countError } = await countQuery;
-
-  if (countError) throw countError;
-
-  const { data, error: insertError } = await supabase
+  const { data, error } = await supabase
     .from('threads')
     .insert({
       workspace_id: workspaceId,
       folder_id: folderId ?? null,
-      position: count ?? 0,
+      position,
       ...(name && { name }),
     })
-    .select('id, workspace_id, folder_id, name, position')
+    .select(THREAD_SELECT)
     .single<IThreadRow>();
 
-  if (insertError) throw insertError;
+  if (error) throw error;
   if (!data) return null;
 
   const thread = toThread(data);
@@ -88,7 +97,7 @@ export const createThread = async (workspaceId: string, folderId?: string, name?
 
 export const updateThreadName = async (id: string, name: string): Promise<void> => {
   const supabase = createClient();
-  const { error } = await supabase.from('threads').update({ name }).eq('id', id);
+  const { error } = await supabase.from('threads').update({ name }).eq('id', id).select('id').single();
 
   if (error) throw error;
 };
@@ -102,14 +111,18 @@ export const deleteThread = async (id: string): Promise<void> => {
 
 export const deleteThreads = async (ids: string[]): Promise<void> => {
   const supabase = createClient();
-  const { error } = await supabase.from('threads').delete().in('id', ids);
 
-  if (error) throw error;
+  return deleteRowsByIds(ids, (chunk) => supabase.from('threads').delete().in('id', chunk));
 };
 
 export const moveThread = async (id: string, folderId: string | null, position: number): Promise<void> => {
   const supabase = createClient();
-  const { error } = await supabase.from('threads').update({ folder_id: folderId, position }).eq('id', id);
+  const { error } = await supabase
+    .from('threads')
+    .update({ folder_id: folderId, position })
+    .eq('id', id)
+    .select('id')
+    .single();
 
   if (error) throw error;
 };

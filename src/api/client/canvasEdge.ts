@@ -2,6 +2,9 @@ import type { ICanvasEdgeRow, ICreateCanvasEdgeInput } from '@interfaces';
 
 import { createClient } from '@/lib/supabase';
 
+import { CANVAS_EDGE_SELECT } from './consts';
+import { readRowsByIds } from './utils';
+
 export const createCanvasEdge = async (input: ICreateCanvasEdgeInput): Promise<void> => {
   const supabase = createClient();
 
@@ -25,17 +28,17 @@ export const deleteCanvasEdge = async (id: string): Promise<void> => {
   if (error) throw error;
 };
 
-export const getCanvasEdges = async (threadId: string): Promise<ICanvasEdgeRow[]> => {
+export const getCanvasEdges = async (threadIds: string[]): Promise<ICanvasEdgeRow[]> => {
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from('canvas_edges')
-    .select('id, thread_id, source_node_id, target_node_id, source_handle, target_handle, created_at')
-    .eq('thread_id', threadId)
-    .order('created_at')
-    .returns<ICanvasEdgeRow[]>();
-
-  if (error) throw error;
-
-  return data ?? [];
+  return readRowsByIds(threadIds, (chunk, from, to) =>
+    supabase
+      .from('canvas_edges')
+      .select(CANVAS_EDGE_SELECT)
+      .in('thread_id', chunk)
+      .order('created_at')
+      .order('id')
+      .range(from, to)
+      .returns<ICanvasEdgeRow[]>(),
+  );
 };

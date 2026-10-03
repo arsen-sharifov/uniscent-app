@@ -5,8 +5,8 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 
-import { isAffected } from '@/components/Canvas/utils';
 import { useTranslations } from '@/i18n';
+import { isAffected } from '@/lib/canvas/utils';
 
 import { HeroStage } from './components';
 import { DESKTOP_QUERY, HERO_LOG_LINES, HERO_VISIBLE_LOG_LINES, LANDING_SURFACE_CLASSES } from './consts';

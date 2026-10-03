@@ -1,6 +1,7 @@
 'use client';
 
 import type { IAuroraField, IAuroraRun, IAuroraStart, IAuroraUpdate, TAuroraWorkerSignal } from '@interfaces';
+import { REDUCED_MOTION_QUERY } from '@constants';
 
 import {
   AURORA_FRAME_STEP_CAP_MS,
@@ -8,7 +9,6 @@ import {
   AURORA_RENDER_SCALE,
   AURORA_STATIC_FRAME_TIME_S,
   LIGHT_SCHEME_QUERY,
-  REDUCED_MOTION_QUERY,
 } from '../consts';
 import { createAuroraRenderer } from './auroraRenderer';
 import { createFrameLoop } from './frameLoop';

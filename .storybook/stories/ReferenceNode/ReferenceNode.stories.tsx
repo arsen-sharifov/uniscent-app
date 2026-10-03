@@ -3,7 +3,7 @@ import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { ReferenceNode } from '@/components';
 
 import { defaultReference, longPathReference, selectedReference } from './consts';
-import { SingleReferenceFlow } from './fragments';
+import { SingleNodeFlow } from '../../components';
 import { ARG_CATEGORIES } from '../../consts';
 import { WithCanvasStage, WithReactFlow, withCanvasStore } from '../../decorators';
 
@@ -11,7 +11,6 @@ const meta: Meta<typeof ReferenceNode> = {
   title: 'Components/Canvas/ReferenceNode',
   component: ReferenceNode,
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:
@@ -51,7 +50,7 @@ export const Default: Story = {
     },
   },
   decorators: [withCanvasStore({ nodes: [defaultReference] })],
-  render: () => <SingleReferenceFlow node={defaultReference} />,
+  render: () => <SingleNodeFlow node={defaultReference} />,
 };
 
 export const Selected: Story = {
@@ -63,7 +62,7 @@ export const Selected: Story = {
     },
   },
   decorators: [withCanvasStore({ nodes: [selectedReference] })],
-  render: () => <SingleReferenceFlow node={selectedReference} />,
+  render: () => <SingleNodeFlow node={selectedReference} />,
 };
 
 export const LongPath: Story = {
@@ -76,5 +75,5 @@ export const LongPath: Story = {
     },
   },
   decorators: [withCanvasStore({ nodes: [longPathReference] })],
-  render: () => <SingleReferenceFlow node={longPathReference} />,
+  render: () => <SingleNodeFlow node={longPathReference} />,
 };

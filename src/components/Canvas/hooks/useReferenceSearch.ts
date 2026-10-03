@@ -10,7 +10,7 @@ import { useCanvasStore } from '@/lib/stores';
 
 export const useReferenceSearch = ({ workspaceId, threadId }: IReferenceSearchInput): IReferenceSearchResult => {
   const t = useTranslations();
-  const isPanelOpen = useCanvasStore((s) => s.referenceSearchPosition !== null);
+  const isPanelOpen = useCanvasStore((state) => state.referenceSearchPosition !== null);
   const [response, setResponse] = useState<IReferenceSearchResponse | null>(null);
   const request = useMemo(() => (isPanelOpen ? { workspaceId, threadId } : null), [workspaceId, threadId, isPanelOpen]);
 
@@ -25,7 +25,7 @@ export const useReferenceSearch = ({ workspaceId, threadId }: IReferenceSearchIn
 
         setResponse({ request, nodes });
       })
-      .catch((error) => {
+      .catch((error: unknown) => {
         if (cancelled) return;
 
         setResponse({ request, nodes: [] });

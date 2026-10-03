@@ -8,8 +8,6 @@ import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
 
-const nodeCopy = TRANSLATIONS.platform.canvas.node;
-
 const onPageClick = vi.fn();
 const onPagePress = vi.fn();
 
@@ -50,13 +48,13 @@ describe('CommentsButton', () => {
 
     describe('WHEN the button renders', () => {
       test('THEN it invites a first comment without a count', () => {
-        expect(screen.getByRole('button', { name: nodeCopy.addComment }).textContent).toBe('');
+        expect(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.addComment }).textContent).toBe('');
       });
     });
 
     describe('WHEN the button is clicked', () => {
       beforeEach(() => {
-        fireEvent.click(screen.getByRole('button', { name: nodeCopy.addComment }));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.addComment }));
       });
 
       test('THEN the node comments open without the click reaching the canvas', () => {
@@ -67,7 +65,7 @@ describe('CommentsButton', () => {
 
     describe('WHEN the pointer goes down on the button', () => {
       beforeEach(() => {
-        fireEvent.mouseDown(screen.getByRole('button', { name: nodeCopy.addComment }));
+        fireEvent.mouseDown(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.addComment }));
       });
 
       test('THEN the press does not reach the canvas', () => {
@@ -85,13 +83,15 @@ describe('CommentsButton', () => {
 
     describe('WHEN the button renders', () => {
       test('THEN it shows the comment count', () => {
-        expect(screen.getByRole('button', { name: nodeCopy.viewComments })).toHaveTextContent('2');
+        expect(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.viewComments })).toHaveTextContent(
+          '2',
+        );
       });
     });
 
     describe('WHEN the button is clicked', () => {
       beforeEach(() => {
-        fireEvent.click(screen.getByRole('button', { name: nodeCopy.viewComments }));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.viewComments }));
       });
 
       test('THEN the comments close', () => {

@@ -7,10 +7,10 @@ describe('detectPositionChanges', () => {
   describe('GIVEN a node that moved between snapshots', () => {
     describe('WHEN changes are detected', () => {
       test('THEN the new coordinates are reported', () => {
-        const prev = [bareNode('n1', 0, 0), bareNode('n2', 50, 50)];
+        const previous = [bareNode('n1', 0, 0), bareNode('n2', 50, 50)];
         const next = [bareNode('n1', 10, 20), bareNode('n2', 50, 50)];
 
-        expect(detectPositionChanges(prev, next)).toEqual([{ id: 'n1', x: 10, y: 20 }]);
+        expect(detectPositionChanges(previous, next)).toEqual([{ id: 'n1', x: 10, y: 20 }]);
       });
     });
   });

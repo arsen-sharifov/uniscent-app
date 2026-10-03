@@ -4,10 +4,13 @@ const WARMUP_ROUTES = [
   '/',
   '/login',
   '/signup',
+  '/join',
   '/platform',
   '/platform/warmup/warmup',
   '/auth/verify-invite',
   '/auth/workspace-invite',
+  '/auth/change-password',
+  '/auth/delete-account',
 ];
 
 const globalSetup = async (config: FullConfig): Promise<void> => {

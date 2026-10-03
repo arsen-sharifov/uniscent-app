@@ -25,7 +25,7 @@ export const Showcase = ({ title, caption, columns = 3, items }: IShowcaseProps)
         )}
       </header>
     )}
-    <div className={`grid grid-cols-1 gap-3 ${SHOWCASE_COLUMN_CLASS[columns]}`}>
+    <div className={clsx('grid grid-cols-1 gap-3', SHOWCASE_COLUMN_CLASS[columns])}>
       {items.map((item) => (
         <article
           key={item.label}

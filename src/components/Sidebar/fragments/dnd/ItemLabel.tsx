@@ -1,6 +1,6 @@
 'use client';
 
-import type { KeyboardEvent } from 'react';
+import type { IInlineEdit } from '@interfaces';
 
 import { SmartTooltip } from '@/components/Tooltip';
 
@@ -9,29 +9,17 @@ import { InlineRenameInput } from './InlineRenameInput';
 interface IItemLabelProps {
   name: string;
   isEditing: boolean;
-  editValue: string;
-  setEditValue: (value: string) => void;
-  inputRef: (element: HTMLInputElement | null) => void;
-  commitRename: () => void;
-  handleKeyDown: (event: KeyboardEvent) => void;
+  edit: IInlineEdit;
 }
 
-export const ItemLabel = ({
-  name,
-  isEditing,
-  editValue,
-  setEditValue,
-  inputRef,
-  commitRename,
-  handleKeyDown,
-}: IItemLabelProps) =>
+export const ItemLabel = ({ name, isEditing, edit }: IItemLabelProps) =>
   isEditing ? (
     <InlineRenameInput
-      value={editValue}
-      onChange={setEditValue}
-      onCommit={commitRename}
-      onKeyDown={handleKeyDown}
-      inputRef={inputRef}
+      value={edit.editValue}
+      onChange={edit.setEditValue}
+      onCommit={edit.commitRename}
+      onKeyDown={edit.handleKeyDown}
+      inputRef={edit.inputRef}
     />
   ) : (
     <SmartTooltip content={name} className="truncate" onlyIfTruncated>

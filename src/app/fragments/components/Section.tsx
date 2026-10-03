@@ -5,7 +5,7 @@ import type { TLandingSectionGround } from '@interfaces';
 
 import { LANDING_SECTION_GROUND_CLASSES } from '../consts';
 
-export interface ISectionProps {
+interface ISectionProps {
   id?: string;
   ground?: TLandingSectionGround;
   snap?: boolean;

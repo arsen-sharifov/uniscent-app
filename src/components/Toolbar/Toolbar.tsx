@@ -3,7 +3,7 @@
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { IToolGroup, IToolItem } from '@interfaces';
+import type { IToolGroup, IToolHoverState, IToolItem } from '@interfaces';
 
 import { Skeleton } from '@/components/Skeleton';
 import { useTranslations } from '@/i18n';
@@ -11,12 +11,6 @@ import { useTranslations } from '@/i18n';
 import { TOOLTIP_DELAY_MS } from './consts';
 import { ExportMenu, HelpMenu, ShortcutsHelp, ToolButton, ToolbarSkeleton, ToolTooltip } from './fragments';
 import { useToolbarShortcuts } from './hooks';
-import { isTypingTarget } from './utils';
-
-interface IToolHoverState {
-  tool: IToolItem;
-  top: number;
-}
 
 const noop = () => {};
 
@@ -37,12 +31,16 @@ export const Toolbar = ({
   threadId,
   threadName,
 }: IToolbarProps) => {
-  useToolbarShortcuts();
-
   const t = useTranslations();
   const pending = pendingGroups.length > 0;
+  const hasToolsAbove = pending || groups.length > 0;
+  const showsExport = !pending && Boolean(threadId && threadName);
   const [hover, setHover] = useState<IToolHoverState | null>(null);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  const toggleShortcuts = useCallback(() => setShortcutsOpen((previous) => !previous), []);
+
+  useToolbarShortcuts(toggleShortcuts);
 
   const showTimerRef = useRef<number | null>(null);
   const visibleRef = useRef(false);
@@ -55,8 +53,15 @@ export const Toolbar = ({
 
   useEffect(() => clearShowTimer, [clearShowTimer]);
 
-  const showHover = useCallback(
-    (next: IToolHoverState) => {
+  const hideHover = useCallback(() => {
+    clearShowTimer();
+    visibleRef.current = false;
+    setHover(null);
+  }, [clearShowTimer]);
+
+  const handleToolEnter = useCallback(
+    (rect: DOMRect, tool: IToolItem) => {
+      const next = { tool, top: rect.top + rect.height / 2 };
       clearShowTimer();
 
       if (visibleRef.current) {
@@ -72,33 +77,6 @@ export const Toolbar = ({
     },
     [clearShowTimer],
   );
-
-  const hideHover = useCallback(() => {
-    clearShowTimer();
-    visibleRef.current = false;
-    setHover(null);
-  }, [clearShowTimer]);
-
-  const handleToolEnter = useCallback(
-    (rect: DOMRect, tool: IToolItem) => {
-      showHover({ tool, top: rect.top + rect.height / 2 });
-    },
-    [showHover],
-  );
-
-  useEffect(() => {
-    const onKey = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== '?') return;
-      if (isTypingTarget(event.target)) return;
-
-      event.preventDefault();
-      setShortcutsOpen((prev) => !prev);
-    };
-
-    window.addEventListener('keydown', onKey);
-
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
 
   return (
     <>
@@ -135,12 +113,21 @@ export const Toolbar = ({
         </div>
 
         {!pending && threadId && threadName && (
-          <div className="mx-2 border-t border-[color:var(--border)] py-2" onPointerEnter={hideHover}>
+          <div
+            className={clsx('mx-2 py-2', hasToolsAbove && 'border-t border-[color:var(--border)]')}
+            onPointerEnter={hideHover}
+          >
             <ExportMenu key={threadId} threadId={threadId} threadName={threadName} />
           </div>
         )}
 
-        <div onPointerEnter={hideHover} className="mx-2 flex justify-center border-t border-[color:var(--border)] py-2">
+        <div
+          onPointerEnter={hideHover}
+          className={clsx(
+            'mx-2 flex justify-center py-2',
+            (hasToolsAbove || showsExport) && 'border-t border-[color:var(--border)]',
+          )}
+        >
           {pending ? (
             <span aria-hidden className="flex h-9 w-9 items-center justify-center">
               <Skeleton className="h-[17px] w-[17px]" />

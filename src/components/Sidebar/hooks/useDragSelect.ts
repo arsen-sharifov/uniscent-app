@@ -1,8 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { IRect } from '@interfaces';
+import type { IRect, IScreenPoint, IUseDragSelectOptions } from '@interfaces';
 
 import {
   AUTO_SCROLL_INTERVAL_MS,
@@ -11,32 +11,29 @@ import {
   DRAG_SELECT_ACTIVATION_PX,
 } from '../consts';
 
-interface IUseDragSelectOptions {
-  containerRef: RefObject<HTMLElement | null>;
-  onSelectionChange: (ids: Set<string>) => void;
-  enabled?: boolean;
-}
-
-const rectsOverlap = (a: DOMRect, b: IRect): boolean =>
-  a.left < b.x + b.width && a.right > b.x && a.top < b.y + b.height && a.bottom > b.y;
+const rectsOverlap = (element: DOMRect, selection: IRect): boolean =>
+  element.left < selection.x + selection.width &&
+  element.right > selection.x &&
+  element.top < selection.y + selection.height &&
+  element.bottom > selection.y;
 
 export const useDragSelect = ({ containerRef, onSelectionChange, enabled = true }: IUseDragSelectOptions) => {
   const [rect, setRect] = useState<IRect | null>(null);
-  const startPos = useRef<{ x: number; y: number } | null>(null);
-  const isActive = useRef(false);
-  const rafId = useRef<number | null>(null);
-  const scrollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
-  const lastSelectedIds = useRef<Set<string>>(new Set());
+  const startPositionRef = useRef<IScreenPoint | null>(null);
+  const isActiveRef = useRef(false);
+  const animationFrameIdRef = useRef<number | null>(null);
+  const scrollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastSelectedIdsRef = useRef<Set<string>>(new Set());
 
   const clearAutoScroll = useCallback(() => {
-    if (scrollInterval.current !== null) {
-      clearInterval(scrollInterval.current);
-      scrollInterval.current = null;
+    if (scrollIntervalRef.current !== null) {
+      clearInterval(scrollIntervalRef.current);
+      scrollIntervalRef.current = null;
     }
   }, []);
 
   const computeRect = useCallback((clientX: number, clientY: number): IRect | null => {
-    const start = startPos.current;
+    const start = startPositionRef.current;
     if (!start) return null;
 
     const x = Math.min(start.x, clientX);
@@ -76,33 +73,33 @@ export const useDragSelect = ({ containerRef, onSelectionChange, enabled = true 
       const target = event.target as HTMLElement;
       if (target.closest('button, input, [data-item-id]')) return;
 
-      startPos.current = { x: event.clientX, y: event.clientY };
-      isActive.current = false;
+      startPositionRef.current = { x: event.clientX, y: event.clientY };
+      isActiveRef.current = false;
     },
     [enabled],
   );
 
   const handleMouseMove = useCallback(
     (event: MouseEvent) => {
-      const start = startPos.current;
+      const start = startPositionRef.current;
       if (!start) return;
 
-      if (!isActive.current) {
+      if (!isActiveRef.current) {
         if (Math.hypot(event.clientX - start.x, event.clientY - start.y) < DRAG_SELECT_ACTIVATION_PX) return;
-        isActive.current = true;
+        isActiveRef.current = true;
       }
 
-      if (rafId.current !== null) cancelAnimationFrame(rafId.current);
+      if (animationFrameIdRef.current !== null) cancelAnimationFrame(animationFrameIdRef.current);
 
-      rafId.current = requestAnimationFrame(() => {
+      animationFrameIdRef.current = requestAnimationFrame(() => {
         const selectionRect = computeRect(event.clientX, event.clientY);
         if (!selectionRect) return;
 
         setRect(selectionRect);
         const ids = findIntersectingIds(selectionRect);
-        const prev = lastSelectedIds.current;
-        if (ids.size !== prev.size || [...ids].some((id) => !prev.has(id))) {
-          lastSelectedIds.current = ids;
+        const previous = lastSelectedIdsRef.current;
+        if (ids.size !== previous.size || [...ids].some((id) => !previous.has(id))) {
+          lastSelectedIdsRef.current = ids;
           onSelectionChange(ids);
         }
       });
@@ -111,21 +108,20 @@ export const useDragSelect = ({ containerRef, onSelectionChange, enabled = true 
       if (!scrollParent) return;
 
       const scrollBounds = scrollParent.getBoundingClientRect();
-      const relativeY = event.clientY - scrollBounds.top;
-      const distFromTop = relativeY;
-      const distFromBottom = scrollBounds.height - relativeY;
+      const distanceFromTop = event.clientY - scrollBounds.top;
+      const distanceFromBottom = scrollBounds.height - distanceFromTop;
 
       clearAutoScroll();
 
-      if (distFromTop < AUTO_SCROLL_ZONE_PX && scrollParent.scrollTop > 0) {
-        scrollInterval.current = setInterval(() => {
+      if (distanceFromTop < AUTO_SCROLL_ZONE_PX && scrollParent.scrollTop > 0) {
+        scrollIntervalRef.current = setInterval(() => {
           scrollParent.scrollTop -= AUTO_SCROLL_STEP_PX;
         }, AUTO_SCROLL_INTERVAL_MS);
       } else if (
-        distFromBottom < AUTO_SCROLL_ZONE_PX &&
+        distanceFromBottom < AUTO_SCROLL_ZONE_PX &&
         scrollParent.scrollTop < scrollParent.scrollHeight - scrollParent.clientHeight
       ) {
-        scrollInterval.current = setInterval(() => {
+        scrollIntervalRef.current = setInterval(() => {
           scrollParent.scrollTop += AUTO_SCROLL_STEP_PX;
         }, AUTO_SCROLL_INTERVAL_MS);
       }
@@ -134,14 +130,14 @@ export const useDragSelect = ({ containerRef, onSelectionChange, enabled = true 
   );
 
   const handleMouseUp = useCallback(() => {
-    startPos.current = null;
-    isActive.current = false;
-    lastSelectedIds.current = new Set();
+    startPositionRef.current = null;
+    isActiveRef.current = false;
+    lastSelectedIdsRef.current = new Set();
     setRect(null);
     clearAutoScroll();
-    if (rafId.current !== null) {
-      cancelAnimationFrame(rafId.current);
-      rafId.current = null;
+    if (animationFrameIdRef.current !== null) {
+      cancelAnimationFrame(animationFrameIdRef.current);
+      animationFrameIdRef.current = null;
     }
   }, [clearAutoScroll]);
 
@@ -161,7 +157,7 @@ export const useDragSelect = ({ containerRef, onSelectionChange, enabled = true 
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('mouseup', handleMouseUp);
       clearAutoScroll();
-      if (rafId.current !== null) cancelAnimationFrame(rafId.current);
+      if (animationFrameIdRef.current !== null) cancelAnimationFrame(animationFrameIdRef.current);
     };
   }, [containerRef, enabled, handleMouseDown, handleMouseMove, handleMouseUp, clearAutoScroll]);
 

@@ -1,5 +1,3 @@
-'use client';
-
 import type { IRect } from '@interfaces';
 
 interface IDragSelectOverlayProps {

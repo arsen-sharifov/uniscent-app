@@ -1,3 +1,5 @@
+import { DioramaNode } from './DioramaNode';
+
 interface ISnapDioramaProps {
   active: boolean;
 }
@@ -31,20 +33,7 @@ export const SnapDiorama = ({ active }: ISnapDioramaProps) => (
       className="transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)] motion-reduce:transition-none"
       style={{ transform: active ? 'translate(100px, 40px)' : 'translate(108px, 33px)' }}
     >
-      <rect
-        x="-20"
-        y="-11"
-        width="40"
-        height="22"
-        rx="3.5"
-        fill="var(--surface-elevated)"
-        stroke={active ? 'var(--accent)' : 'var(--border-strong)'}
-        strokeWidth="1.1"
-        className="transition-[stroke] duration-200 ease-out motion-reduce:transition-none"
-      />
-      <rect x="-14" y="-6" width="28" height="2" rx="1" fill="var(--text-muted)" opacity="0.55" />
-      <rect x="-14" y="-1.5" width="20" height="2" rx="1" fill="var(--text-muted)" opacity="0.32" />
-      <rect x="-14" y="3" width="24" height="2" rx="1" fill="var(--text-muted)" opacity="0.28" />
+      <DioramaNode active={active} strokeWidth={1.1} />
     </g>
   </svg>
 );

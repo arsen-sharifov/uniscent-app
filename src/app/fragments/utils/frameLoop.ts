@@ -6,23 +6,23 @@ export const createFrameLoop = (
   initialElapsedSeconds: number,
 ): IAuroraFrameLoop => {
   let elapsedSeconds = initialElapsedSeconds;
-  let frame: number | null = null;
+  let animationFrameId: number | null = null;
   let lastNow: number | null = null;
 
   const tick = (now: number) => {
     elapsedSeconds += Math.min(now - (lastNow ?? now), stepCapMs) / 1000;
     lastNow = now;
     draw(elapsedSeconds);
-    frame = requestAnimationFrame(tick);
+    animationFrameId = requestAnimationFrame(tick);
   };
 
   return {
     start: () => {
-      frame ??= requestAnimationFrame(tick);
+      animationFrameId ??= requestAnimationFrame(tick);
     },
     stop: () => {
-      if (frame !== null) cancelAnimationFrame(frame);
-      frame = null;
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
+      animationFrameId = null;
       lastNow = null;
     },
     elapsed: () => elapsedSeconds,

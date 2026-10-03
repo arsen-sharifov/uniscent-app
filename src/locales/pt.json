@@ -8,6 +8,7 @@
       "submit": "Entrar",
       "submitting": "A entrar…",
       "emailSent": "Verifique o seu e-mail para confirmar a conta.",
+      "invalidLink": "Esta hiperligação é inválida ou expirou. Tente iniciar sessão ou peça uma nova hiperligação.",
       "noAccount": "Não tem conta?",
       "signUpLink": "Criar conta"
     },
@@ -49,13 +50,25 @@
       "inviteHeading": "Configure a sua conta",
       "inviteSubtitle": "Está a juntar-se à sua equipa no Uniscept"
     },
+    "join": {
+      "heading": "Foi convidado",
+      "subtitle": "Aceite o convite para configurar a sua conta no Uniscept.",
+      "accept": "Aceitar convite",
+      "accepting": "A aceitar…",
+      "signedInAs": "Tem sessão iniciada como {email}. Para aceitar o convite, a sessão desta conta será terminada primeiro.",
+      "switchAccount": "Sair e aceitar",
+      "stay": "Manter a sessão"
+    },
     "placeholders": {
       "name": "João Silva",
-      "email": "voce@exemplo.com",
+      "email": "name@example.com",
       "password": "••••••••"
     },
     "errors": {
-      "invalidInviteCode": "Código de convite inválido"
+      "invalidInviteCode": "Código de convite inválido",
+      "signInFailed": "Não foi possível iniciar sessão",
+      "signUpFailed": "Não foi possível criar a conta",
+      "joinFailed": "Não foi possível configurar a conta"
     },
     "confirmed": {
       "heading": "E-mail confirmado",
@@ -68,8 +81,9 @@
     }
   },
   "common": {
-    "loading": "A carregar",
     "close": "Fechar",
+    "moreInfo": "Mais informações",
+    "completed": "Concluído",
     "userAvatar": "Utilizador",
     "notifications": "Notificações",
     "errors": {
@@ -77,6 +91,7 @@
       "permission": "Não tem permissão para fazer isso.",
       "notFound": "Já não foi possível encontrar isso.",
       "rateLimit": "Demasiadas tentativas. Aguarde um momento.",
+      "limitReached": "Limite atingido. Remova alguns itens e tente novamente.",
       "validation": "Alguns dados parecem inválidos. Reveja e tente novamente.",
       "auth": "A sua sessão expirou. Inicie sessão novamente.",
       "unknown": "Algo correu mal. Tente novamente.",
@@ -84,10 +99,10 @@
       "emailNotConfirmed": "Confirme o seu email antes de iniciar sessão.",
       "emailTaken": "Já existe uma conta com este email.",
       "invalidEmail": "Esse email não parece válido.",
-      "weakPassword": "A palavra-passe é demasiado fraca. Use pelo menos 6 caracteres.",
-      "samePassword": "A nova palavra-passe deve ser diferente da atual."
+      "weakPassword": "A palavra-passe é demasiado fraca. Use pelo menos 8 caracteres.",
+      "samePassword": "A nova palavra-passe deve ser diferente da atual.",
+      "ownsSharedWorkspaces": "Transfira ou elimine os espaços que partilha com outras pessoas antes de eliminar a sua conta."
     },
-    "noPermission": "Você não tem permissão",
     "errorTitles": {
       "createFailed": "Não foi possível criar",
       "renameFailed": "Não foi possível renomear",
@@ -105,6 +120,9 @@
       "errorTitle": "Algo falhou",
       "errorHint": "Ocorreu um erro inesperado. Pode tentar novamente.",
       "retry": "Tentar novamente"
+    },
+    "metadata": {
+      "description": "Uma plataforma para discussões estruturadas e mapeamento de argumentos"
     }
   },
   "platform": {
@@ -113,12 +131,12 @@
         "title": "Convites",
         "accept": "Aceitar",
         "decline": "Recusar",
-        "accepted": "Você entrou no espaço de trabalho",
+        "accepted": "Entrou no espaço de trabalho",
         "declined": "Convite recusado",
         "acceptFailed": "Não foi possível aceitar o convite",
         "declineFailed": "Não foi possível recusar o convite"
       },
-      "workspaceSettings": "Configurações do espaço de trabalho",
+      "workspaceSettings": "Definições do espaço de trabalho",
       "workspaces": "Espaços",
       "noWorkspaceSelected": "Nenhum espaço selecionado",
       "noWorkspaces": "Sem espaços de trabalho. Crie um para começar.",
@@ -134,10 +152,15 @@
       "workspaceDeleted": "Espaço eliminado",
       "itemsDeleted": "Itens eliminados",
       "workspacesDeleted": "Espaços eliminados",
-      "workspacesDeleteSkipped": "Alguns espaços não foram eliminados porque você não os gere",
+      "workspacesDeleteSkipped": "Alguns espaços não foram eliminados porque não os gere",
       "structure": "Estrutura",
       "newThread": "Novo tópico",
       "newFolder": "Nova pasta",
+      "defaultNames": {
+        "workspace": "Novo espaço",
+        "folder": "Nova pasta",
+        "thread": "Novo tópico"
+      },
       "signOut": "Sair",
       "deleteWorkspaceTitle": "Eliminar espaço",
       "deleteFolderTitle": "Eliminar pasta",
@@ -151,13 +174,15 @@
       "treeAriaLabel": "Navegação",
       "dragToReorder": "Arraste para reordenar",
       "resolved": "Resolvido",
-      "itemsSelected": "elementos selecionados",
-      "workspacesSelected": "espaços selecionados",
+      "itemsSelected": "{count, plural, one {elemento selecionado} other {elementos selecionados}}",
+      "workspacesSelected": "{count, plural, one {espaço selecionado} other {espaços selecionados}}",
       "moveToFolder": "Mover para pasta",
+      "structureLocked": "Requer a permissão «Gerir tópicos e pastas»",
       "rootLevel": "Nível raiz",
       "bulkDeleteTitle": "Eliminar elementos",
       "bulkDeleteConfirm": "Tem a certeza que quer eliminar estes elementos? A ação não pode ser anulada.",
       "searchPlaceholder": "Pesquisar…",
+      "clearSearch": "Limpar pesquisa",
       "noSearchResults": "Sem correspondências",
       "emptyStructureTitle": "Ainda nada por aqui",
       "emptyStructureHint": "Crie um tópico ou pasta para começar a organizar o trabalho.",
@@ -170,12 +195,12 @@
       "export": {
         "label": "Exportar tela",
         "description": "O grafo inteiro, no tema atual, com uma pequena marca Uniscept.",
-        "loading": "Preparando exportação…",
+        "loading": "A preparar a exportação…",
         "unavailable": "Abra uma tela para exportá-la.",
         "tooLarge": "Este grafo é grande demais para uma imagem nítida. Escolha SVG para exportá-lo em qualquer tamanho.",
         "formats": {
           "png": "Imagem de alta qualidade",
-          "jpg": "Arquivo de imagem menor",
+          "jpg": "Ficheiro de imagem mais pequeno",
           "svg": "Vetor editável"
         }
       },
@@ -189,7 +214,7 @@
         "actionClose": "fechar"
       },
       "tools": {
-        "ariaLabel": "Ferramentas do canvas",
+        "ariaLabel": "Ferramentas da tela",
         "groups": {
           "navigate": "Navegação",
           "history": "Histórico",
@@ -200,7 +225,7 @@
         "items": {
           "select": {
             "label": "Selecionar",
-            "description": "Selecione e arraste nós pelo canvas."
+            "description": "Selecione e arraste nós pela tela."
           },
           "pan": {
             "label": "Deslocar",
@@ -216,7 +241,7 @@
           },
           "addNode": {
             "label": "Adicionar nó",
-            "description": "Clique em qualquer parte do canvas para colocar um novo nó."
+            "description": "Clique em qualquer parte da tela para colocar um novo nó."
           },
           "connect": {
             "label": "Ligar",
@@ -236,11 +261,11 @@
           },
           "answer": {
             "label": "Resposta",
-            "description": "Marca um nó como a resposta final da discussão."
+            "description": "Marque um nó como a resposta final da discussão."
           },
           "crossReference": {
             "label": "Referência cruzada",
-            "description": "Coloque uma referência a um nó de outro canvas."
+            "description": "Coloque uma referência a um nó de outra tela."
           },
           "undo": {
             "label": "Anular",
@@ -253,8 +278,8 @@
         }
       },
       "loadError": {
-        "title": "Backend do canvas inacessível",
-        "hint": "Não foi possível ligar ao Supabase para carregar este canvas. Verifique se a instância local do Supabase está em execução e tente novamente.",
+        "title": "Não foi possível carregar esta tela",
+        "hint": "Verifique a sua ligação e tente novamente.",
         "retry": "Tentar novamente"
       },
       "node": {
@@ -271,7 +296,8 @@
         "sendComment": "Enviar comentário",
         "closeComments": "Fechar",
         "commentsHeader": "Comentários",
-        "noComments": "Ainda sem comentários. Inicie a conversa."
+        "noComments": "Ainda sem comentários. Inicie a conversa.",
+        "labelAriaLabel": "Texto do nó"
       },
       "question": {
         "badge": "Pergunta",
@@ -304,11 +330,11 @@
         "discardAriaLabel": "Descartar alterações falhadas"
       },
       "context": {
-        "ariaLabel": "Ações do canvas",
+        "ariaLabel": "Ações da tela",
         "addNode": "Adicionar nó",
         "addReference": "Adicionar referência",
         "deleteEdge": "Eliminar aresta",
-        "openReferenced": "Abrir canvas referenciado",
+        "openReferenced": "Abrir tela referenciada",
         "deleteReference": "Eliminar referência",
         "markValid": "Marcar válido",
         "unmarkValid": "Remover válido",
@@ -319,7 +345,12 @@
         "needsValidParent": "Requer a pergunta ou um passo válido antes",
         "comment": "Comentar",
         "duplicate": "Duplicar",
-        "delete": "Eliminar"
+        "delete": "Eliminar",
+        "deleteNotAllowed": "Só o autor ou o proprietário do espaço o pode eliminar"
+      },
+      "deleteBlocked": {
+        "foreignNodes": "Nada foi eliminado. Alguns nós selecionados só podem ser eliminados pelo autor ou pelo proprietário do espaço.",
+        "question": "Nada foi eliminado. A pergunta não pode ser eliminada. Desmarque-a e tente novamente."
       },
       "shortcuts": {
         "title": "Atalhos de teclado",
@@ -545,23 +576,23 @@
           "body": "É o nome do espaço atual, no topo da barra lateral."
         },
         "workspacesSettings": {
-          "title": "Abra as configurações do espaço",
-          "body": "Passe o cursor sobre a linha do espaço e clique na engrenagem. Estas configurações aplicam-se só a este espaço."
+          "title": "Abra as definições do espaço",
+          "body": "Passe o cursor sobre a linha do espaço e clique na engrenagem. Estas definições aplicam-se só a este espaço."
         },
         "workspacesGeneral": {
           "title": "A secção Geral",
-          "body": "As configurações do espaço abrem aqui: o nome, o número de membros, a sua função e a data de criação do espaço."
+          "body": "As definições do espaço abrem aqui: o nome, o número de membros, a sua função e a data de criação do espaço."
         },
         "workspacesOwner": {
           "title": "Há sempre um único proprietário",
-          "body": "A propriedade transfere-se, nunca se partilha: o proprietário cede-a na secção Membros. Eliminar o espaço exige a permissão Gerenciar o espaço de trabalho, que só o proprietário tem, a não ser que uma função personalizada a conceda."
+          "body": "A propriedade transfere-se, nunca se partilha: o proprietário cede-a na secção Membros. Eliminar o espaço exige a permissão Gerir o espaço de trabalho, que só o proprietário tem, a não ser que uma função personalizada a conceda."
         },
         "membersWhat": {
           "title": "As funções aplicam-se a todo o espaço",
           "body": "O acesso define-se uma vez por espaço, não por tela. Uma função decide se alguém pode editar telas, apenas comentar ou apenas ler."
         },
         "membersOpen": {
-          "title": "Abra as configurações do espaço",
+          "title": "Abra as definições do espaço",
           "body": "Abra o seletor de espaços e depois clique na engrenagem da linha. Os membros e as funções estão lá."
         },
         "membersSection": {
@@ -803,7 +834,6 @@
       "close": "Fechar definições",
       "comingSoon": "Em breve",
       "languageSaving": "A guardar idioma…",
-      "languageSaveFailed": "Falha ao guardar o idioma. Tente novamente.",
       "groups": {
         "account": "Conta",
         "preferences": "Preferências",
@@ -830,10 +860,11 @@
         "emailChangeFailed": "Falha ao alterar o e-mail. Tente novamente.",
         "emailChangeSent": "Verifique o seu novo e-mail para confirmar a alteração.",
         "emailInvalid": "Introduza um endereço de e-mail válido.",
-        "namePlaceholder": "Como os outros te veem",
+        "namePlaceholder": "Como os outros o veem",
         "avatarTitle": "Avatar",
-        "avatarOptions": "opções",
+        "avatarOptionCount": "{count, plural, one {# opção} other {# opções}}",
         "badgesTitle": "Insígnias",
+        "badgeEarned": "Nova insígnia: {name}",
         "initialsLabel": "Iniciais",
         "avatarIcons": {
           "avatarIconCat": "Gato",
@@ -861,47 +892,45 @@
           "badgeFounder": "Fundador",
           "founderUnlock": "Juntou-se durante o beta inicial.",
           "badgeInitiate": "Iniciado",
-          "initiateUnlock": "Termina a visita e todos os guias.",
+          "initiateUnlock": "Termine a visita e todos os guias.",
           "badgeFirstSteps": "Início",
-          "firstStepsUnlock": "Cria o teu primeiro canvas.",
-          "badgeArchitect": "Arquiteto",
-          "architectUnlock": "Constrói um canvas com 25 ou mais nós.",
-          "badgeConnector": "Conector",
-          "connectorUnlock": "Faz 50 ligações entre nós.",
-          "badgeCritic": "Crítico",
-          "criticUnlock": "Marca 25 caminhos como válidos ou inválidos.",
-          "badgeLinguist": "Linguista",
-          "linguistUnlock": "Muda o idioma da interface.",
-          "badgeCurator": "Curador",
-          "curatorUnlock": "Usa uma referência entre canvases.",
-          "badgeVoice": "Voz",
-          "voiceUnlock": "Publica o teu primeiro comentário.",
-          "badgeExplorer": "Explorador",
-          "explorerUnlock": "Abre 10 canvases diferentes.",
-          "badgeStoryteller": "Contador",
-          "storytellerUnlock": "Cria 5 fios próprios.",
+          "firstStepsUnlock": "Crie a sua primeira tela.",
           "badgeWorkspaceBuilder": "Construtor",
-          "workspaceBuilderUnlock": "Cria o teu primeiro espaço.",
-          "badgeNightOwl": "Coruja",
-          "nightOwlUnlock": "Trabalha depois da meia-noite durante uma semana.",
-          "badgeMarathoner": "Maratonista",
-          "marathonerUnlock": "Mantém-te ativo 30 dias seguidos.",
-          "badgeCollaborator": "Colaborador",
-          "collaboratorUnlock": "Junta-te a um espaço partilhado.",
+          "workspaceBuilderUnlock": "Crie o seu primeiro espaço.",
+          "badgeArchitect": "Arquiteto",
+          "architectUnlock": "Construa uma tela com 25 ou mais nós.",
+          "badgeConnector": "Conector",
+          "connectorUnlock": "Trace 15 ligações numa só tela.",
+          "badgeCritic": "Crítico",
+          "criticUnlock": "Marque um caminho como inválido.",
           "badgeWeaver": "Tecelão",
-          "weaverUnlock": "Mistura caminhos válidos e inválidos num canvas.",
-          "badgeSage": "Sábio",
-          "sageUnlock": "Deixa 100 comentários ponderados."
+          "weaverUnlock": "Misture caminhos válidos e inválidos numa tela.",
+          "badgeVerdict": "Veredicto",
+          "verdictUnlock": "Marque um nó como resposta final.",
+          "badgeVoice": "Voz",
+          "voiceUnlock": "Publique o seu primeiro comentário.",
+          "badgeCurator": "Curador",
+          "curatorUnlock": "Use uma referência entre telas.",
+          "badgeCollaborator": "Colaborador",
+          "collaboratorUnlock": "Junte-se a um espaço partilhado.",
+          "badgeLinguist": "Linguista",
+          "linguistUnlock": "Mude o idioma da interface.",
+          "badgeStylist": "Estilista",
+          "stylistUnlock": "Mude para outro tema.",
+          "badgeCartographer": "Cartógrafo",
+          "cartographerUnlock": "Exporte uma tela como imagem.",
+          "badgeNightOwl": "Coruja",
+          "nightOwlUnlock": "Adicione um nó entre a meia-noite e as 5 da manhã."
         }
       },
       "security": {
         "changePassword": "Alterar palavra-passe",
         "passwordCaption": "Acesso à conta",
-        "passwordBlurb": "Roda o segredo usado para iniciar sessão. A nova palavra-passe fica ativa no próximo início.",
+        "passwordBlurb": "Rode o segredo usado para iniciar sessão. A nova palavra-passe fica ativa no próximo início.",
         "passwordCardTitle": "Palavra-passe da conta",
         "passwordCardCaption": "Mín. 8 caracteres",
         "currentPassword": "Palavra-passe atual",
-        "currentPasswordRequired": "Introduz a palavra-passe atual",
+        "currentPasswordRequired": "Introduza a palavra-passe atual",
         "currentPasswordIncorrect": "A palavra-passe atual está incorreta",
         "passwordSame": "A nova palavra-passe deve ser diferente da atual",
         "newPassword": "Nova palavra-passe",
@@ -913,10 +942,12 @@
         "passwordTooShort": "A palavra-passe deve ter pelo menos 8 caracteres",
         "dangerZone": "Zona perigosa",
         "dangerZoneCaption": "irreversível",
-        "dangerZoneBlurb": "Ações destrutivas que não podem ser revertidas. Lê com atenção antes de continuar.",
+        "dangerZoneBlurb": "Ações destrutivas que não podem ser revertidas. Leia com atenção antes de continuar.",
         "deleteAccount": "Eliminar conta",
-        "deleteAccountCaption": "Apaga todos os teus espaços, fios e canvases",
+        "deleteAccountCaption": "Apaga todos os seus espaços, tópicos e telas",
         "deleteConfirm": "Tem a certeza? Esta ação não pode ser anulada. Todos os seus dados serão eliminados permanentemente.",
+        "deletePassword": "Confirme com a sua palavra-passe",
+        "deleteBlocked": "É proprietário de espaços que outras pessoas utilizam. Transfira a propriedade ou elimine-os antes de eliminar a sua conta.",
         "deleteButton": "Eliminar a minha conta",
         "deleting": "A eliminar…",
         "cancel": "Cancelar",
@@ -945,7 +976,6 @@
         "themeBloom": "Bloom",
         "bloomDesc": "Porcelana quente, ação magenta",
         "autoDesc": "Emparelha Daybreak e Eclipse",
-        "adaptive": "Adaptável",
         "canvas": "Tela",
         "canvasIntro": "Quatro texturas",
         "canvasBlurb": "Escolha a superfície onde as suas ideias vivem — do papel tranquilo a uma grelha traçada.",
@@ -968,22 +998,22 @@
         }
       },
       "editor": {
-        "blurb": "Ajusta como o canvas responde enquanto constróis.",
-        "behaviors": "Comportamentos do canvas",
+        "blurb": "Ajuste como a tela responde enquanto constrói.",
+        "behaviors": "Comportamentos da tela",
         "behaviorsCaption": "Ajuste, guias",
         "snapToGrid": "Ajustar à grelha",
-        "snapToGridDescription": "Arrasta os nós em passos de 16 pixels",
+        "snapToGridDescription": "Arraste os nós em passos de 16 pixels",
         "smartGuides": "Guias inteligentes",
         "smartGuidesDescription": "Linhas de alinhamento ao arrastar",
         "zoom": "Zoom predefinido",
-        "zoomCaption": "Ampliação inicial do canvas",
-        "zoomBlurb": "Quão próximo começas ao abrir qualquer canvas.",
+        "zoomCaption": "Ampliação inicial da tela",
+        "zoomBlurb": "Quão próximo começa ao abrir qualquer tela.",
         "defaultZoom": "Nível de zoom por omissão"
       },
       "plan": {
-        "title": "O teu plano",
+        "title": "O seu plano",
         "caption": "Subscrição",
-        "blurb": "Escolhe um nível que se ajuste à forma como queres pensar com Uniscept.",
+        "blurb": "Escolha um nível que se ajuste à forma como quer pensar com Uniscept.",
         "current": "Atual",
         "lockedBadge": "Em breve",
         "free": "Gratuito",
@@ -995,17 +1025,17 @@
       "notifications": {
         "title": "Avisar-me sobre",
         "mentions": "Menções",
-        "mentionsDescription": "Quando alguém menciona você (@) num comentário.",
+        "mentionsDescription": "Quando alguém o menciona (@) num comentário.",
         "comments": "Comentários",
         "commentsDescription": "Respostas e novos comentários nos seus nós e telas.",
         "invites": "Convites para espaço",
-        "invitesDescription": "Quando você é convidado para um espaço ou seu papel muda.",
+        "invitesDescription": "Quando é convidado para um espaço ou a sua função muda.",
         "digest": "Resumo semanal",
         "digestDescription": "Um resumo de segunda-feira da atividade dos seus espaços."
       }
     },
     "workspaceSettings": {
-      "close": "Fechar as configurações do espaço de trabalho",
+      "close": "Fechar as definições do espaço de trabalho",
       "groups": {
         "workspace": "Espaço de trabalho",
         "access": "Acesso"
@@ -1020,18 +1050,32 @@
         "member": "Membro",
         "viewer": "Visualizador"
       },
+      "roleIcons": {
+        "shield": "Escudo",
+        "star": "Estrela",
+        "flag": "Bandeira",
+        "sparkles": "Faíscas",
+        "target": "Alvo",
+        "zap": "Relâmpago",
+        "rocket": "Foguetão",
+        "award": "Prémio",
+        "compass": "Bússola",
+        "crown": "Coroa",
+        "penTool": "Caneta",
+        "eye": "Olho"
+      },
       "general": {
         "nameLabel": "Nome do espaço de trabalho",
         "namePlaceholder": "Dê um nome a este espaço de trabalho",
-        "save": "Salvar",
-        "saving": "Salvando…",
+        "save": "Guardar",
+        "saving": "A guardar…",
         "membersStat": "Membros",
-        "roleStat": "Sua função",
+        "roleStat": "A sua função",
         "createdStat": "Criado"
       },
       "members": {
         "hint": "Pessoas com acesso a este espaço de trabalho.",
-        "you": "Você",
+        "you": "Eu",
         "changeRole": "Alterar função",
         "remove": "Remover",
         "removeConfirm": "Remover",
@@ -1042,16 +1086,16 @@
         "transferTitle": "Transferir propriedade",
         "transferCritical": "Ação crítica",
         "transferConfirmPrefix": "Transferir a propriedade para",
-        "transferConfirmSuffix": "? Você se tornará membro e esta ação não pode ser desfeita.",
+        "transferConfirmSuffix": "? Passará a ser membro e esta ação não pode ser anulada.",
         "transferConfirm": "Transferir",
         "transferred": "Propriedade transferida",
         "transferFailed": "Não foi possível transferir a propriedade",
         "cancel": "Cancelar",
         "inviteTitle": "Convidar pessoas",
         "inviteHint": "Elas entram na próxima vez que abrirem o Uniscept.",
-        "emailPlaceholder": "nome@empresa.com",
+        "emailPlaceholder": "name@example.com",
         "sendInvite": "Enviar convite",
-        "sending": "Enviando…",
+        "sending": "A enviar…",
         "invited": "Convite pronto",
         "inviteFailed": "Não foi possível criar o convite",
         "pendingTitle": "Pendentes",
@@ -1061,51 +1105,51 @@
       },
       "roles": {
         "hint": "Cada pessoa tem uma função. As funções definem o que ela pode fazer.",
-        "membersSuffix": "membros",
+        "memberCount": "{count, plural, =1 {# membro} other {# membros}}",
         "newRole": "Nova função",
         "nameLabel": "Nome da função",
         "namePlaceholder": "ex.: Revisor",
         "iconLabel": "Ícone",
         "permissionsLabel": "Permissões",
         "systemLocked": "Integrada",
-        "save": "Salvar função",
-        "saving": "Salvando…",
+        "save": "Guardar função",
+        "saving": "A guardar…",
         "create": "Criar função",
         "cancel": "Cancelar",
         "edit": "Editar função",
-        "delete": "Excluir função",
+        "delete": "Eliminar função",
         "created": "Função criada",
         "createFailed": "Não foi possível criar a função",
         "updated": "Função atualizada",
         "updateFailed": "Não foi possível atualizar a função",
-        "deleteConfirm": "Excluir",
-        "deleted": "Função excluída",
-        "deleteFailed": "Não foi possível excluir a função"
+        "deleteConfirm": "Eliminar",
+        "deleted": "Função eliminada",
+        "deleteFailed": "Não foi possível eliminar a função"
       },
       "permissions": {
         "canEditCanvas": {
-          "name": "Editar o quadro",
+          "name": "Editar a tela",
           "description": "Criar e alterar nós, conexões e conclusões."
         },
         "canComment": {
           "name": "Comentar",
-          "description": "Deixar comentários em nós e quadros."
+          "description": "Deixar comentários em nós e telas."
         },
         "canManageStructure": {
-          "name": "Gerenciar tópicos e pastas",
-          "description": "Criar, renomear, mover e excluir tópicos e pastas."
+          "name": "Gerir tópicos e pastas",
+          "description": "Criar, renomear, mover e eliminar tópicos e pastas."
         },
         "canManageMembers": {
-          "name": "Gerenciar membros",
+          "name": "Gerir membros",
           "description": "Convidar pessoas, atribuir funções e remover membros."
         },
         "canManageRoles": {
-          "name": "Gerenciar funções",
-          "description": "Criar, editar e excluir funções personalizadas."
+          "name": "Gerir funções",
+          "description": "Criar, editar e eliminar funções personalizadas."
         },
         "canManageWorkspace": {
-          "name": "Gerenciar o espaço de trabalho",
-          "description": "Renomear ou excluir o espaço de trabalho."
+          "name": "Gerir o espaço de trabalho",
+          "description": "Renomear ou eliminar o espaço de trabalho."
         }
       }
     }
@@ -1119,7 +1163,7 @@
     "hero": {
       "title": "O pensamento é",
       "titleAccent": "estrutura.",
-      "subtitle1": "Cada thread no Slack é um cemitério de ideias.",
+      "subtitle1": "Cada tópico no Slack é um cemitério de ideias.",
       "subtitle2": "Cada reunião é amnésia estruturada.",
       "tagline": "Construa conhecimento. Não caos.",
       "ctaPrimary": "Começar",
@@ -1138,7 +1182,7 @@
         "counterRefuted": "refutadas",
         "counterAffected": "afetadas",
         "log": {
-          "opened": "Thread T-001 aberta · 7 afirmações citadas",
+          "opened": "Tópico T-001 aberto · 7 afirmações citadas",
           "refuted": "P-02 refutada na revisão",
           "tainted": "2 conclusões dependentes contaminadas",
           "rerouted": "P-05 fixada · dependência morta redirecionada",
@@ -1147,7 +1191,7 @@
         "claims": {
           "q": "Reconstruímos o núcleo legacy para a v2?",
           "p1": "O núcleo legacy bloqueia cada item do roadmap",
-          "p2": "A equipe pode congelar features por seis meses",
+          "p2": "A equipa pode congelar features por seis meses",
           "p3": "Três seniores ainda conhecem o núcleo de ponta a ponta",
           "p5": "Uma migração strangler reconstrói sem congelamento",
           "c1": "Reconstruir o núcleo vale o custo",
@@ -1160,25 +1204,25 @@
       "subtitle": "Ferramentas superficiais geram pensamento superficial.",
       "stream": {
         "channel": "#product-decisions",
-        "live": "live",
+        "live": "em direto",
         "stamp": "Enterrada",
         "decision": "DECISÃO: lançamos a reescrita v2 no Q4",
         "lines": [
-          "ok, subindo o hotfix",
+          "ok, a subir o hotfix",
           "alguém verificou o staging?",
           "espera, em que config estamos",
-          "ver thread ↑",
-          "reenviando o link do doc",
+          "ver tópico ↑",
+          "a reenviar o link do doc",
           "quem cuida da retenção agora?",
           "almoço primeiro?",
-          "reiniciando o pod de demo",
+          "a reiniciar o pod de demo",
           "alguém reexplica o plano"
         ]
       },
       "exhibits": {
         "chat": {
           "medium": "Chat",
-          "claim": "As decisões afundam no meio da thread.",
+          "claim": "As decisões afundam a meio do tópico.",
           "detail": "O argumento que resolveu tudo está quatrocentas mensagens acima, espalhado por três canais.",
           "verdict": "Sem estrutura"
         },
@@ -1211,11 +1255,11 @@
         },
         "references": {
           "title": "Referências cruzadas",
-          "description": "Referencie uma conclusão validada de outro canvas. Prove uma vez, apoie-se nela onde importar."
+          "description": "Referencie uma conclusão validada de outra tela. Prove uma vez, apoie-se nela onde importar."
         },
         "collaboration": {
           "title": "Colaboração em equipa",
-          "description": "Papéis no workspace, comentários por nó, permissões próprias. Argumentem às claras, decidam em registo."
+          "description": "Funções no espaço, comentários por nó, permissões próprias. Argumentem às claras, decidam em registo."
         }
       },
       "vignettes": {
@@ -1225,8 +1269,8 @@
         "validationPremise": "Custos ficam estáveis em escala",
         "validationConclusion": "A economia unitária sustenta-se",
         "validationSafe": "A retenção mantém-se em escala",
-        "referencesCanvasA": "Canvas · Preços",
-        "referencesCanvasB": "Canvas · Estratégia",
+        "referencesCanvasA": "Tela · Preços",
+        "referencesCanvasB": "Tela · Estratégia",
         "referencesSource": "Retorno do CAC em menos de 12 meses",
         "referencesBadge": "Referência",
         "collaborationClaim": "Lançar a migração atrás de um flag",
@@ -1279,7 +1323,7 @@
           "name": "Demo",
           "description": "Por sessão",
           "features": [
-            "Experimente o canvas",
+            "Experimente a tela",
             "Sem necessidade de conta",
             "Explore funcionalidades",
             "Armazenamento de sessão"
@@ -1287,7 +1331,7 @@
         },
         "lite": {
           "name": "Lite",
-          "features": ["Canvases ilimitados", "Utilizador único", "Armazenamento na nuvem", "Opções de exportação"]
+          "features": ["Telas ilimitadas", "Utilizador único", "Armazenamento na nuvem", "Opções de exportação"]
         },
         "standard": {
           "name": "Standard",
@@ -1311,7 +1355,7 @@
       "steps": {
         "ask": {
           "title": "Pergunte",
-          "description": "Abra uma thread. O nó central da pergunta já espera no canvas."
+          "description": "Abra um tópico. O nó central da pergunta já espera na tela."
         },
         "argue": {
           "title": "Argumente",

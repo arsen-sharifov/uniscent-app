@@ -14,7 +14,6 @@ import type {
   TNodeBandTone,
 } from '@interfaces';
 
-export const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 export const LIGHT_SCHEME_QUERY = '(prefers-color-scheme: light)';
 export const FINE_POINTER_QUERY = '(pointer: fine)';
 export const DESKTOP_QUERY = '(min-width: 1024px)';
@@ -48,6 +47,7 @@ export const HERO_BAND_TONES: Record<THeroMiniTone, TNodeBandTone> = {
 export const HERO_EDGE_TONE_STROKES: Record<THeroEdgeTone, string> = {
   default: 'var(--hero-edge)',
   valid: 'var(--hero-edge-valid)',
+  answer: 'var(--decision)',
   invalid: 'var(--hero-edge-invalid)',
   tainted: 'var(--hero-edge-tainted)',
   reference: 'var(--hero-edge-reference)',
@@ -112,7 +112,7 @@ export const VALIDATION_VIGNETTE_EDGES: IHeroEdge[] = [
 
 export const VALIDATION_VIGNETTE_REPAIRED_EDGES = VALIDATION_VIGNETTE_EDGES.filter((edge) => edge.source !== 'vv-p');
 
-export const COLLAB_VIGNETTE_EDGES: IHeroEdge[] = [{ id: 'cv-ab', source: 'cv-a', target: 'cv-b' }];
+export const COLLABORATION_VIGNETTE_EDGES: IHeroEdge[] = [{ id: 'cv-ab', source: 'cv-a', target: 'cv-b' }];
 
 export const REFERENCES_VIGNETTE_EDGES: IHeroEdge[] = [{ id: 'rv-sr', source: 'rv-s', target: 'rv-r' }];
 export const REFERENCES_VIGNETTE_TONES: ReadonlyMap<string, THeroEdgeTone> = new Map([['rv-sr', 'reference']]);
@@ -236,8 +236,8 @@ export const HERO_REMEASURE_DELAY_MS = 320;
 export const HOW_IT_WORKS_STEP_DELAY_MS = 550;
 export const VALIDATION_VIGNETTE_PHASES = 3;
 export const VALIDATION_VIGNETTE_INTERVAL_MS = 3400;
-export const COLLAB_VIGNETTE_PHASES = 3;
-export const COLLAB_VIGNETTE_INTERVAL_MS = 2600;
+export const COLLABORATION_VIGNETTE_PHASES = 3;
+export const COLLABORATION_VIGNETTE_INTERVAL_MS = 2600;
 export const STREAM_DECISION_INDEX = 4;
 
 export const TILT_MAX_DEG = 2.4;

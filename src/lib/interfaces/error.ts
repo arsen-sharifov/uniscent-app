@@ -5,6 +5,7 @@ export type TErrorCategory =
   | 'permission'
   | 'notFound'
   | 'rateLimit'
+  | 'limitReached'
   | 'validation'
   | 'auth'
   | 'invalidCredentials'
@@ -13,6 +14,7 @@ export type TErrorCategory =
   | 'emailTaken'
   | 'weakPassword'
   | 'samePassword'
+  | 'ownsSharedWorkspaces'
   | 'unknown';
 
 export interface IAppError {
@@ -32,4 +34,8 @@ export interface IHandleErrorOptions extends IToastOptions {
 export interface IRouteError {
   error: Error & { digest?: string };
   reset: () => void;
+}
+
+export interface IErrorBoundaryState {
+  hasError: boolean;
 }

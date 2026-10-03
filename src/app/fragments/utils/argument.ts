@@ -10,19 +10,24 @@ import {
   type THeroTone,
 } from '@interfaces';
 
-import { computeEffectiveStatuses, isAffected, resolveEdgeTone } from '@/components/Canvas/utils';
+import { computeEdgeTones as computeCanvasEdgeTones, computeEffectiveStatuses, isAffected } from '@/lib/canvas/utils';
+import { groupBy } from '@/lib/utils';
 
-const toCanvasNode = (claim: IHeroClaim, refutedIds: ReadonlySet<string>): TCanvasNode => ({
-  id: claim.id,
-  type: claim.kind === 'question' ? ECanvasNodeType.Question : ECanvasNodeType.Canvas,
-  position: { x: 0, y: 0 },
-  data: {
-    label: claim.code,
-    status: refutedIds.has(claim.id) ? 'invalid' : claim.status,
-    isAnswer: claim.isAnswer === true && !refutedIds.has(claim.id),
-    comments: [],
-  },
-});
+const toCanvasNodes = (claims: IHeroClaim[], refutedIds: ReadonlySet<string>): TCanvasNode[] =>
+  claims.map((claim) => ({
+    id: claim.id,
+    type: claim.kind === 'question' ? ECanvasNodeType.Question : ECanvasNodeType.Canvas,
+    position: { x: 0, y: 0 },
+    data: {
+      label: claim.code,
+      status: refutedIds.has(claim.id) ? 'invalid' : claim.status,
+      isAnswer: claim.isAnswer === true && !refutedIds.has(claim.id),
+      comments: [],
+    },
+  }));
+
+const toCanvasEdges = (edges: IHeroEdge[]): Edge[] =>
+  edges.map((edge) => ({ id: edge.id, source: edge.source, target: edge.target }));
 
 export const resolveClaimTone = (claim: IHeroClaim, status: TEffectiveStatus | undefined): THeroTone => {
   if (claim.kind === 'question') return 'question';
@@ -37,38 +42,34 @@ export const computeClaimStatuses = (
   claims: IHeroClaim[],
   edges: IHeroEdge[],
   refutedIds: ReadonlySet<string>,
-): Map<string, TEffectiveStatus> =>
-  computeEffectiveStatuses(
-    claims.map((claim) => toCanvasNode(claim, refutedIds)),
-    edges.map<Edge>((edge) => ({ id: edge.id, source: edge.source, target: edge.target })),
-  );
+): Map<string, TEffectiveStatus> => computeEffectiveStatuses(toCanvasNodes(claims, refutedIds), toCanvasEdges(edges));
 
-export const computeEdgeTones = (edges: IHeroEdge[], statuses: Map<string, TEffectiveStatus>): Map<string, TEdgeTone> =>
-  new Map(edges.map((edge) => [edge.id, resolveEdgeTone(statuses.get(edge.source), statuses.get(edge.target))]));
+export const computeEdgeTones = (
+  claims: IHeroClaim[],
+  edges: IHeroEdge[],
+  refutedIds: ReadonlySet<string>,
+  statuses: Map<string, TEffectiveStatus>,
+): Map<string, TEdgeTone> => computeCanvasEdgeTones(toCanvasNodes(claims, refutedIds), toCanvasEdges(edges), statuses);
 
 const walkDepths = (
   frontier: string[],
   depth: number,
-  adjacency: Map<string, string[]>,
-  acc: Map<string, number>,
+  edgesBySource: Map<string, IHeroEdge[]>,
+  depthById: Map<string, number>,
 ): Map<string, number> => {
-  const next = [...new Set(frontier.flatMap((id) => adjacency.get(id) ?? []).filter((target) => !acc.has(target)))];
-  if (next.length === 0) return acc;
+  const targets = frontier.flatMap((id) => (edgesBySource.get(id) ?? []).map((edge) => edge.target));
+  const next = [...new Set(targets.filter((target) => !depthById.has(target)))];
+  if (next.length === 0) return depthById;
 
-  next.forEach((target) => acc.set(target, depth));
+  next.forEach((target) => depthById.set(target, depth));
 
-  return walkDepths(next, depth + 1, adjacency, acc);
+  return walkDepths(next, depth + 1, edgesBySource, depthById);
 };
 
 export const collectCascadeDepths = (edges: IHeroEdge[], refutedIds: ReadonlySet<string>): Map<string, number> => {
-  const adjacency = edges.reduce((map, edge) => {
-    map.set(edge.source, [...(map.get(edge.source) ?? []), edge.target]);
-
-    return map;
-  }, new Map<string, string[]>());
-
+  const edgesBySource = groupBy(edges, (edge) => edge.source);
   const roots = [...refutedIds];
   const seeded = new Map(roots.map((id) => [id, 0]));
 
-  return walkDepths(roots, 1, adjacency, seeded);
+  return walkDepths(roots, 1, edgesBySource, seeded);
 };

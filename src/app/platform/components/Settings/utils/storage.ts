@@ -41,10 +41,10 @@ export const readFromStorage = (): IPreferences => {
   }
 };
 
-export const writeToStorage = (prefs: IPreferences): void => {
+export const writeToStorage = (preferences: IPreferences): void => {
   if (typeof window === 'undefined') {
     return;
   }
 
-  localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(prefs));
+  localStorage.setItem(PREFERENCES_STORAGE_KEY, JSON.stringify(preferences));
 };

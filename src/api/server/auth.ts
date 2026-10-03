@@ -1,79 +1,160 @@
-import { timingSafeEqual } from 'node:crypto';
+import { createHash, timingSafeEqual } from 'node:crypto';
 
+import type { AuthError, User } from '@supabase/supabase-js';
 import { NextResponse } from 'next/server';
 
-import { INVITE_RATE_LIMIT_MAX_ATTEMPTS, INVITE_RATE_LIMIT_WINDOW_MS } from '@constants';
-import { createClient as createServerClient } from '@/lib/supabase/server';
+import {
+  INVITE_RATE_LIMIT_MAX_ATTEMPTS,
+  INVITE_RATE_LIMIT_WINDOW_MS,
+  PASSWORD_CHECK_RATE_LIMIT_MAX_ATTEMPTS,
+  PASSWORD_CHECK_RATE_LIMIT_WINDOW_MS,
+} from '@constants';
+import { event } from '@/lib/events';
 
-import { getAdminClient } from './utils';
+import {
+  authenticateRequest,
+  createRateLimiter,
+  getAdminClient,
+  getClientIp,
+  isSameOriginRequest,
+  normalizeEmail,
+  verifyPassword,
+} from './utils';
 
-const inviteAttempts = new Map<string, { count: number; resetAt: number }>();
+const allowInviteAttempt = createRateLimiter({
+  maxAttempts: INVITE_RATE_LIMIT_MAX_ATTEMPTS,
+  windowMs: INVITE_RATE_LIMIT_WINDOW_MS,
+});
 
-const safeEqualStrings = (a: string, b: string): boolean => {
-  const bufA = Buffer.from(a, 'utf8');
-  const bufB = Buffer.from(b, 'utf8');
-  if (bufA.length !== bufB.length) return false;
+const allowPasswordCheck = createRateLimiter({
+  maxAttempts: PASSWORD_CHECK_RATE_LIMIT_MAX_ATTEMPTS,
+  windowMs: PASSWORD_CHECK_RATE_LIMIT_WINDOW_MS,
+});
 
-  return timingSafeEqual(bufA, bufB);
-};
+const digest = (value: string) => createHash('sha256').update(value, 'utf8').digest();
 
-const getClientIp = (request: Request): string => {
-  const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0]!.trim();
+const toFailureStatus = (error: AuthError) => (error.status && error.status >= 400 ? error.status : 500);
 
-  const real = request.headers.get('x-real-ip');
-  if (real) return real.trim();
-
-  return 'unknown';
-};
-
-const checkInviteRateLimit = (ip: string): boolean => {
-  const now = Date.now();
-  const record = inviteAttempts.get(ip);
-
-  if (!record || record.resetAt <= now) {
-    inviteAttempts.set(ip, { count: 1, resetAt: now + INVITE_RATE_LIMIT_WINDOW_MS });
-
-    return true;
+const checkCurrentPassword = async (user: User, password: unknown): Promise<NextResponse | null> => {
+  if (typeof password !== 'string' || !password || !user.email) {
+    return NextResponse.json({ error: { message: 'Invalid request' } }, { status: 400 });
   }
 
-  if (record.count >= INVITE_RATE_LIMIT_MAX_ATTEMPTS) return false;
+  if (!allowPasswordCheck(user.id)) {
+    return NextResponse.json({ error: { message: 'Too many attempts, try again later' } }, { status: 429 });
+  }
 
-  record.count += 1;
+  const { error } = await verifyPassword(user.email, password);
 
-  return true;
+  if (!error) return null;
+
+  if (error.code === 'invalid_credentials') {
+    return NextResponse.json({ error: { message: 'Invalid credentials', code: error.code } }, { status: 400 });
+  }
+
+  event.error(error, { toast: false, context: 'auth.verifyPassword' });
+
+  return NextResponse.json(
+    { error: { message: 'Password check failed', code: error.code } },
+    { status: toFailureStatus(error) },
+  );
 };
 
 export const handleVerifyInvite = async (request: Request) => {
-  if (!checkInviteRateLimit(getClientIp(request))) {
+  if (!isSameOriginRequest(request)) {
+    return NextResponse.json({ valid: false }, { status: 403 });
+  }
+
+  if (!allowInviteAttempt(getClientIp(request))) {
     return NextResponse.json({ valid: false }, { status: 429 });
   }
 
   const body = await request.json().catch(() => null);
   const code = body?.code;
+  const email = normalizeEmail(body?.email);
   const expected = process.env.INVITE_CODE;
 
-  if (typeof code !== 'string' || !expected || !safeEqualStrings(code, expected)) {
+  if (!email) {
+    return NextResponse.json({ valid: false }, { status: 400 });
+  }
+
+  if (typeof code !== 'string' || !expected || !timingSafeEqual(digest(code), digest(expected))) {
     return NextResponse.json({ valid: false }, { status: 403 });
+  }
+
+  const { error } = await getAdminClient().rpc('grant_signup_allowance', { p_email: email });
+
+  if (error) {
+    event.error(error, { toast: false, context: 'auth.grantSignupAllowance' });
+
+    return NextResponse.json({ valid: false }, { status: 500 });
   }
 
   return NextResponse.json({ valid: true });
 };
 
-export const handleDeleteAccount = async () => {
-  const supabase = await createServerClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export const handleChangePassword = async (request: Request) => {
+  const { rejection, supabase, user } = await authenticateRequest(request);
 
-  if (!user) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  if (rejection) return rejection;
+
+  const body = await request.json().catch(() => null);
+  const currentPassword = body?.currentPassword;
+  const newPassword = body?.newPassword;
+
+  if (typeof newPassword !== 'string' || !newPassword) {
+    return NextResponse.json({ error: { message: 'Invalid request' } }, { status: 400 });
+  }
+
+  const passwordRejection = await checkCurrentPassword(user, currentPassword);
+
+  if (passwordRejection) return passwordRejection;
+
+  const { error } = await supabase.auth.updateUser({ password: newPassword, current_password: currentPassword });
+
+  if (error) {
+    event.error(error, { toast: false, context: 'auth.changePassword' });
+
+    return NextResponse.json(
+      { error: { message: 'Password update failed', code: error.code } },
+      { status: toFailureStatus(error) },
+    );
+  }
+
+  return NextResponse.json({ success: true });
+};
+
+export const handleDeleteAccount = async (request: Request) => {
+  const { rejection, supabase, user } = await authenticateRequest(request);
+
+  if (rejection) return rejection;
+
+  const body = await request.json().catch(() => null);
+  const passwordRejection = await checkCurrentPassword(user, body?.password);
+
+  if (passwordRejection) return passwordRejection;
+
+  const { data: sharedWorkspaces, error: checkError } = await supabase.rpc('get_my_owned_shared_workspaces');
+
+  if (checkError) {
+    event.error(checkError, { toast: false, context: 'auth.checkSharedWorkspaces' });
+
+    return NextResponse.json({ error: { message: 'Account deletion failed' } }, { status: 500 });
+  }
+
+  if (sharedWorkspaces?.length) {
+    return NextResponse.json(
+      { error: { message: 'Account owns shared workspaces', code: 'owns_shared_workspaces' } },
+      { status: 409 },
+    );
   }
 
   const { error } = await getAdminClient().auth.admin.deleteUser(user.id);
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    event.error(error, { toast: false, context: 'auth.deleteAccount' });
+
+    return NextResponse.json({ error: { message: 'Account deletion failed' } }, { status: 500 });
   }
 
   return NextResponse.json({ success: true });

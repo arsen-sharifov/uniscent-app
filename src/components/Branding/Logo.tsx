@@ -4,8 +4,6 @@ interface ILogoProps {
   className?: string;
 }
 
-export const Logo = ({ className }: ILogoProps) => {
-  return (
-    <span className={clsx('font-grotesk font-extrabold tracking-[-0.02em] select-none', className)}>Uniscept</span>
-  );
-};
+export const Logo = ({ className }: ILogoProps) => (
+  <span className={clsx('font-grotesk font-extrabold tracking-[-0.02em] select-none', className)}>Uniscept</span>
+);

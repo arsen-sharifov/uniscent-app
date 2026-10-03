@@ -5,4 +5,5 @@ export * from './useEscapeKey';
 export * from './useFocusTrap';
 export * from './useMenuKeyboardNavigation';
 export * from './useMounted';
+export * from './useReturnFocus';
 export * from './useViewportChange';

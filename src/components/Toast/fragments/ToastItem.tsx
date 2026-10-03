@@ -26,7 +26,6 @@ export const ToastItem = ({ toast, onDismiss }: IToastItemProps) => {
   const isError = 'errorCategory' in toast;
   const visual = TOAST_VISUAL_BY_TYPE[isError ? 'error' : toast.type];
   const Icon = visual.icon;
-  const message = isError ? t.common.errors[toast.errorCategory] : toast.message;
 
   useEffect(() => {
     remainingRef.current = toast.duration;
@@ -37,9 +36,7 @@ export const ToastItem = ({ toast, onDismiss }: IToastItemProps) => {
   }, [toast.duration]);
 
   useEffect(() => {
-    if (!leaving) {
-      return;
-    }
+    if (!leaving) return;
 
     const fallback = setTimeout(() => onDismiss(toast.id), TOAST_EXIT_FALLBACK_MS);
 
@@ -103,7 +100,7 @@ export const ToastItem = ({ toast, onDismiss }: IToastItemProps) => {
               : 'font-medium text-[color:var(--text-strong)]',
           )}
         >
-          {message}
+          {isError ? t.common.errors[toast.errorCategory] : toast.message}
         </p>
       </div>
 

@@ -23,7 +23,7 @@ const collectMessages = (dictionary: object, prefix = ''): Array<[string, string
 const EN_MESSAGES = new Map(collectMessages(en));
 
 const placeholdersOf = (message: string): string =>
-  [...message.matchAll(/\{(\w+)/g)]
+  [...message.matchAll(/\{\s*(\w+)\s*[,}]/g)]
     .map((match) => match[1] ?? '')
     .sort()
     .join(',');

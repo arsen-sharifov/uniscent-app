@@ -36,7 +36,10 @@ export const useHeroCascade = (): IHeroCascade => {
   const edges = phase === 'repaired' ? HERO_EDGES_REPAIRED : HERO_EDGES;
 
   const statuses = useMemo(() => computeClaimStatuses(claims, edges, refutedIds), [claims, edges, refutedIds]);
-  const edgeTones = useMemo(() => computeEdgeTones(edges, statuses), [edges, statuses]);
+  const edgeTones = useMemo(
+    () => computeEdgeTones(claims, edges, refutedIds, statuses),
+    [claims, edges, refutedIds, statuses],
+  );
   const depths = useMemo(() => collectCascadeDepths(edges, refutedIds), [edges, refutedIds]);
 
   return { phase, claims, edges, statuses, edgeTones, depths, refutedIds };

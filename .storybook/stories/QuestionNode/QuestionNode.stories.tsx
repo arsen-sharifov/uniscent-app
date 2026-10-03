@@ -11,7 +11,7 @@ import {
   SB_QUESTION_ID,
   selectedQuestion,
 } from './consts';
-import { QuestionNodeFlow } from './fragments';
+import { SingleNodeFlow } from '../../components';
 import { ARG_CATEGORIES } from '../../consts';
 import { WithCanvasStage, withCanvasStore, WithReactFlow } from '../../decorators';
 
@@ -19,7 +19,6 @@ const meta: Meta<typeof QuestionNode> = {
   title: 'Components/Canvas/QuestionNode',
   component: QuestionNode,
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:
@@ -61,7 +60,7 @@ export const Default: Story = {
     },
   },
   decorators: [withCanvasStore({ nodes: [defaultQuestion] })],
-  render: () => <QuestionNodeFlow node={defaultQuestion} />,
+  render: () => <SingleNodeFlow node={defaultQuestion} />,
 };
 
 export const Placeholder: Story = {
@@ -74,7 +73,7 @@ export const Placeholder: Story = {
     },
   },
   decorators: [withCanvasStore({ nodes: [placeholderQuestion] })],
-  render: () => <QuestionNodeFlow node={placeholderQuestion} />,
+  render: () => <SingleNodeFlow node={placeholderQuestion} />,
 };
 
 export const Selected: Story = {
@@ -86,7 +85,7 @@ export const Selected: Story = {
     },
   },
   decorators: [withCanvasStore({ nodes: [selectedQuestion] })],
-  render: () => <QuestionNodeFlow node={selectedQuestion} />,
+  render: () => <SingleNodeFlow node={selectedQuestion} />,
 };
 
 export const Editing: Story = {
@@ -98,7 +97,7 @@ export const Editing: Story = {
     },
   },
   decorators: [withCanvasStore({ nodes: [editingQuestion], editingNodeId: SB_QUESTION_ID })],
-  render: () => <QuestionNodeFlow node={editingQuestion} />,
+  render: () => <SingleNodeFlow node={editingQuestion} />,
 };
 
 export const LongQuestion: Story = {
@@ -111,7 +110,7 @@ export const LongQuestion: Story = {
     },
   },
   decorators: [withCanvasStore({ nodes: [longQuestion] })],
-  render: () => <QuestionNodeFlow node={longQuestion} />,
+  render: () => <SingleNodeFlow node={longQuestion} />,
 };
 
 export const PendingConnection: Story = {
@@ -124,5 +123,5 @@ export const PendingConnection: Story = {
     },
   },
   decorators: [withCanvasStore({ nodes: [pendingQuestion], pendingConnection: SB_QUESTION_ID })],
-  render: () => <QuestionNodeFlow node={pendingQuestion} />,
+  render: () => <SingleNodeFlow node={pendingQuestion} />,
 };

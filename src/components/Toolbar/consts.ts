@@ -1,6 +1,6 @@
 import { Compass, Keyboard } from 'lucide-react';
 
-import type { IHelpMenuItem, TCanvasExportFormat, TToolTone, TTourAnchor } from '@interfaces';
+import type { IHelpMenuItem, IToolToneColors, TCanvasExportFormat, TToolTone, TTourAnchor } from '@interfaces';
 
 import { ECanvasTool } from '@/components/tools';
 
@@ -11,7 +11,7 @@ export const HELP_MENU_ITEMS: readonly IHelpMenuItem[] = [
   { id: 'guides', icon: Compass, labelKey: 'menuGuides' },
 ];
 
-export const TOOL_TONES: Record<TToolTone, { ink: string; fill: string }> = {
+export const TOOL_TONES: Record<TToolTone, IToolToneColors> = {
   success: { ink: 'var(--status-success)', fill: 'var(--status-success-bg)' },
   error: { ink: 'var(--status-error)', fill: 'var(--status-error-bg)' },
   decision: { ink: 'var(--decision)', fill: 'var(--decision-soft)' },
@@ -54,11 +54,20 @@ export const TOOL_KEY_MAP: Record<string, ECanvasTool> = {
   r: ECanvasTool.CrossReference,
 };
 
+export const SELECT_DELETE_KEYS: readonly string[] = ['Backspace', 'Delete'];
+
+export const LETTER_PATTERN = /^\p{L}$/u;
+
+export const LATIN_LETTER_PATTERN = /^[a-z]$/i;
+
+export const LETTER_KEY_CODE_PATTERN = /^Key([A-Z])$/;
+
 export const SHORTCUT_MODIFIER_TOKENS: ReadonlySet<string> = new Set(['⌘', '⇧', '⌥', '⌃']);
 
-export const ARIA_MODIFIER_MAP: Record<string, string> = {
-  '⌘': 'Meta+',
-  '⌃': 'Control+',
-  '⌥': 'Alt+',
-  '⇧': 'Shift+',
+export const ARIA_KEY_NAMES: Record<string, string> = {
+  '⌘': 'Meta',
+  '⌃': 'Control',
+  '⌥': 'Alt',
+  '⇧': 'Shift',
+  '+': 'Plus',
 };

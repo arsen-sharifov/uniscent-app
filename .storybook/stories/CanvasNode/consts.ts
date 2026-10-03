@@ -1,13 +1,8 @@
 import type { TCanvasNode } from '@interfaces';
 
-import { CanvasEdge, CanvasNode } from '@/components';
-
 import { createCanvasNode, createComment } from '../../utils';
 
 export const SB_NODE_ID = 'sb-node-1';
-
-export const NODE_TYPES = { 'canvas-node': CanvasNode };
-export const EDGE_TYPES = { default: CanvasEdge };
 
 export const defaultNode: TCanvasNode = createCanvasNode(
   SB_NODE_ID,

@@ -3,16 +3,11 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { TTourAnchor } from '@interfaces';
 import { TOUR_FOCUS_ATTRIBUTE } from '@constants';
-import { domRect } from '@mocks/browser';
+import { elementAt } from '@mocks/browser';
 import { useAnchorFocus } from '@/components/Tour/hooks';
 
-const toolbarButton = (anchor: TTourAnchor, size: number): HTMLElement => {
-  const element = document.createElement('button');
-  element.dataset.tour = anchor;
-  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(domRect({ width: size, height: size }));
-
-  return element;
-};
+const toolbarButton = (anchor: TTourAnchor, size: number): HTMLElement =>
+  elementAt({ 'data-tour': anchor }, { width: size, height: size }, 'button');
 
 let view: RenderHookResult<void, { anchor: TTourAnchor | null }>;
 

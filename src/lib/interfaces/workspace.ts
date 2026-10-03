@@ -21,7 +21,7 @@ export interface IThread {
   folderId: string | null;
   name: string;
   position: number;
-  hasAnswer: boolean;
+  resolved: boolean;
 }
 
 export interface IWorkspaceRow {
@@ -164,4 +164,8 @@ export interface IMyInvitationRow {
   role_name: string;
   invited_by_name: string | null;
   created_at: string;
+}
+
+export interface INodeEditAccess extends Pick<IWorkspaceAccess, 'isOwner' | 'canEditCanvas'> {
+  userId: string | null;
 }

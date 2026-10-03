@@ -6,8 +6,6 @@ import { ExpandToggle } from '@/components/Canvas/fragments';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
 
-const nodeCopy = TRANSLATIONS.platform.canvas.node;
-
 const onToggle = vi.fn();
 const onPageClick = vi.fn();
 const onPagePress = vi.fn();
@@ -30,13 +28,15 @@ describe('ExpandToggle', () => {
 
     describe('WHEN the toggle renders', () => {
       test('THEN it offers to show more and is left out of exports', () => {
-        expect(screen.getByRole('button', { name: nodeCopy.showMore })).toHaveAttribute('data-export-omit');
+        expect(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.showMore })).toHaveAttribute(
+          'data-export-omit',
+        );
       });
     });
 
     describe('WHEN the toggle is clicked', () => {
       beforeEach(() => {
-        fireEvent.click(screen.getByRole('button', { name: nodeCopy.showMore }));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.showMore }));
       });
 
       test('THEN the label toggles once without the click reaching the canvas', () => {
@@ -47,7 +47,7 @@ describe('ExpandToggle', () => {
 
     describe('WHEN the pointer goes down on the toggle', () => {
       beforeEach(() => {
-        fireEvent.mouseDown(screen.getByRole('button', { name: nodeCopy.showMore }));
+        fireEvent.mouseDown(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.showMore }));
       });
 
       test('THEN the press does not reach the canvas', () => {
@@ -63,8 +63,10 @@ describe('ExpandToggle', () => {
 
     describe('WHEN the toggle renders', () => {
       test('THEN it offers to show less with the chevron turned up', () => {
-        expect(screen.getByRole('button', { name: nodeCopy.showLess })).toBeInTheDocument();
-        expect(screen.getByRole('button', { name: nodeCopy.showLess }).querySelector('svg')).toHaveClass('rotate-180');
+        expect(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.showLess })).toBeInTheDocument();
+        expect(
+          screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.showLess }).querySelector('svg'),
+        ).toHaveClass('rotate-180');
       });
     });
   });

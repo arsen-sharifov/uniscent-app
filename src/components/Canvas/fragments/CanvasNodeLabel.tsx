@@ -2,34 +2,36 @@
 
 import { clsx } from 'clsx';
 
-import { useExpandableLabel, useLabelEditing } from '../hooks';
+import { useTranslations } from '@/i18n';
+
+import { useExpandableLabel } from '../hooks';
 import { CommentsButton } from './CommentsButton';
 import { ExpandToggle } from './ExpandToggle';
+import { NodeLabelEditor } from './NodeLabelEditor';
 
 interface ICanvasNodeLabelProps {
   id: string;
   label: string;
   isEditing: boolean;
+  measured: boolean;
   commentCount: number;
 }
 
-export const CanvasNodeLabel = ({ id, label, isEditing, commentCount }: ICanvasNodeLabelProps) => {
-  const { inputRef, handleLabelBlur, handleLabelKeyDown } = useLabelEditing(id, label, isEditing);
+export const CanvasNodeLabel = ({ id, label, isEditing, measured, commentCount }: ICanvasNodeLabelProps) => {
+  const t = useTranslations();
   const { labelRefCallback, expanded, expandable, toggleExpanded } = useExpandableLabel();
 
   return (
     <>
       <div className="flex min-w-0 items-start gap-2">
         {isEditing ? (
-          <textarea
-            ref={inputRef}
-            defaultValue={label}
-            onBlur={handleLabelBlur}
-            onKeyDown={handleLabelKeyDown}
-            onClick={(event) => event.stopPropagation()}
-            onMouseDown={(event) => event.stopPropagation()}
-            rows={1}
-            className="nodrag field-sizing-content w-full resize-none overflow-hidden bg-transparent font-grotesk text-[13.5px] leading-[1.55] font-medium tracking-tight break-words text-[color:var(--text-strong)] caret-[color:var(--accent)] outline-none placeholder:text-[color:var(--text-muted)]"
+          <NodeLabelEditor
+            id={id}
+            label={label}
+            measured={measured}
+            ariaLabel={t.platform.canvas.node.labelAriaLabel}
+            className="text-[13.5px] leading-[1.55] font-medium"
+            signalLabelled
           />
         ) : (
           <p

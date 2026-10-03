@@ -86,7 +86,7 @@ export const NodiBesideTheWindow: Story = {
       },
     },
   },
-  render: ({ pose }) => <BesideWindow pose={pose} character="nodi" />,
+  render: ({ pose = 'point' }) => <BesideWindow pose={pose} character="nodi" />,
 };
 
 export const ErgoBesideTheWindow: Story = {
@@ -100,5 +100,5 @@ export const ErgoBesideTheWindow: Story = {
       },
     },
   },
-  render: ({ pose }) => <BesideWindow pose={pose} character="ergo" />,
+  render: ({ pose = 'point' }) => <BesideWindow pose={pose} character="ergo" />,
 };

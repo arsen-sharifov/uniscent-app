@@ -1,8 +1,8 @@
 'use client';
 
 import type { IGuideDefinition, ITourSnapshot } from '@interfaces';
-import { ANCHOR_SEPARATOR } from '@constants';
-import { useOnboardingStore } from '@/lib/onboarding';
+
+import { joinAnchors, useOnboardingStore } from '@/lib/onboarding';
 
 import { ExampleChoice } from './ExampleChoice';
 import { TourSpotlight } from './TourSpotlight';
@@ -25,8 +25,8 @@ export const ExampleRun = ({ guide, stepIndex, snapshot, onCreateExample, onDele
   const isLastStep = stepIndex === guide.steps.length - 1;
 
   const { busy, removeExample } = useExampleScene(step?.act ?? null, stepIndex, onCreateExample, onDeleteExample);
-  const anchorKey = step?.anchors?.(snapshot).join(ANCHOR_SEPARATOR) ?? '';
-  const openKey = step?.openAnchors?.join(ANCHOR_SEPARATOR) ?? '';
+  const anchorKey = joinAnchors(step?.anchors?.(snapshot));
+  const openKey = joinAnchors(step?.openAnchors);
   const { rect, open } = useTourGeometry(anchorKey, openKey);
 
   const removeAndFinish = async () => {

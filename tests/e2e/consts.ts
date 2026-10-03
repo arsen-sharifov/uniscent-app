@@ -32,6 +32,8 @@ export const E2E_ACCOUNT_PASSWORD = 'Uniscept-E2E-1!';
 
 export const E2E_ACCOUNT_PLAN = 'beta';
 
+export const E2E_MAILPIT_URL = 'http://127.0.0.1:54324';
+
 export const CANVAS_NODE_TYPE = 'canvas-node';
 
 export const QUESTION_NODE_TYPE = 'question-node';

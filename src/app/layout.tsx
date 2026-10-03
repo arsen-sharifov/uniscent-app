@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { JetBrains_Mono, Onest } from 'next/font/google';
+import { headers } from 'next/headers';
 import { NextIntlClientProvider } from 'next-intl';
 import { getLocale } from 'next-intl/server';
 import type { ReactNode } from 'react';
@@ -27,6 +28,7 @@ const heroMono = JetBrains_Mono({
 
 const RootLayout = async ({ children }: Readonly<{ children: ReactNode }>) => {
   const locale = await getLocale();
+  const nonce = (await headers()).get('x-nonce') ?? undefined;
 
   return (
     <html
@@ -38,7 +40,7 @@ const RootLayout = async ({ children }: Readonly<{ children: ReactNode }>) => {
       suppressHydrationWarning
     >
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
+        <script nonce={nonce} dangerouslySetInnerHTML={{ __html: THEME_BOOTSTRAP }} />
       </head>
       <body
         className={`${heroSans.variable} ${heroMono.variable} bg-[color:var(--app-bg)] font-grotesk text-[color:var(--text)] antialiased`}

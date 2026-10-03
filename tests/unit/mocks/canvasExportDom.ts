@@ -16,6 +16,10 @@ const TARGET_LABEL = 'Refuted premise';
 const DRAFT_LABEL = 'Draft label';
 const PLACEHOLDER_LABEL = 'Type a label';
 const MULTILINE_LABEL = 'First line\nSecond line';
+const MARKUP_LABEL = '</text><script>alert(1)</script><a href="javascript:alert(2)">go</a>';
+const MARKUP_THREAD = 'Plan"><script>alert(3)</script>';
+const CONTROL_LABEL = `Bell${String.fromCodePoint(0x07)} form${String.fromCodePoint(0x0c)} feed${String.fromCodePoint(0xff_ff)} end`;
+const CONTROL_SAFE_LABEL = 'Bell form feed end';
 const OMITTED_LABEL = 'Show more';
 const HIDDEN_LABEL = 'Hidden helper';
 const EDGE_STROKE = 'rgb(21, 128, 61)';
@@ -33,6 +37,10 @@ export const EXPORT_FIXTURE = {
   draftLabel: DRAFT_LABEL,
   placeholderLabel: PLACEHOLDER_LABEL,
   multilineLabel: MULTILINE_LABEL,
+  markupLabel: MARKUP_LABEL,
+  markupThread: MARKUP_THREAD,
+  controlLabel: CONTROL_LABEL,
+  controlSafeLabel: CONTROL_SAFE_LABEL,
   omittedLabel: OMITTED_LABEL,
   hiddenLabel: HIDDEN_LABEL,
   edgeStroke: EDGE_STROKE,
@@ -242,13 +250,15 @@ export const buildPlaceholderCanvas = (): HTMLElement => {
   return root;
 };
 
-export const buildMultilineCanvas = (): HTMLElement => {
+export const buildLabelledCanvas = (label: string): HTMLElement => {
   const root = buildExportCanvas();
   const paragraph = root.querySelector('[data-id="source"] p');
-  if (paragraph) paragraph.textContent = MULTILINE_LABEL;
+  if (paragraph) paragraph.textContent = label;
 
   return root;
 };
+
+export const buildMultilineCanvas = (): HTMLElement => buildLabelledCanvas(MULTILINE_LABEL);
 
 const FONT_FAMILY = 'Onest';
 const OTHER_FAMILY = 'JetBrains Mono';

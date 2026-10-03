@@ -14,18 +14,17 @@ import { isToolDisabled } from '../utils';
 
 export const useToolbar = (workspaceLoading = false): IToolbarModel => {
   const t = useTranslations();
-  const storedActiveTool = useCanvasStore((s) => s.activeTool);
-  const middlePan = useCanvasStore((s) => s.middlePan);
-  const canEditCanvas = usePermissionsStore((s) => s.canEditCanvas);
-  const grantsPending = usePermissionsStore((s) => s.workspaceId !== null && !s.resolved);
+  const storedActiveTool = useCanvasStore((state) => state.activeTool);
+  const middlePan = useCanvasStore((state) => state.middlePan);
+  const canEditCanvas = usePermissionsStore((state) => state.canEditCanvas);
+  const grantsPending = usePermissionsStore((state) => state.workspaceId !== null && !state.resolved);
 
   const activeTool = middlePan ? ECanvasTool.Pan : storedActiveTool;
 
   const canUndo = useStore(useCanvasStore.temporal, (state) => state.pastStates.length > 0);
   const canRedo = useStore(useCanvasStore.temporal, (state) => state.futureStates.length > 0);
 
-  const toolsTranslations = t.platform.canvas.tools;
-  const baseGroups = useMemo(() => buildCanvasToolGroups(toolsTranslations), [toolsTranslations]);
+  const baseGroups = useMemo(() => buildCanvasToolGroups(t.platform.canvas.tools), [t.platform.canvas.tools]);
 
   const groups = useMemo(
     () =>

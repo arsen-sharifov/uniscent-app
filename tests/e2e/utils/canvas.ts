@@ -18,8 +18,6 @@ import {
   SAVE_STATE_SELECTOR,
 } from '../consts';
 
-const { canvas } = COPY.platform;
-
 export const getPane = (page: Page): Locator => page.locator(PANE_SELECTOR);
 
 export const getNodes = (page: Page): Locator => page.locator(`${NODE_SELECTOR}-${CANVAS_NODE_TYPE}`);
@@ -40,16 +38,17 @@ export const expectSaved = async (page: Page): Promise<void> => {
   await expect(page.locator(SAVE_STATE_SELECTOR)).toHaveAttribute(SAVE_STATE_ATTRIBUTE, SAVE_STATE_SAVED);
 };
 
-export const getToolbar = (page: Page): Locator => page.getByRole('complementary', { name: canvas.tools.ariaLabel });
+const getToolbar = (page: Page): Locator =>
+  page.getByRole('complementary', { name: COPY.platform.canvas.tools.ariaLabel });
 
 export const selectTool = async (page: Page, label: string): Promise<void> => {
   await getToolbar(page).getByRole('button', { name: label, exact: true }).click();
 };
 
 export const downloadExport = async (page: Page, format: string): Promise<Download> => {
-  await getToolbar(page).getByRole('button', { name: canvas.export.label, exact: true }).click();
+  await getToolbar(page).getByRole('button', { name: COPY.platform.canvas.export.label, exact: true }).click();
 
-  const menu = page.getByRole('menu', { name: canvas.export.label });
+  const menu = page.getByRole('menu', { name: COPY.platform.canvas.export.label });
   await expect(menu).toBeVisible();
 
   const [download] = await Promise.all([
@@ -61,7 +60,7 @@ export const downloadExport = async (page: Page, format: string): Promise<Downlo
 };
 
 export const addNodeAt = async (page: Page, x: number, y: number): Promise<void> => {
-  await selectTool(page, canvas.tools.items.addNode.label);
+  await selectTool(page, COPY.platform.canvas.tools.items.addNode.label);
   await getPane(page).click({ position: { x, y } });
 };
 
@@ -83,12 +82,12 @@ const commitLabel = async (node: Locator, label: string, attempt = 1): Promise<v
 };
 
 export const renameNode = async (page: Page, node: Locator, label: string): Promise<void> => {
-  await selectTool(page, canvas.tools.items.select.label);
+  await selectTool(page, COPY.platform.canvas.tools.items.select.label);
   await commitLabel(node, label);
 };
 
 export const editQuestion = async (page: Page, label: string): Promise<void> => {
-  await selectTool(page, canvas.tools.items.select.label);
+  await selectTool(page, COPY.platform.canvas.tools.items.select.label);
   await commitLabel(getQuestionNode(page), label);
 };
 
@@ -99,7 +98,7 @@ const openContextMenu = async (
   attempt = 1,
 ): Promise<Locator> => {
   await target.click({ button: 'right', ...options });
-  const menu = page.getByRole('menu', { name: canvas.context.ariaLabel });
+  const menu = page.getByRole('menu', { name: COPY.platform.canvas.context.ariaLabel });
   const opened = await menu
     .waitFor({ state: 'visible', timeout: CONTEXT_MENU_TIMEOUT_MS })
     .then(() => true)
@@ -127,7 +126,7 @@ export const openPaneMenu = (page: Page, position: { x: number; y: number }): Pr
 
 export const addNodeComment = async (node: Locator, text: string): Promise<void> => {
   await node.hover();
-  await node.getByRole('button', { name: canvas.node.addComment }).click();
-  await node.getByPlaceholder(canvas.node.addCommentPlaceholder).fill(text);
-  await node.getByRole('button', { name: canvas.node.sendComment }).click();
+  await node.getByRole('button', { name: COPY.platform.canvas.node.addComment }).click();
+  await node.getByPlaceholder(COPY.platform.canvas.node.addCommentPlaceholder).fill(text);
+  await node.getByRole('button', { name: COPY.platform.canvas.node.sendComment }).click();
 };

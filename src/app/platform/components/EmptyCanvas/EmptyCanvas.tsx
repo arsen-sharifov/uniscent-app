@@ -15,7 +15,6 @@ interface IEmptyCanvasProps {
 
 export const EmptyCanvas = ({ hasWorkspace, onCreateThread, onCreateWorkspace }: IEmptyCanvasProps) => {
   const t = useTranslations();
-  const onboarding = t.platform.onboarding;
   const canManageStructure = usePermissionsStore((state) => state.canManageStructure);
   const openOffer = useOnboardingStore((state) => state.openOffer);
   const touring = useOnboardingStore((state) => state.run !== null);
@@ -23,18 +22,18 @@ export const EmptyCanvas = ({ hasWorkspace, onCreateThread, onCreateWorkspace }:
   const canCreate = !hasWorkspace || canManageStructure;
   const label = hasWorkspace ? t.platform.sidebar.newThread : t.platform.sidebar.newWorkspace;
   const create = hasWorkspace ? onCreateThread : onCreateWorkspace;
-  const createBody = hasWorkspace ? onboarding.emptyPlatformBody : onboarding.emptyWorkspaceBody;
+  const createBody = hasWorkspace ? t.platform.onboarding.emptyPlatformBody : t.platform.onboarding.emptyWorkspaceBody;
 
   return (
     <div className="flex h-full w-full flex-col items-center justify-center gap-3 px-6 text-center">
-      <Mascot pose="idle" label={onboarding.nodiAlt} />
+      <Mascot pose="idle" label={t.platform.onboarding.nodiAlt} />
 
       <p className="font-grotesk text-[13px] font-semibold tracking-tight text-[color:var(--text-strong)]">
-        {hasWorkspace ? onboarding.emptyPlatformTitle : onboarding.emptyWorkspaceTitle}
+        {hasWorkspace ? t.platform.onboarding.emptyPlatformTitle : t.platform.onboarding.emptyWorkspaceTitle}
       </p>
 
       <p className="max-w-xs font-grotesk text-[12px] leading-relaxed text-[color:var(--text-muted)]">
-        {canCreate ? createBody : onboarding.emptyViewerBody}
+        {canCreate ? createBody : t.platform.onboarding.emptyViewerBody}
       </p>
 
       {canCreate && (
@@ -54,7 +53,7 @@ export const EmptyCanvas = ({ hasWorkspace, onCreateThread, onCreateWorkspace }:
           onClick={openOffer}
           className="cursor-pointer font-mono-ui text-[10.5px] tracking-[0.06em] text-[color:var(--text-subtle)] lowercase underline-offset-4 transition-colors duration-200 ease-out hover:text-[color:var(--text-muted)] hover:underline focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none motion-reduce:transition-none"
         >
-          {onboarding.emptyPlatformAction}
+          {t.platform.onboarding.emptyPlatformAction}
         </button>
       )}
     </div>

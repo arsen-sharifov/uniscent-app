@@ -70,12 +70,27 @@ describe('useInlineEdit', () => {
     describe('WHEN Enter is pressed during an edit', () => {
       beforeEach(() => {
         act(() => editor.current.startEditing('1', 'Alpha'));
+        act(() => editor.current.setEditValue('Alpha prime'));
         act(() => editor.current.handleKeyDown({ key: 'Enter' } as ReactKeyboardEvent));
       });
 
       test('THEN the edit commits', () => {
-        expect(onRename).toHaveBeenCalledExactlyOnceWith('1', 'Alpha');
+        expect(onRename).toHaveBeenCalledExactlyOnceWith('1', 'Alpha prime');
         expect(editor.current.editingId).toBeNull();
+      });
+    });
+
+    describe('WHEN the edit commits with the name unchanged', () => {
+      beforeEach(() => {
+        act(() => editor.current.startEditing('1', 'Alpha'));
+        act(() => editor.current.setEditValue(' Alpha '));
+        act(() => editor.current.commitRename());
+      });
+
+      test('THEN no rename is sent and editing closes', () => {
+        expect(onRename).not.toHaveBeenCalled();
+        expect(editor.current.editingId).toBeNull();
+        expect(onAutoEditHandled).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -132,6 +147,30 @@ describe('useInlineEdit', () => {
 
       test('THEN the handled callback fires', () => {
         expect(onAutoEditHandled).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('WHEN the auto edited item gets a new name', () => {
+      beforeEach(() => {
+        editor = renderHook(() =>
+          useInlineEdit({ items: RENAME_ITEMS, autoEditId: '2', onRename, onAutoEditHandled }),
+        ).result;
+        act(() => editor.current.setEditValue('Gamma'));
+        act(() => editor.current.commitRename());
+      });
+
+      test('THEN the rename reaches the owner', () => {
+        expect(onRename).toHaveBeenCalledExactlyOnceWith('2', 'Gamma');
+      });
+    });
+
+    describe('WHEN the hook renders without any auto edit prop', () => {
+      beforeEach(() => {
+        editor = renderHook(() => useInlineEdit({ items: RENAME_ITEMS })).result;
+      });
+
+      test('THEN it settles idle instead of looping', () => {
+        expect(editor.current.editingId).toBeNull();
       });
     });
 

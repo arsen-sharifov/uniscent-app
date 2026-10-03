@@ -1,9 +1,22 @@
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { completeInvitedAccount, getSession, setSession, signIn, signOut, signUp } from '@api/client';
+import {
+  completeInvitedAccount,
+  getSession,
+  signIn,
+  signOut,
+  signUp,
+  verifyInvitation,
+  verifyInviteCode,
+} from '@api/client';
+import { primeFetch } from '@mocks/fetch';
 import { primeSupabase } from '@mocks/supabase';
 
-vi.mock('@/lib/supabase/client', () => import('@mocks/supabase'));
+vi.mock('@/lib/supabase', () => import('@mocks/supabase'));
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe('signIn', () => {
   describe('GIVEN sign-in credentials', () => {
@@ -51,18 +64,17 @@ describe('getSession', () => {
   });
 });
 
-describe('setSession', () => {
-  describe('GIVEN access and refresh tokens', () => {
-    describe('WHEN the session is set', () => {
-      test('THEN the tokens map to snake case fields', async () => {
+describe('verifyInvitation', () => {
+  describe('GIVEN the token hash of an emailed invitation', () => {
+    describe('WHEN the invitation is verified', () => {
+      test('THEN the hash is checked as an invite and the auth result is returned', async () => {
         const { client } = primeSupabase([]);
 
-        await setSession('access-1', 'refresh-1');
-
-        expect(client.auth.setSession).toHaveBeenCalledExactlyOnceWith({
-          access_token: 'access-1',
-          refresh_token: 'refresh-1',
+        await expect(verifyInvitation('hash-1')).resolves.toEqual({
+          data: { user: null, session: null },
+          error: null,
         });
+        expect(client.auth.verifyOtp).toHaveBeenCalledExactlyOnceWith({ token_hash: 'hash-1', type: 'invite' });
       });
     });
   });
@@ -88,11 +100,79 @@ describe('completeInvitedAccount', () => {
 describe('signOut', () => {
   describe('GIVEN a signed-in user', () => {
     describe('WHEN the user signs out', () => {
-      test('THEN sign out runs and the result is returned', async () => {
+      test('THEN sign out runs and resolves', async () => {
         const { client } = primeSupabase([]);
 
-        await expect(signOut()).resolves.toEqual({ error: null });
+        await expect(signOut()).resolves.toBeUndefined();
         expect(client.auth.signOut).toHaveBeenCalledTimes(1);
+      });
+    });
+
+    describe('WHEN the user signs out of this browser only', () => {
+      test('THEN the local scope passes through', async () => {
+        const { client } = primeSupabase([]);
+
+        await expect(signOut({ scope: 'local' })).resolves.toBeUndefined();
+        expect(client.auth.signOut).toHaveBeenCalledExactlyOnceWith({ scope: 'local' });
+      });
+    });
+  });
+
+  describe('GIVEN a sign out the auth server fails', () => {
+    describe('WHEN the user signs out', () => {
+      test('THEN the auth error is thrown instead of returned', async () => {
+        const failure = new Error('auth unreachable');
+        const { client } = primeSupabase([]);
+        vi.mocked(client.auth.signOut).mockResolvedValue({ error: failure } as never);
+
+        await expect(signOut()).rejects.toBe(failure);
+      });
+    });
+  });
+});
+
+describe('verifyInviteCode', () => {
+  describe('GIVEN the server accepts the code', () => {
+    describe('WHEN the code is verified', () => {
+      test('THEN the code is valid and posted as json', async () => {
+        const fetchSpy = primeFetch(200);
+
+        await expect(verifyInviteCode('beta-code', 'new@user.dev')).resolves.toBe(true);
+        expect(fetchSpy).toHaveBeenCalledExactlyOnceWith('/auth/verify-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: 'beta-code', email: 'new@user.dev' }),
+        });
+      });
+    });
+  });
+
+  describe('GIVEN the server rejects the code', () => {
+    describe('WHEN the code is verified', () => {
+      test('THEN the code is reported invalid', async () => {
+        primeFetch(403);
+
+        await expect(verifyInviteCode('wrong', 'new@user.dev')).resolves.toBe(false);
+      });
+    });
+  });
+
+  describe('GIVEN a client throttled by the rate limit', () => {
+    describe('WHEN the code is verified', () => {
+      test('THEN the check fails with the rate limit status instead of calling the code invalid', async () => {
+        primeFetch(429);
+
+        await expect(verifyInviteCode('beta-code', 'new@user.dev')).rejects.toMatchObject({ status: 429 });
+      });
+    });
+  });
+
+  describe('GIVEN a failing server', () => {
+    describe('WHEN the code is verified', () => {
+      test('THEN the check fails with the server status', async () => {
+        primeFetch(500);
+
+        await expect(verifyInviteCode('beta-code', 'new@user.dev')).rejects.toMatchObject({ status: 500 });
       });
     });
   });

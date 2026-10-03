@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { TCanvasExportOutcome } from '@interfaces';
 
-import { LONG_THREAD_NAME, UNICODE_THREAD_NAME } from '@mocks/canvasExport';
+import { BIDI_SAFE_FILENAME, BIDI_THREAD_NAME, LONG_THREAD_NAME, UNICODE_THREAD_NAME } from '@mocks/canvasExport';
 import {
   EXPORT_BLOB_URL,
   EXPORT_FIXTURE,
@@ -57,6 +57,14 @@ describe('getExportFilename', () => {
         expect(getExportFilename('CON', 'png')).toBe('_CON.png');
         expect(getExportFilename('LPT1.notes', 'jpg')).toBe('_LPT1.notes.jpg');
         expect(getExportFilename(' ... ', 'svg')).toBe('Uniscept.svg');
+      });
+    });
+  });
+
+  describe('GIVEN a thread name with bidi control characters', () => {
+    describe('WHEN the export filename is created', () => {
+      test('THEN the controls are removed so the name cannot disguise its extension', () => {
+        expect(getExportFilename(BIDI_THREAD_NAME, 'svg')).toBe(BIDI_SAFE_FILENAME);
       });
     });
   });

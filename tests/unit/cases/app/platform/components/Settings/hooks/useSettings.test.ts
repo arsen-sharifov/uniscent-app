@@ -2,7 +2,14 @@ import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { IChangePasswordPayload, IUserProfileUpdate, TChangePasswordResult } from '@interfaces';
-import { deleteAccount, getUser, updateEmail, updatePassword, updateUserMetadata, verifyPassword } from '@api/client';
+import {
+  deleteAccount,
+  getMyOwnedSharedWorkspaces,
+  getUser,
+  updateEmail,
+  updatePassword,
+  updateUserMetadata,
+} from '@api/client';
 import { TRANSLATIONS } from '@mocks/i18n';
 import { useSettings } from '@/app/platform/components/Settings/hooks';
 import { event } from '@/lib/events';
@@ -27,8 +34,6 @@ const errorResponse = (error: object) => ({ data: { user: null }, error }) as ne
 const PROFILE_UPDATE: IUserProfileUpdate = { name: 'Ada Lovelace', avatarIcon: null };
 const PASSWORD_PAYLOAD: IChangePasswordPayload = { currentPassword: 'old-secret', newPassword: 'new-secret' };
 
-const WRONG_PASSWORD_ERROR = { code: 'invalid_credentials' };
-const BAD_REQUEST_ERROR = { code: 'bad_request', status: 400 };
 const OUTAGE_ERROR = { code: 'unexpected_failure', status: 500 };
 const SAVE_ERROR = { code: 'save_failed', status: 500 };
 
@@ -75,8 +80,9 @@ describe('useSettings', () => {
         expect(getUser).toHaveBeenCalledTimes(1);
       });
 
-      test('THEN the account deletion passes through to the api', () => {
+      test('THEN the account deletion and its shared workspace check pass through to the api', () => {
         expect(settings.current.deleteAccount).toBe(deleteAccount);
+        expect(settings.current.getMyOwnedSharedWorkspaces).toBe(getMyOwnedSharedWorkspaces);
       });
     });
   });
@@ -86,8 +92,7 @@ describe('useSettings', () => {
       vi.mocked(getUser).mockResolvedValue(USER_RESPONSE);
       vi.mocked(updateUserMetadata).mockResolvedValue(UPDATED_USER_RESPONSE);
       vi.mocked(updateEmail).mockResolvedValue(USER_RESPONSE);
-      vi.mocked(verifyPassword).mockResolvedValue(USER_RESPONSE);
-      vi.mocked(updatePassword).mockResolvedValue(USER_RESPONSE);
+      vi.mocked(updatePassword).mockResolvedValue(true);
 
       settings = renderHook(() => useSettings()).result;
       await act(async () => {
@@ -130,20 +135,22 @@ describe('useSettings', () => {
         });
       });
 
-      test('THEN the password updates after a successful verification', () => {
+      test('THEN both passwords go to the server check and the change is reported', () => {
         expect(result).toBe('updated');
-        expect(verifyPassword).toHaveBeenCalledExactlyOnceWith(USER.email, PASSWORD_PAYLOAD.currentPassword);
-        expect(updatePassword).toHaveBeenCalledExactlyOnceWith(PASSWORD_PAYLOAD.newPassword);
+        expect(updatePassword).toHaveBeenCalledExactlyOnceWith(
+          PASSWORD_PAYLOAD.currentPassword,
+          PASSWORD_PAYLOAD.newPassword,
+        );
       });
     });
   });
 
-  describe('GIVEN a loaded account with a wrong current password', () => {
+  describe('GIVEN a loaded account whose current password the server rejects', () => {
     let result: TChangePasswordResult;
 
     beforeEach(async () => {
       vi.mocked(getUser).mockResolvedValue(USER_RESPONSE);
-      vi.mocked(verifyPassword).mockResolvedValue(errorResponse(WRONG_PASSWORD_ERROR));
+      vi.mocked(updatePassword).mockResolvedValue(false);
 
       settings = renderHook(() => useSettings()).result;
       await act(async () => {
@@ -158,36 +165,8 @@ describe('useSettings', () => {
         });
       });
 
-      test('THEN the incorrect current password is reported without an update', () => {
+      test('THEN the incorrect current password is reported', () => {
         expect(result).toBe('incorrectCurrentPassword');
-        expect(updatePassword).not.toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('GIVEN a loaded account with a password check failing with status 400', () => {
-    let result: TChangePasswordResult;
-
-    beforeEach(async () => {
-      vi.mocked(getUser).mockResolvedValue(USER_RESPONSE);
-      vi.mocked(verifyPassword).mockResolvedValue(errorResponse(BAD_REQUEST_ERROR));
-
-      settings = renderHook(() => useSettings()).result;
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
-      });
-    });
-
-    describe('WHEN the password change is attempted', () => {
-      beforeEach(async () => {
-        await act(async () => {
-          result = await settings.current.changePassword(PASSWORD_PAYLOAD);
-        });
-      });
-
-      test('THEN the incorrect current password is reported without an update', () => {
-        expect(result).toBe('incorrectCurrentPassword');
-        expect(updatePassword).not.toHaveBeenCalled();
       });
     });
   });
@@ -197,7 +176,7 @@ describe('useSettings', () => {
       vi.mocked(getUser).mockResolvedValue(USER_RESPONSE);
       vi.mocked(updateUserMetadata).mockResolvedValue(errorResponse(SAVE_ERROR));
       vi.mocked(updateEmail).mockResolvedValue(errorResponse(SAVE_ERROR));
-      vi.mocked(verifyPassword).mockResolvedValue(errorResponse(OUTAGE_ERROR));
+      vi.mocked(updatePassword).mockRejectedValue(OUTAGE_ERROR);
 
       settings = renderHook(() => useSettings()).result;
       await act(async () => {
@@ -218,30 +197,9 @@ describe('useSettings', () => {
       });
     });
 
-    describe('WHEN the password check hits an auth outage', () => {
-      test('THEN the change rejects and the password stays', async () => {
+    describe('WHEN the password change hits an auth outage', () => {
+      test('THEN the change rejects with the api error', async () => {
         await expect(settings.current.changePassword(PASSWORD_PAYLOAD)).rejects.toBe(OUTAGE_ERROR);
-        expect(updatePassword).not.toHaveBeenCalled();
-      });
-    });
-  });
-
-  describe('GIVEN a loaded account where the new password is rejected', () => {
-    beforeEach(async () => {
-      vi.mocked(getUser).mockResolvedValue(USER_RESPONSE);
-      vi.mocked(verifyPassword).mockResolvedValue(USER_RESPONSE);
-      vi.mocked(updatePassword).mockResolvedValue(errorResponse(SAVE_ERROR));
-
-      settings = renderHook(() => useSettings()).result;
-      await act(async () => {
-        await vi.advanceTimersByTimeAsync(0);
-      });
-    });
-
-    describe('WHEN the password change is submitted', () => {
-      test('THEN the change rejects after a successful verification', async () => {
-        await expect(settings.current.changePassword(PASSWORD_PAYLOAD)).rejects.toBe(SAVE_ERROR);
-        expect(verifyPassword).toHaveBeenCalledExactlyOnceWith(USER.email, PASSWORD_PAYLOAD.currentPassword);
       });
     });
   });
@@ -260,13 +218,6 @@ describe('useSettings', () => {
       test('THEN loading ends without a user', () => {
         expect(settings.current.loading).toBe(false);
         expect(settings.current.user).toBeNull();
-      });
-    });
-
-    describe('WHEN a password change is attempted', () => {
-      test('THEN the change rejects before any verification', async () => {
-        await expect(settings.current.changePassword(PASSWORD_PAYLOAD)).rejects.toThrow('Missing user email');
-        expect(verifyPassword).not.toHaveBeenCalled();
       });
     });
   });

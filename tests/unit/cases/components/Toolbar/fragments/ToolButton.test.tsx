@@ -1,5 +1,5 @@
 import { fireEvent, render, screen } from '@testing-library/react';
-import { Hand, Undo2 } from 'lucide-react';
+import { Hand, Undo2, ZoomIn } from 'lucide-react';
 import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { IToolItem } from '@interfaces';
@@ -8,6 +8,7 @@ import { ToolButton } from '@/components/Toolbar/fragments';
 
 const PAN: IToolItem = { id: 'pan', icon: Hand, label: 'Pan', shortcut: 'H' };
 const UNDO: IToolItem = { id: 'undo', icon: Undo2, label: 'Undo', kind: 'action' };
+const ZOOM_IN: IToolItem = { id: 'zoom-in', icon: ZoomIn, label: 'Zoom in', shortcut: '+' };
 
 const onClick = vi.fn();
 
@@ -23,6 +24,18 @@ describe('ToolButton', () => {
       test('THEN it is pressed and shows the accent selection mark', () => {
         expect(screen.getByRole('button', { name: 'Pan' })).toHaveAttribute('aria-pressed', 'true');
         expect(selectionMark()).toHaveClass('opacity-100', 'bg-[color:var(--accent)]');
+      });
+    });
+  });
+
+  describe('GIVEN a tool bound to the plus key', () => {
+    beforeEach(() => {
+      render(<ToolButton tool={ZOOM_IN} active={false} onClick={onClick} />);
+    });
+
+    describe('WHEN it renders', () => {
+      test('THEN it announces the Plus key shortcut', () => {
+        expect(screen.getByRole('button', { name: 'Zoom in' })).toHaveAttribute('aria-keyshortcuts', 'Plus');
       });
     });
   });

@@ -27,9 +27,10 @@ export const ToolButton = ({ tool, active, onClick, onPointerEnter, onPointerLea
   const isSelected = active && !isAction && !tool.disabled;
   const Icon = tool.icon;
   const tone = tool.tone && !tool.disabled ? TOOL_TONES[tool.tone] : null;
-  const toneStyle = tone
-    ? { color: tone.ink, backgroundColor: isSelected || flash ? tone.fill : undefined }
-    : undefined;
+  const lit = isSelected || flash;
+  const idle = !tool.disabled && !lit;
+  const toneFill = lit ? tone?.fill : undefined;
+  const toneStyle = tone ? { color: tone.ink, backgroundColor: toneFill } : undefined;
 
   const handleClick = useCallback(() => {
     if (tool.disabled) return;
@@ -68,15 +69,8 @@ export const ToolButton = ({ tool, active, onClick, onPointerEnter, onPointerLea
           'focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:ring-offset-1 focus-visible:ring-offset-[color:var(--surface)]',
           tool.disabled && 'cursor-not-allowed text-[color:var(--text-muted)] opacity-40',
           !tool.disabled && 'cursor-pointer active:scale-[0.94]',
-          !tool.disabled &&
-            !isSelected &&
-            !flash &&
-            'hover:bg-[color:var(--surface-overlay)] active:bg-[color:var(--surface-overlay)]',
-          !tool.disabled &&
-            !isSelected &&
-            !flash &&
-            !tone &&
-            'text-[color:var(--text-muted)] hover:text-[color:var(--text)]',
+          idle && 'hover:bg-[color:var(--surface-overlay)] active:bg-[color:var(--surface-overlay)]',
+          idle && !tone && 'text-[color:var(--text-muted)] hover:text-[color:var(--text)]',
           isSelected &&
             !tone &&
             'bg-[color:var(--accent-soft)] text-[color:var(--accent-text)] shadow-[0_8px_24px_-12px_var(--accent-glow)]',

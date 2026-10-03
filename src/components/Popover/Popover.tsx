@@ -1,7 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { IPopoverTrigger, TPopoverPlacement } from '@interfaces';
@@ -28,30 +28,31 @@ export const Popover = ({
 }: IPopoverProps) => {
   const [triggerElement, setTriggerElement] = useState<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDialogElement>(null);
+  const triggerId = useId();
 
   const mounted = useMounted();
 
   const place = useCallback(() => {
-    const panelEl = panelRef.current;
-    if (!triggerElement || !panelEl) return;
+    const panelElement = panelRef.current;
+    if (!triggerElement || !panelElement) return;
     const rect = triggerElement.getBoundingClientRect();
-    const panelWidth = panelEl.offsetWidth || rect.width;
+    const panelWidth = panelElement.offsetWidth || rect.width;
 
-    panelEl.style.position = 'fixed';
-    panelEl.style.zIndex = '50';
-    panelEl.style.minWidth = `${rect.width}px`;
+    panelElement.style.position = 'fixed';
+    panelElement.style.zIndex = '50';
+    panelElement.style.minWidth = `${rect.width}px`;
 
     if (placement.startsWith('bottom')) {
-      panelEl.style.top = `${rect.bottom + offset}px`;
-      panelEl.style.bottom = '';
+      panelElement.style.top = `${rect.bottom + offset}px`;
+      panelElement.style.bottom = '';
     } else {
-      panelEl.style.bottom = `${window.innerHeight - rect.top + offset}px`;
-      panelEl.style.top = '';
+      panelElement.style.bottom = `${window.innerHeight - rect.top + offset}px`;
+      panelElement.style.top = '';
     }
     if (placement.endsWith('start')) {
-      panelEl.style.left = `${rect.left}px`;
+      panelElement.style.left = `${rect.left}px`;
     } else {
-      panelEl.style.left = `${Math.max(8, rect.right - panelWidth)}px`;
+      panelElement.style.left = `${Math.max(8, rect.right - panelWidth)}px`;
     }
   }, [triggerElement, placement, offset]);
 
@@ -62,31 +63,39 @@ export const Popover = ({
 
   const dismiss = useCallback(() => onOpenChange(false), [onOpenChange]);
 
+  const dismissToTrigger = useCallback(() => {
+    onOpenChange(false);
+    triggerElement?.focus();
+  }, [onOpenChange, triggerElement]);
+
   useEffect(() => {
     if (!open) return;
-    const onDocClick = (event: MouseEvent) => {
+    const handleDocumentMouseDown = (event: MouseEvent) => {
       const target = event.target as Node;
       if (panelRef.current?.contains(target)) return;
       if (triggerElement?.contains(target)) return;
       onOpenChange(false);
     };
-    document.addEventListener('mousedown', onDocClick);
+    document.addEventListener('mousedown', handleDocumentMouseDown);
 
-    return () => document.removeEventListener('mousedown', onDocClick);
+    return () => document.removeEventListener('mousedown', handleDocumentMouseDown);
   }, [open, onOpenChange, triggerElement]);
 
-  useEscapeKey(dismiss, open);
+  useEscapeKey(dismissToTrigger, open);
   useViewportChange({ onScroll: place, onResize: dismiss, enabled: open, capture: true });
 
   useEffect(() => {
-    if (!open) return;
-    panelRef.current?.focus();
+    const panel = panelRef.current;
+    if (!open || !panel || panel.contains(document.activeElement)) return;
+
+    panel.focus();
   }, [open]);
 
   return (
     <>
       {renderTrigger({
         ref: setTriggerElement,
+        id: triggerId,
         onClick: () => onOpenChange(!open),
         'aria-expanded': open,
         'aria-haspopup': 'dialog',
@@ -98,6 +107,7 @@ export const Popover = ({
             open
             ref={panelRef}
             aria-modal="false"
+            aria-labelledby={triggerId}
             tabIndex={-1}
             className={clsx(
               'inset-auto overflow-hidden rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--text)] shadow-[var(--shadow-modal)] outline-none',

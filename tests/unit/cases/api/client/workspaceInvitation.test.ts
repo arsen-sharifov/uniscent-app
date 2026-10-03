@@ -1,16 +1,22 @@
-import { describe, expect, test, vi } from 'vitest';
+import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import {
   acceptWorkspaceInvitation,
+  createWorkspaceInvitation,
   declineWorkspaceInvitation,
   getMyInvitations,
   getWorkspaceInvitations,
   revokeWorkspaceInvitation,
 } from '@api/client';
+import { primeFetch } from '@mocks/fetch';
 import { myInvitationRow, workspaceInvitationRow } from '@mocks/rows';
 import { primeSupabase } from '@mocks/supabase';
 
 vi.mock('@/lib/supabase', () => import('@mocks/supabase'));
+
+afterEach(() => {
+  vi.unstubAllGlobals();
+});
 
 describe('getWorkspaceInvitations', () => {
   describe('GIVEN stored invitations for the workspace', () => {
@@ -51,6 +57,38 @@ describe('getWorkspaceInvitations', () => {
         vi.mocked(client.rpc).mockResolvedValue({ data: null, error: new Error('db down') });
 
         await expect(getWorkspaceInvitations('ws-1')).rejects.toThrow('db down');
+      });
+    });
+  });
+});
+
+describe('createWorkspaceInvitation', () => {
+  describe('GIVEN the invite route accepts the invitation', () => {
+    describe('WHEN a teammate is invited', () => {
+      test('THEN the invitation is posted as json', async () => {
+        const fetchSpy = primeFetch(200, { ok: true });
+
+        await createWorkspaceInvitation('ws-1', 'teammate@acme.dev', 'role-1');
+
+        expect(fetchSpy).toHaveBeenCalledExactlyOnceWith('/auth/workspace-invite', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ workspaceId: 'ws-1', email: 'teammate@acme.dev', roleId: 'role-1' }),
+        });
+      });
+    });
+  });
+
+  describe('GIVEN the invite route refuses the invitation', () => {
+    describe('WHEN a teammate is invited', () => {
+      test('THEN the invitation fails with the response status and pg code', async () => {
+        primeFetch(403, { error: { message: 'Invitation failed', code: '42501' } });
+
+        await expect(createWorkspaceInvitation('ws-1', 'teammate@acme.dev', 'role-1')).rejects.toMatchObject({
+          message: 'Invitation failed',
+          status: 403,
+          code: '42501',
+        });
       });
     });
   });

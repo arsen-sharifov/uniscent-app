@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { negotiateLocale } from '@/i18n/utils';
+import { isLocale, negotiateLocale } from '@/i18n/utils';
 
 describe('negotiateLocale', () => {
   describe('GIVEN a browser asking for a supported language', () => {
@@ -26,6 +26,18 @@ describe('negotiateLocale', () => {
         expect(negotiateLocale('')).toBe('en');
         expect(negotiateLocale('*')).toBe('en');
         expect(negotiateLocale('de-DE,de;q=0.9')).toBe('en');
+      });
+    });
+  });
+});
+
+describe('isLocale', () => {
+  describe('GIVEN a stored value', () => {
+    describe('WHEN it is checked', () => {
+      test('THEN only a supported language code passes', () => {
+        expect(isLocale('uk')).toBe(true);
+        expect(isLocale('de')).toBe(false);
+        expect(isLocale(undefined)).toBe(false);
       });
     });
   });

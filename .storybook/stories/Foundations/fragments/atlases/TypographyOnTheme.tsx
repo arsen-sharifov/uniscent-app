@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
 
-import type { TTheme } from '@constants';
+import type { TTheme } from '@interfaces';
 
 import { THEME_LIST, TYPE_SCALE } from '../../consts';
 import { findActiveTheme } from '../../utils';

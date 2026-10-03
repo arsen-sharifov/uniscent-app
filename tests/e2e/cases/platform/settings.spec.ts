@@ -9,16 +9,15 @@ import {
   openSection,
   openSettings,
   seedAccount,
+  seedMember,
   seedThread,
+  seedWorkspace,
   signIn,
   signOut,
   uniqueLabel,
   waitForCanvas,
   waitForPreferencesSave,
 } from '../../utils';
-
-const { settings } = COPY.platform;
-const { appearance, editor, profile, sections, security } = settings;
 
 const NEW_PASSWORD = 'Uniscept-E2E-2!';
 
@@ -75,13 +74,13 @@ test.describe('appearance preferences', () => {
       await page.goto('/platform');
       await expect(getSidebar(page)).toContainText(workspace.name);
       const modal = await openSettings(page);
-      await openSection(modal, sections.appearance);
+      await openSection(modal, COPY.platform.settings.sections.appearance);
     });
 
     test.describe('WHEN another theme is picked', () => {
       test.beforeEach(async ({ page }) => {
         const saved = waitForPreferencesSave(page);
-        await page.getByRole('radio', { name: appearance.themeEclipse }).click();
+        await page.getByRole('radio', { name: COPY.platform.settings.appearance.themeEclipse }).click();
         await saved;
       });
 
@@ -97,7 +96,7 @@ test.describe('appearance preferences', () => {
     test.describe('WHEN another language is picked', () => {
       test.beforeEach(async ({ page }) => {
         const saved = waitForPreferencesSave(page);
-        await page.getByRole('button', { name: appearance.languages.uk, exact: true }).click();
+        await page.getByRole('button', { name: COPY.platform.settings.appearance.languages.uk, exact: true }).click();
         await saved;
       });
 
@@ -113,7 +112,7 @@ test.describe('appearance preferences', () => {
     test.describe('WHEN another canvas pattern is picked', () => {
       test.beforeEach(async ({ page }) => {
         const saved = waitForPreferencesSave(page);
-        await page.getByRole('radio', { name: appearance.patternLines }).click();
+        await page.getByRole('radio', { name: COPY.platform.settings.appearance.patternLines }).click();
         await saved;
       });
 
@@ -135,52 +134,70 @@ test.describe('editor preferences', () => {
       await page.goto(`/platform/${workspace.id}/${thread.id}`);
       await waitForCanvas(page);
       const modal = await openSettings(page);
-      await openSection(modal, sections.editor);
+      await openSection(modal, COPY.platform.settings.sections.editor);
     });
 
     test.describe('WHEN snap to grid is switched on', () => {
       test.beforeEach(async ({ page }) => {
         const saved = waitForPreferencesSave(page);
-        await page.getByRole('switch', { name: editor.snapToGrid }).click();
+        await page.getByRole('switch', { name: COPY.platform.settings.editor.snapToGrid }).click();
         await saved;
       });
 
       test('THEN the switch stays on after a reload', async ({ page }) => {
-        await expect(page.getByRole('switch', { name: editor.snapToGrid })).toHaveAttribute('aria-checked', 'true');
+        await expect(page.getByRole('switch', { name: COPY.platform.settings.editor.snapToGrid })).toHaveAttribute(
+          'aria-checked',
+          'true',
+        );
 
         await page.reload();
         await waitForCanvas(page);
         const modal = await openSettings(page);
-        await openSection(modal, sections.editor);
+        await openSection(modal, COPY.platform.settings.sections.editor);
 
-        await expect(page.getByRole('switch', { name: editor.snapToGrid })).toHaveAttribute('aria-checked', 'true');
+        await expect(page.getByRole('switch', { name: COPY.platform.settings.editor.snapToGrid })).toHaveAttribute(
+          'aria-checked',
+          'true',
+        );
       });
     });
 
     test.describe('WHEN smart guides are switched off', () => {
       test.beforeEach(async ({ page }) => {
-        await expect(page.getByRole('switch', { name: editor.smartGuides })).toHaveAttribute('aria-checked', 'true');
+        await expect(page.getByRole('switch', { name: COPY.platform.settings.editor.smartGuides })).toHaveAttribute(
+          'aria-checked',
+          'true',
+        );
         const saved = waitForPreferencesSave(page);
-        await page.getByRole('switch', { name: editor.smartGuides }).click();
+        await page.getByRole('switch', { name: COPY.platform.settings.editor.smartGuides }).click();
         await saved;
       });
 
       test('THEN the switch stays off after a reload', async ({ page }) => {
-        await expect(page.getByRole('switch', { name: editor.smartGuides })).toHaveAttribute('aria-checked', 'false');
+        await expect(page.getByRole('switch', { name: COPY.platform.settings.editor.smartGuides })).toHaveAttribute(
+          'aria-checked',
+          'false',
+        );
 
         await page.reload();
         await waitForCanvas(page);
         const modal = await openSettings(page);
-        await openSection(modal, sections.editor);
+        await openSection(modal, COPY.platform.settings.sections.editor);
 
-        await expect(page.getByRole('switch', { name: editor.smartGuides })).toHaveAttribute('aria-checked', 'false');
+        await expect(page.getByRole('switch', { name: COPY.platform.settings.editor.smartGuides })).toHaveAttribute(
+          'aria-checked',
+          'false',
+        );
       });
     });
 
     test.describe('WHEN another default zoom level is picked', () => {
       test.beforeEach(async ({ page }) => {
         const saved = waitForPreferencesSave(page);
-        await page.getByRole('radiogroup', { name: editor.defaultZoom }).getByRole('radio', { name: /125/ }).click();
+        await page
+          .getByRole('radiogroup', { name: COPY.platform.settings.editor.defaultZoom })
+          .getByRole('radio', { name: /125/ })
+          .click();
         await saved;
       });
 
@@ -188,10 +205,12 @@ test.describe('editor preferences', () => {
         await page.reload();
         await waitForCanvas(page);
         const modal = await openSettings(page);
-        await openSection(modal, sections.editor);
+        await openSection(modal, COPY.platform.settings.sections.editor);
 
         await expect(
-          page.getByRole('radiogroup', { name: editor.defaultZoom }).getByRole('radio', { name: /125/ }),
+          page
+            .getByRole('radiogroup', { name: COPY.platform.settings.editor.defaultZoom })
+            .getByRole('radio', { name: /125/ }),
         ).toHaveAttribute('aria-checked', 'true');
       });
 
@@ -206,14 +225,15 @@ test.describe('editor preferences', () => {
 });
 
 guestTest.describe('security', () => {
-  guestTest.describe('GIVEN a throwaway account on the security section', () => {
+  guestTest.describe('GIVEN a throwaway sole owner on the security section', () => {
     let disposable: IE2ESeededAccount;
 
     guestTest.beforeEach(async ({ page }) => {
       disposable = await seedAccount(uniqueLabel('sec'));
+      await seedWorkspace(disposable.id, uniqueLabel('Solo'));
       await signIn(page, disposable.email, disposable.password);
       const modal = await openSettings(page);
-      await openSection(modal, sections.security);
+      await openSection(modal, COPY.platform.settings.sections.security);
     });
 
     guestTest.afterEach(async () => {
@@ -223,12 +243,12 @@ guestTest.describe('security', () => {
     guestTest.describe('WHEN the password is changed and the account signs back in with it', () => {
       guestTest.beforeEach(async ({ page }) => {
         const modal = getSettingsModal(page);
-        await modal.getByLabel(security.currentPassword).fill(disposable.password);
-        await modal.getByLabel(security.newPassword, { exact: true }).fill(NEW_PASSWORD);
-        await modal.getByLabel(security.confirmPassword).fill(NEW_PASSWORD);
-        await modal.getByRole('button', { name: security.updatePassword, exact: true }).click();
-        await expect(modal.getByText(security.passwordUpdated, { exact: true })).toBeVisible();
-        await modal.getByRole('button', { name: settings.close }).click();
+        await modal.getByLabel(COPY.platform.settings.security.currentPassword).fill(disposable.password);
+        await modal.getByLabel(COPY.platform.settings.security.newPassword, { exact: true }).fill(NEW_PASSWORD);
+        await modal.getByLabel(COPY.platform.settings.security.confirmPassword).fill(NEW_PASSWORD);
+        await modal.getByRole('button', { name: COPY.platform.settings.security.updatePassword, exact: true }).click();
+        await expect(modal.getByText(COPY.platform.settings.security.passwordUpdated, { exact: true })).toBeVisible();
+        await modal.getByRole('button', { name: COPY.platform.settings.close }).click();
         await signOut(page);
         await signIn(page, disposable.email, NEW_PASSWORD);
       });
@@ -242,24 +262,25 @@ guestTest.describe('security', () => {
     guestTest.describe('WHEN the wrong current password is submitted', () => {
       guestTest.beforeEach(async ({ page }) => {
         const modal = getSettingsModal(page);
-        await modal.getByLabel(security.currentPassword).fill('definitely-not-the-password');
-        await modal.getByLabel(security.newPassword, { exact: true }).fill(NEW_PASSWORD);
-        await modal.getByLabel(security.confirmPassword).fill(NEW_PASSWORD);
-        await modal.getByRole('button', { name: security.updatePassword, exact: true }).click();
+        await modal.getByLabel(COPY.platform.settings.security.currentPassword).fill('definitely-not-the-password');
+        await modal.getByLabel(COPY.platform.settings.security.newPassword, { exact: true }).fill(NEW_PASSWORD);
+        await modal.getByLabel(COPY.platform.settings.security.confirmPassword).fill(NEW_PASSWORD);
+        await modal.getByRole('button', { name: COPY.platform.settings.security.updatePassword, exact: true }).click();
       });
 
       guestTest('THEN the form refuses the change inline', async ({ page }) => {
         await expect(
-          getSettingsModal(page).getByText(security.currentPasswordIncorrect, { exact: true }),
+          getSettingsModal(page).getByText(COPY.platform.settings.security.currentPasswordIncorrect, { exact: true }),
         ).toBeVisible();
       });
     });
 
-    guestTest.describe('WHEN the account is deleted from the danger zone', () => {
+    guestTest.describe('WHEN the account is deleted from the danger zone with its password', () => {
       guestTest.beforeEach(async ({ page }) => {
         const modal = getSettingsModal(page);
-        await modal.getByRole('button', { name: security.deleteAccount, exact: true }).click();
-        await modal.getByRole('button', { name: security.deleteButton, exact: true }).click();
+        await modal.getByRole('button', { name: COPY.platform.settings.security.deleteAccount, exact: true }).click();
+        await modal.getByLabel(COPY.platform.settings.security.deletePassword).fill(disposable.password);
+        await modal.getByRole('button', { name: COPY.platform.settings.security.deleteButton, exact: true }).click();
         await page.waitForURL(/\/login$/);
       });
 
@@ -271,6 +292,63 @@ guestTest.describe('security', () => {
         await expect(getErrorToast(page, COPY.common.errors.invalidCredentials)).toBeVisible();
       });
     });
+
+    guestTest.describe('WHEN the deletion is confirmed with a wrong password', () => {
+      guestTest.beforeEach(async ({ page }) => {
+        const modal = getSettingsModal(page);
+        await modal.getByRole('button', { name: COPY.platform.settings.security.deleteAccount, exact: true }).click();
+        await modal.getByLabel(COPY.platform.settings.security.deletePassword).fill('definitely-not-the-password');
+        await modal.getByRole('button', { name: COPY.platform.settings.security.deleteButton, exact: true }).click();
+      });
+
+      guestTest('THEN the refusal is toasted and the account stays signed in', async ({ page }) => {
+        await expect(getErrorToast(page, COPY.common.errors.invalidCredentials)).toBeVisible();
+        await expect(page).toHaveURL(/\/platform/);
+        await expect(getSettingsModal(page)).toBeVisible();
+      });
+    });
+  });
+
+  guestTest.describe('GIVEN a throwaway owner of a workspace a teammate still uses, on the security section', () => {
+    let owner: IE2ESeededAccount;
+    let teammate: IE2ESeededAccount;
+    let sharedName: string;
+
+    guestTest.beforeEach(async ({ page }) => {
+      owner = await seedAccount(uniqueLabel('owner'));
+      teammate = await seedAccount(uniqueLabel('mate'));
+      sharedName = uniqueLabel('Shared');
+      const shared = await seedWorkspace(owner.id, sharedName);
+      await seedMember(shared.id, teammate.id, 'member');
+      await signIn(page, owner.email, owner.password);
+      const modal = await openSettings(page);
+      await openSection(modal, COPY.platform.settings.sections.security);
+    });
+
+    guestTest.afterEach(async () => {
+      await deleteAccountByEmail(owner.email);
+      await deleteAccountByEmail(teammate.email);
+    });
+
+    guestTest.describe('WHEN the account deletion is opened', () => {
+      guestTest.beforeEach(async ({ page }) => {
+        await getSettingsModal(page)
+          .getByRole('button', { name: COPY.platform.settings.security.deleteAccount, exact: true })
+          .click();
+      });
+
+      guestTest('THEN the shared workspace is named and the deletion cannot be confirmed', async ({ page }) => {
+        const modal = getSettingsModal(page);
+
+        await expect(
+          modal.getByRole('alert').filter({ hasText: COPY.platform.settings.security.deleteBlocked }),
+        ).toContainText(sharedName);
+        await expect(modal.getByLabel(COPY.platform.settings.security.deletePassword)).toHaveCount(0);
+        await expect(
+          modal.getByRole('button', { name: COPY.platform.settings.security.deleteButton, exact: true }),
+        ).toHaveCount(0);
+      });
+    });
   });
 });
 
@@ -280,15 +358,15 @@ test.describe('profile', () => {
       await page.goto('/platform');
       await expect(getSidebar(page)).toContainText(workspace.name);
       const modal = await openSettings(page);
-      await openSection(modal, sections.profile);
+      await openSection(modal, COPY.platform.settings.sections.profile);
     });
 
     test.describe('WHEN the display name is changed and saved', () => {
       test.beforeEach(async ({ page }) => {
         const modal = getSettingsModal(page);
-        await modal.getByPlaceholder(profile.namePlaceholder).fill('Renamed thinker');
-        await modal.getByRole('button', { name: profile.save }).click();
-        await expect(modal.getByText(profile.saved, { exact: true })).toBeVisible();
+        await modal.getByPlaceholder(COPY.platform.settings.profile.namePlaceholder).fill('Renamed thinker');
+        await modal.getByRole('button', { name: COPY.platform.settings.profile.save }).click();
+        await expect(modal.getByText(COPY.platform.settings.profile.saved, { exact: true })).toBeVisible();
       });
 
       test('THEN the sidebar greets the new name after a reload', async ({ page }) => {

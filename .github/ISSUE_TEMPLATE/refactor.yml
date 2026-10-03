@@ -1,6 +1,6 @@
 name: Refactor
 description: Restructuring without behaviour change
-title: 'refactor: '
+title: 'DEV: '
 labels: [refactor]
 body:
   - type: textarea

@@ -17,8 +17,8 @@ import {
   type TTourStepKey,
 } from '@interfaces';
 
-import { isCanvasNodeData } from '@/components/Canvas/utils';
 import { ECanvasTool } from '@/components/tools';
+import { isCanvasNodeData } from '@/lib/canvas/utils';
 
 const CANVAS_OPEN: readonly TTourAnchor[] = ['canvas', 'toolbar'];
 

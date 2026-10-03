@@ -10,5 +10,5 @@ export const countNestedThreads = (items: readonly TNavItem[], insideFolder = fa
     return total + countNestedThreads(item.items, true);
   }, 0);
 
-export const sameAnchors = (a: ReadonlySet<TTourAnchor>, b: ReadonlySet<TTourAnchor>): boolean =>
-  a.size === b.size && [...a].every((anchor) => b.has(anchor));
+export const sameAnchors = (first: ReadonlySet<TTourAnchor>, second: ReadonlySet<TTourAnchor>): boolean =>
+  first.size === second.size && [...first].every((anchor) => second.has(anchor));

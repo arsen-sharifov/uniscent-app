@@ -1,6 +1,6 @@
 name: Tests
 description: Tests only (unit, integration, e2e, Storybook)
-title: 'test: '
+title: 'DEV: '
 labels: [test]
 body:
   - type: textarea

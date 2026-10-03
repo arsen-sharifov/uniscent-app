@@ -2,31 +2,41 @@
 
 import { type FocusEvent, type KeyboardEvent, useEffect, useRef } from 'react';
 
+import type { IUseLabelEditingOptions, IUseLabelEditingResult } from '@interfaces';
+
 import { useOnboardingStore } from '@/lib/onboarding';
 import { useCanvasStore } from '@/lib/stores';
+import { isTypingTarget } from '@/lib/utils';
 
-export const useLabelEditing = (id: string, label: string, isEditing: boolean) => {
-  const setEditingNodeId = useCanvasStore((s) => s.setEditingNodeId);
-  const updateNodeLabel = useCanvasStore((s) => s.updateNodeLabel);
+export const useLabelEditing = ({
+  id,
+  label,
+  measured,
+  signalLabelled = false,
+}: IUseLabelEditingOptions): IUseLabelEditingResult => {
+  const setEditingNodeId = useCanvasStore((state) => state.setEditingNodeId);
+  const updateNodeLabel = useCanvasStore((state) => state.updateNodeLabel);
 
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
-    if (!isEditing) return;
+    if (!measured) return;
 
     const input = inputRef.current;
     if (!input) return;
+    if (document.activeElement !== input && isTypingTarget(document.activeElement)) return;
 
     input.focus();
     input.setSelectionRange(input.value.length, input.value.length);
-  }, [isEditing]);
+  }, [measured]);
 
   const commitLabel = (value: string) => {
     const nextLabel = value.trim() || label;
-    if (nextLabel !== label) useOnboardingStore.getState().markSignal('nodeLabelled');
+    setEditingNodeId(null);
+    if (nextLabel === label) return;
 
     updateNodeLabel(id, nextLabel);
-    setEditingNodeId(null);
+    if (signalLabelled) useOnboardingStore.getState().markSignal('nodeLabelled');
   };
 
   const handleLabelBlur = (event: FocusEvent<HTMLTextAreaElement>) => commitLabel(event.target.value);

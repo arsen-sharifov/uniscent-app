@@ -1,7 +1,7 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import { useFlash } from '@/components/Toolbar/hooks';
+import { FLASH_DURATION_MS, useFlash } from '@/components/Toolbar';
 
 let flash: { current: ReturnType<typeof useFlash> };
 
@@ -35,7 +35,7 @@ describe('useFlash', () => {
     describe('WHEN it is triggered and its duration passes', () => {
       beforeEach(() => {
         act(() => flash.current.triggerFlash());
-        act(() => vi.advanceTimersByTime(220));
+        act(() => vi.advanceTimersByTime(FLASH_DURATION_MS));
       });
 
       test('THEN it is off again', () => {
@@ -46,9 +46,9 @@ describe('useFlash', () => {
     describe('WHEN it is triggered again before the first flash ends', () => {
       beforeEach(() => {
         act(() => flash.current.triggerFlash());
-        act(() => vi.advanceTimersByTime(150));
+        act(() => vi.advanceTimersByTime(FLASH_DURATION_MS - 1));
         act(() => flash.current.triggerFlash());
-        act(() => vi.advanceTimersByTime(150));
+        act(() => vi.advanceTimersByTime(FLASH_DURATION_MS - 1));
       });
 
       test('THEN the second trigger restarts the duration', () => {

@@ -7,12 +7,10 @@ import { THREAD_ID, canvasNode, comment } from '@mocks/canvas';
 import { TRANSLATIONS } from '@mocks/i18n';
 import { COMMENT_ACCESS, READONLY_ACCESS } from '@mocks/roles';
 import { CommentsPanelContent } from '@/components/Canvas/fragments';
+import { MAX_COMMENT_LENGTH } from '@/lib/canvas';
 import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
-
-const nodeCopy = TRANSLATIONS.platform.canvas.node;
-const commentsCopy = TRANSLATIONS.platform.canvas.comments;
 
 const onCommentTextChange = vi.fn();
 
@@ -42,21 +40,41 @@ describe('CommentsPanelContent', () => {
 
     describe('WHEN the panel renders', () => {
       test('THEN both comments are listed under a counted header with delete offered only on their own', () => {
-        expect(screen.getByText(nodeCopy.commentsHeader)).toHaveTextContent(`${nodeCopy.commentsHeader}2`);
+        expect(screen.getByText(TRANSLATIONS.platform.canvas.node.commentsHeader)).toHaveTextContent(
+          `${TRANSLATIONS.platform.canvas.node.commentsHeader}2`,
+        );
         expect(screen.getByText('Mine')).toBeInTheDocument();
         expect(screen.getByText('Theirs')).toBeInTheDocument();
-        expect(screen.getAllByRole('button', { name: commentsCopy.deleteAriaLabel })).toHaveLength(1);
+        expect(
+          screen.getAllByRole('button', { name: TRANSLATIONS.platform.canvas.comments.deleteAriaLabel }),
+        ).toHaveLength(1);
       });
 
       test('THEN the composer is empty and cannot send yet', () => {
-        expect(screen.getByPlaceholderText(nodeCopy.addCommentPlaceholder)).toHaveValue('');
-        expect(screen.getByRole('button', { name: nodeCopy.sendComment })).toBeDisabled();
+        expect(screen.getByPlaceholderText(TRANSLATIONS.platform.canvas.node.addCommentPlaceholder)).toHaveValue('');
+        expect(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.sendComment })).toBeDisabled();
+      });
+
+      test('THEN the composer stops at the longest comment the canvas stores', () => {
+        expect(screen.getByPlaceholderText(TRANSLATIONS.platform.canvas.node.addCommentPlaceholder)).toHaveAttribute(
+          'maxlength',
+          String(MAX_COMMENT_LENGTH),
+        );
+      });
+
+      test('THEN the list and the composer keep wheel and drag gestures away from the canvas', () => {
+        expect(screen.getByText('Mine').closest('.nowheel')).toHaveClass('nopan');
+        expect(
+          screen.getByPlaceholderText(TRANSLATIONS.platform.canvas.node.addCommentPlaceholder).closest('form'),
+        ).toHaveClass('nopan');
       });
     });
 
     describe('WHEN they type into the composer', () => {
       beforeEach(() => {
-        fireEvent.change(screen.getByPlaceholderText(nodeCopy.addCommentPlaceholder), { target: { value: 'Draft' } });
+        fireEvent.change(screen.getByPlaceholderText(TRANSLATIONS.platform.canvas.node.addCommentPlaceholder), {
+          target: { value: 'Draft' },
+        });
       });
 
       test('THEN the draft is handed to the owner', () => {
@@ -66,7 +84,7 @@ describe('CommentsPanelContent', () => {
 
     describe('WHEN they delete their own comment', () => {
       beforeEach(() => {
-        fireEvent.click(screen.getByRole('button', { name: commentsCopy.deleteAriaLabel }));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.comments.deleteAriaLabel }));
       });
 
       test('THEN only the foreign comment remains on the node', () => {
@@ -76,7 +94,7 @@ describe('CommentsPanelContent', () => {
 
     describe('WHEN they close the panel', () => {
       beforeEach(() => {
-        fireEvent.click(screen.getByRole('button', { name: nodeCopy.closeComments }));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.closeComments }));
       });
 
       test('THEN the node comments are no longer open', () => {
@@ -101,7 +119,7 @@ describe('CommentsPanelContent', () => {
 
     describe('WHEN the draft is sent', () => {
       beforeEach(() => {
-        fireEvent.click(screen.getByRole('button', { name: nodeCopy.sendComment }));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.canvas.node.sendComment }));
       });
 
       test('THEN the trimmed comment is added and the draft is cleared', () => {
@@ -122,7 +140,7 @@ describe('CommentsPanelContent', () => {
 
     describe('WHEN the composer form is submitted anyway', () => {
       beforeEach(() => {
-        fireEvent.submit(screen.getByPlaceholderText(nodeCopy.addCommentPlaceholder));
+        fireEvent.submit(screen.getByPlaceholderText(TRANSLATIONS.platform.canvas.node.addCommentPlaceholder));
       });
 
       test('THEN nothing is added and the draft is left alone', () => {
@@ -145,8 +163,10 @@ describe('CommentsPanelContent', () => {
       });
 
       test('THEN the empty note shows and the header carries no count', () => {
-        expect(screen.getByText(nodeCopy.noComments)).toBeInTheDocument();
-        expect(screen.getByText(nodeCopy.commentsHeader)).toHaveTextContent(new RegExp(`^${nodeCopy.commentsHeader}$`));
+        expect(screen.getByText(TRANSLATIONS.platform.canvas.node.noComments)).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.canvas.node.commentsHeader)).toHaveTextContent(
+          new RegExp(`^${TRANSLATIONS.platform.canvas.node.commentsHeader}$`),
+        );
       });
     });
   });
@@ -170,8 +190,12 @@ describe('CommentsPanelContent', () => {
 
       test('THEN the comments are readable without a composer or delete actions', () => {
         expect(screen.getByText('Mine')).toBeInTheDocument();
-        expect(screen.queryByPlaceholderText(nodeCopy.addCommentPlaceholder)).not.toBeInTheDocument();
-        expect(screen.queryByRole('button', { name: commentsCopy.deleteAriaLabel })).not.toBeInTheDocument();
+        expect(
+          screen.queryByPlaceholderText(TRANSLATIONS.platform.canvas.node.addCommentPlaceholder),
+        ).not.toBeInTheDocument();
+        expect(
+          screen.queryByRole('button', { name: TRANSLATIONS.platform.canvas.comments.deleteAriaLabel }),
+        ).not.toBeInTheDocument();
       });
     });
   });

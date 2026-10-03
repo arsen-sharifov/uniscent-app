@@ -7,11 +7,12 @@ import { useTranslations } from '@/i18n';
 
 interface INodiHeadingProps {
   title: string;
+  titleId: string;
   pose: TMascotPose;
   nodiClassName?: string;
 }
 
-export const NodiHeading = ({ title, pose, nodiClassName }: INodiHeadingProps) => {
+export const NodiHeading = ({ title, titleId, pose, nodiClassName }: INodiHeadingProps) => {
   const t = useTranslations();
 
   return (
@@ -22,7 +23,10 @@ export const NodiHeading = ({ title, pose, nodiClassName }: INodiHeadingProps) =
         <span className="block font-mono-ui text-[10.5px] tracking-[0.12em] text-[color:var(--accent-text)]">
           {t.platform.onboarding.nodiName}
         </span>
-        <h2 className="mt-1 font-grotesk text-lg leading-tight font-semibold tracking-tight text-[color:var(--text-strong)]">
+        <h2
+          id={titleId}
+          className="mt-1 font-grotesk text-lg leading-tight font-semibold tracking-tight text-[color:var(--text-strong)]"
+        >
           {title}
         </h2>
       </div>

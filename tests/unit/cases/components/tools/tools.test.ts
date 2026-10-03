@@ -1,9 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
+import { TRANSLATIONS } from '@mocks/i18n';
 import { ECanvasTool, buildCanvasToolGroups, buildCanvasTools, isCanvasTool } from '@/components/tools';
-import en from '@/locales/en.json';
-
-const TOOLS_TRANSLATIONS = en.platform.canvas.tools;
 
 describe('isCanvasTool', () => {
   describe('GIVEN a canvas tool id', () => {
@@ -29,24 +27,24 @@ describe('buildCanvasTools', () => {
   describe('GIVEN the english tool translations', () => {
     describe('WHEN the tools are built', () => {
       test('THEN every canvas tool id has its own entry', () => {
-        const tools = buildCanvasTools(TOOLS_TRANSLATIONS);
+        const tools = buildCanvasTools(TRANSLATIONS.platform.canvas.tools);
 
         expect(Object.keys(tools).sort()).toEqual(Object.values(ECanvasTool).sort());
       });
 
       test('THEN entries carry their id, shortcut and translated label', () => {
-        const tools = buildCanvasTools(TOOLS_TRANSLATIONS);
+        const tools = buildCanvasTools(TRANSLATIONS.platform.canvas.tools);
 
         expect(tools[ECanvasTool.AddNode]).toMatchObject({
           id: ECanvasTool.AddNode,
           shortcut: 'N',
-          label: TOOLS_TRANSLATIONS.items.addNode.label,
-          description: TOOLS_TRANSLATIONS.items.addNode.description,
+          label: TRANSLATIONS.platform.canvas.tools.items.addNode.label,
+          description: TRANSLATIONS.platform.canvas.tools.items.addNode.description,
         });
       });
 
       test('THEN history tools are marked as actions', () => {
-        const tools = buildCanvasTools(TOOLS_TRANSLATIONS);
+        const tools = buildCanvasTools(TRANSLATIONS.platform.canvas.tools);
 
         expect(tools[ECanvasTool.Undo]).toMatchObject({ kind: 'action', shortcut: '⌘Z' });
         expect(tools[ECanvasTool.Redo]).toMatchObject({ kind: 'action', shortcut: '⌘⇧Z' });
@@ -59,7 +57,7 @@ describe('buildCanvasToolGroups', () => {
   describe('GIVEN the english tool translations', () => {
     describe('WHEN the groups are built', () => {
       test('THEN every group holds its tools in canonical order', () => {
-        const groups = buildCanvasToolGroups(TOOLS_TRANSLATIONS).map((group) => ({
+        const groups = buildCanvasToolGroups(TRANSLATIONS.platform.canvas.tools).map((group) => ({
           id: group.id,
           tools: group.tools.map((tool) => tool.id),
         }));

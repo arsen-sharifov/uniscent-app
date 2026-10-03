@@ -1,12 +1,12 @@
 'use client';
 
 import { clsx } from 'clsx';
-import type { ReactNode } from 'react';
+import type { LucideIcon } from 'lucide-react';
 
 import type { TMenuItemAccent } from '@interfaces';
 
 interface IMenuItemProps {
-  icon: ReactNode;
+  icon: LucideIcon;
   label: string;
   shortcut?: string;
   onClick: () => void;
@@ -16,7 +16,7 @@ interface IMenuItemProps {
 }
 
 export const MenuItem = ({
-  icon,
+  icon: Icon,
   label,
   shortcut,
   onClick,
@@ -28,7 +28,6 @@ export const MenuItem = ({
     type="button"
     role="menuitem"
     tabIndex={-1}
-    disabled={disabled}
     aria-disabled={disabled}
     title={disabled ? hint : undefined}
     onClick={disabled ? undefined : onClick}
@@ -49,7 +48,9 @@ export const MenuItem = ({
         'text-[color:var(--text)] hover:bg-[color:var(--accent-soft)] focus-visible:bg-[color:var(--accent-soft)]',
     )}
   >
-    <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center">{icon}</span>
+    <span className="flex h-3.5 w-3.5 shrink-0 items-center justify-center">
+      <Icon className="h-3 w-3" strokeWidth={2.25} />
+    </span>
 
     <span className="flex min-w-0 flex-1 flex-col">
       <span className="truncate">{label}</span>
@@ -67,5 +68,3 @@ export const MenuItem = ({
     )}
   </button>
 );
-
-export const MenuDivider = () => <div className="-mx-1 my-1 h-px bg-[color:var(--border)]" aria-hidden />;

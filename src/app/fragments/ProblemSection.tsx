@@ -22,26 +22,22 @@ export const ProblemSection = () => {
           <ThreadStream />
 
           <div className="flex flex-col gap-4">
-            {HERO_EXHIBITS.map((exhibitId) => {
-              const content = t.landing.problem.exhibits[exhibitId];
-
-              return (
-                <TiltPanel key={exhibitId}>
-                  <article className={clsx(LANDING_SURFACE_CLASSES.card, 'relative flex h-full flex-col p-5')}>
-                    <p className="font-grotesk text-lg leading-snug font-semibold tracking-tight text-[color:var(--hero-card-text)]">
-                      {content.claim}
-                    </p>
-                    <p className="mt-2 flex-1 font-grotesk text-[13.5px] leading-snug text-[color:var(--hero-card-muted)]">
-                      {content.detail}
-                    </p>
-                    <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded border border-[color:var(--hero-refuted)]/35 bg-[color:var(--hero-refuted)]/8 px-2 py-1 font-mono-ui text-[9px] font-bold tracking-[0.14em] text-[color:var(--hero-refuted)] uppercase">
-                      <XCircle aria-hidden className="h-2.5 w-2.5 shrink-0" strokeWidth={2.5} />
-                      {content.verdict} · {content.medium}
-                    </span>
-                  </article>
-                </TiltPanel>
-              );
-            })}
+            {HERO_EXHIBITS.map((exhibitId) => (
+              <TiltPanel key={exhibitId}>
+                <article className={clsx(LANDING_SURFACE_CLASSES.card, 'relative flex h-full flex-col p-5')}>
+                  <p className="font-grotesk text-lg leading-snug font-semibold tracking-tight text-[color:var(--hero-card-text)]">
+                    {t.landing.problem.exhibits[exhibitId].claim}
+                  </p>
+                  <p className="mt-2 flex-1 font-grotesk text-[13.5px] leading-snug text-[color:var(--hero-card-muted)]">
+                    {t.landing.problem.exhibits[exhibitId].detail}
+                  </p>
+                  <span className="mt-3 inline-flex w-fit items-center gap-1.5 rounded border border-[color:var(--hero-refuted)]/35 bg-[color:var(--hero-refuted)]/8 px-2 py-1 font-mono-ui text-[9px] font-bold tracking-[0.14em] text-[color:var(--hero-refuted)] uppercase">
+                    <XCircle aria-hidden className="h-2.5 w-2.5 shrink-0" strokeWidth={2.5} />
+                    {t.landing.problem.exhibits[exhibitId].verdict} · {t.landing.problem.exhibits[exhibitId].medium}
+                  </span>
+                </article>
+              </TiltPanel>
+            ))}
           </div>
         </div>
       </div>

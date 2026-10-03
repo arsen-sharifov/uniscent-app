@@ -4,14 +4,16 @@ import {
   createWorkspace,
   deleteWorkspace,
   deleteWorkspaces,
+  getMyOwnedSharedWorkspaces,
   getMyWorkspacePermissions,
   getMyWorkspaces,
   getWorkspace,
+  IDS_PER_REQUEST,
   moveWorkspace,
   updateWorkspaceName,
 } from '@api/client';
 import { myWorkspaceRow, workspaceAccessRow, workspaceRow } from '@mocks/rows';
-import { primeSupabase } from '@mocks/supabase';
+import { NO_ROW_ERROR, primeSupabase } from '@mocks/supabase';
 
 vi.mock('@/lib/supabase', () => import('@mocks/supabase'));
 
@@ -52,6 +54,51 @@ describe('getMyWorkspaces', () => {
         vi.mocked(client.rpc).mockResolvedValue({ data: null, error: new Error('db down') });
 
         await expect(getMyWorkspaces()).rejects.toThrow('db down');
+      });
+    });
+  });
+});
+
+describe('getMyOwnedSharedWorkspaces', () => {
+  describe('GIVEN owned workspaces that other members use', () => {
+    describe('WHEN the shared workspaces are fetched', () => {
+      test('THEN their ids and names come back in the rpc order', async () => {
+        const { client } = primeSupabase([]);
+        vi.mocked(client.rpc).mockResolvedValue({
+          data: [
+            { id: 'ws-1', name: 'Alpha' },
+            { id: 'ws-2', name: 'Beta' },
+          ],
+          error: null,
+        });
+
+        await expect(getMyOwnedSharedWorkspaces()).resolves.toEqual([
+          { id: 'ws-1', name: 'Alpha' },
+          { id: 'ws-2', name: 'Beta' },
+        ]);
+        expect(client.rpc).toHaveBeenCalledExactlyOnceWith('get_my_owned_shared_workspaces');
+      });
+    });
+  });
+
+  describe('GIVEN the rpc returns null data', () => {
+    describe('WHEN the shared workspaces are fetched', () => {
+      test('THEN an empty list is returned', async () => {
+        const { client } = primeSupabase([]);
+        vi.mocked(client.rpc).mockResolvedValue({ data: null, error: null });
+
+        await expect(getMyOwnedSharedWorkspaces()).resolves.toEqual([]);
+      });
+    });
+  });
+
+  describe('GIVEN a failing rpc', () => {
+    describe('WHEN the shared workspaces are fetched', () => {
+      test('THEN the error propagates', async () => {
+        const { client } = primeSupabase([]);
+        vi.mocked(client.rpc).mockResolvedValue({ data: null, error: new Error('db down') });
+
+        await expect(getMyOwnedSharedWorkspaces()).rejects.toThrow('db down');
       });
     });
   });
@@ -157,10 +204,25 @@ describe('createWorkspace', () => {
 
   describe('GIVEN no signed-in user', () => {
     describe('WHEN a workspace is created', () => {
-      test('THEN nothing is written and nothing is returned', async () => {
+      test('THEN the auth requirement error is thrown and nothing is written', async () => {
         const { client } = primeSupabase([{ data: null }], { user: null });
 
-        await expect(createWorkspace('Workspace')).resolves.toBeNull();
+        await expect(createWorkspace('Workspace')).rejects.toThrow('Authenticated user required');
+        expect(client.from).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('GIVEN an auth check that fails', () => {
+    describe('WHEN a workspace is created', () => {
+      test('THEN the auth error propagates instead of a silent no-op', async () => {
+        const { client } = primeSupabase([{ data: null }]);
+        vi.mocked(client.auth.getUser).mockResolvedValue({
+          data: { user: null },
+          error: new Error('auth down'),
+        } as never);
+
+        await expect(createWorkspace('Workspace')).rejects.toThrow('auth down');
         expect(client.from).not.toHaveBeenCalled();
       });
     });
@@ -211,6 +273,17 @@ describe('updateWorkspaceName', () => {
       });
     });
   });
+
+  describe('GIVEN a rename the database applies to no row', () => {
+    describe('WHEN the name is updated', () => {
+      test('THEN the missing row is reported instead of a silent success', async () => {
+        const { queries } = primeSupabase([{ data: [] }]);
+        vi.spyOn(queries[0]!, 'single').mockResolvedValue({ data: null, error: NO_ROW_ERROR, count: null });
+
+        await expect(updateWorkspaceName('ws-1', 'Renamed')).rejects.toMatchObject({ code: 'PGRST116' });
+      });
+    });
+  });
 });
 
 describe('deleteWorkspace', () => {
@@ -254,6 +327,23 @@ describe('deleteWorkspaces', () => {
     });
   });
 
+  describe('GIVEN more workspace ids than one request may carry', () => {
+    describe('WHEN the workspaces are deleted', () => {
+      test('THEN the ids are split into bounded delete requests', async () => {
+        const workspaceIds = Array.from({ length: IDS_PER_REQUEST + 1 }, (_, index) => `ws-${index}`);
+        const { queries } = primeSupabase([{ data: null }, { data: null }]);
+        const filters = [vi.spyOn(queries[0]!, 'in'), vi.spyOn(queries[1]!, 'in')];
+
+        await deleteWorkspaces(workspaceIds);
+
+        expect(filters.map((filter) => filter.mock.calls)).toEqual([
+          [['id', workspaceIds.slice(0, IDS_PER_REQUEST)]],
+          [['id', [`ws-${IDS_PER_REQUEST}`]]],
+        ]);
+      });
+    });
+  });
+
   describe('GIVEN a failing delete', () => {
     describe('WHEN the workspaces are deleted', () => {
       test('THEN the error propagates', async () => {
@@ -287,6 +377,17 @@ describe('moveWorkspace', () => {
         primeSupabase([{ error: new Error('db down') }]);
 
         await expect(moveWorkspace('ws-1', 3)).rejects.toThrow('db down');
+      });
+    });
+  });
+
+  describe('GIVEN a move the database applies to no row', () => {
+    describe('WHEN the workspace is moved', () => {
+      test('THEN the missing row is reported instead of a silent success', async () => {
+        const { queries } = primeSupabase([{ data: [] }]);
+        vi.spyOn(queries[0]!, 'single').mockResolvedValue({ data: null, error: NO_ROW_ERROR, count: null });
+
+        await expect(moveWorkspace('ws-1', 2)).rejects.toMatchObject({ code: 'PGRST116' });
       });
     });
   });

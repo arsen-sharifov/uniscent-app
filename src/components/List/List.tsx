@@ -11,7 +11,7 @@ interface IListProps {
 
 export const List = ({ trigger, children, defaultOpen = false }: IListProps) => {
   const [open, setOpen] = useState(defaultOpen);
-  const toggle = () => setOpen((prev) => !prev);
+  const toggle = () => setOpen((previous) => !previous);
 
   return (
     <div>
@@ -22,7 +22,9 @@ export const List = ({ trigger, children, defaultOpen = false }: IListProps) => 
           open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
         )}
       >
-        <div className="overflow-hidden">{children}</div>
+        <div inert={!open} className="overflow-hidden">
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -1,3 +1,5 @@
+import type { KeyboardEvent, RefObject } from 'react';
+
 export type TNavItemType = 'folder' | 'thread';
 
 export type TWorkspaceDropZone = 'before' | 'after';
@@ -6,11 +8,23 @@ export type TSingleDeleteTitleKey = 'deleteWorkspaceTitle' | 'deleteFolderTitle'
 
 export type TItemActionTone = 'accent' | 'neutral' | 'danger';
 
+export type TItemRowSize = 'regular' | 'compact';
+
+export interface IItemRowInsets {
+  row: string;
+  grip: string;
+}
+
+export interface IRenamableItem {
+  id: string;
+  name: string;
+}
+
 export interface IThreadItem {
   type: 'thread';
   id: string;
   name: string;
-  answered?: boolean;
+  resolved?: boolean;
 }
 
 export interface IFolderItem {
@@ -39,13 +53,46 @@ export interface IFlattenedItem {
   index: number;
   collapsed: boolean;
   childCount: number;
-  answered?: boolean;
+  resolved?: boolean;
 }
 
 export interface IProjection {
   depth: number;
   parentId: string | null;
   zone: TDropZone;
+}
+
+export interface IUseDndTreeOptions {
+  items: TNavItem[];
+  onMoveItem?: (id: string, parentId: string | null, position: number) => void;
+  onBulkMove?: (ids: Set<string>, parentId: string | null, position: number) => void;
+  editingId?: string | null;
+  selectedIds?: Set<string>;
+}
+
+export interface IUseDragSelectOptions {
+  containerRef: RefObject<HTMLElement | null>;
+  onSelectionChange: (ids: Set<string>) => void;
+  enabled?: boolean;
+}
+
+export interface IUseInlineEditOptions {
+  items: IRenamableItem[];
+  autoEditId?: string | null;
+  onAutoEditHandled?: () => void;
+  onRename?: (id: string, name: string) => void;
+  findItem?: (id: string) => IRenamableItem | null | undefined;
+}
+
+export interface IInlineEdit {
+  editingId: string | null;
+  editValue: string;
+  setEditValue: (value: string) => void;
+  inputRef: (element: HTMLInputElement | null) => void;
+  startEditing: (id: string, name: string) => void;
+  commitRename: () => void;
+  cancelEditing: () => void;
+  handleKeyDown: (event: KeyboardEvent) => void;
 }
 
 export type TDeleteTarget =
@@ -59,6 +106,5 @@ export type TDeleteTarget =
       mode: 'bulk';
       scope: 'workspace' | 'navItem';
       ids: Set<string>;
-      count: number;
     }
   | null;

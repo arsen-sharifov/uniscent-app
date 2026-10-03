@@ -7,20 +7,21 @@
       "password": "Contraseña",
       "submit": "Iniciar sesión",
       "submitting": "Iniciando sesión…",
-      "emailSent": "Revisa tu correo para confirmar tu cuenta.",
-      "noAccount": "¿No tienes cuenta?",
-      "signUpLink": "Regístrate"
+      "emailSent": "Revise su correo para confirmar su cuenta.",
+      "invalidLink": "Este enlace no es válido o ha caducado. Intente iniciar sesión o pida un enlace nuevo.",
+      "noAccount": "¿No tiene cuenta?",
+      "signUpLink": "Regístrese"
     },
     "signUp": {
       "heading": "Crear cuenta",
-      "subtitle": "Completa tus datos",
+      "subtitle": "Complete sus datos",
       "steps": {
         "plan": "Plan",
         "account": "Cuenta"
       },
       "planStep": {
-        "heading": "Elige tu plan",
-        "subtitle": "Selecciona cómo quieres comenzar",
+        "heading": "Elija su plan",
+        "subtitle": "Seleccione cómo quiere comenzar",
         "available": "Disponible",
         "betaPlan": "Beta",
         "free": "Gratis",
@@ -33,61 +34,75 @@
       "accountStep": {
         "name": "Nombre completo",
         "inviteCode": "Código de invitación",
-        "inviteCodeTooltip": "Requerido durante la beta cerrada. Pide tu código al equipo.",
-        "inviteCodePlaceholder": "Introduce tu código de invitación",
+        "inviteCodeTooltip": "Requerido durante la beta cerrada. Pida su código al equipo.",
+        "inviteCodePlaceholder": "Introduzca su código de invitación",
         "email": "Correo",
         "password": "Contraseña",
         "back": "Atrás",
         "submit": "Registrarse",
         "submitting": "Creando cuenta…",
-        "emailLocked": "Se te invitó con este correo",
+        "emailLocked": "Se le invitó con este correo",
         "join": "Unirse",
-        "joining": "Uniéndote…"
+        "joining": "Uniéndose…"
       },
-      "hasAccount": "¿Ya tienes cuenta?",
+      "hasAccount": "¿Ya tiene cuenta?",
       "signInLink": "Iniciar sesión",
-      "inviteHeading": "Configura tu cuenta",
-      "inviteSubtitle": "Te unes a tu equipo en Uniscept"
+      "inviteHeading": "Configure su cuenta",
+      "inviteSubtitle": "Se une a su equipo en Uniscept"
+    },
+    "join": {
+      "heading": "Le han invitado",
+      "subtitle": "Acepte la invitación para configurar su cuenta en Uniscept.",
+      "accept": "Aceptar invitación",
+      "accepting": "Aceptando…",
+      "signedInAs": "Ha iniciado sesión como {email}. Para aceptar la invitación, primero se cerrará la sesión de esa cuenta.",
+      "switchAccount": "Cerrar sesión y aceptar",
+      "stay": "Mantener la sesión"
     },
     "placeholders": {
       "name": "Juan Pérez",
-      "email": "tu@ejemplo.com",
+      "email": "name@example.com",
       "password": "••••••••"
     },
     "errors": {
-      "invalidInviteCode": "Código de invitación inválido"
+      "invalidInviteCode": "Código de invitación inválido",
+      "signInFailed": "No se pudo iniciar sesión",
+      "signUpFailed": "No se pudo crear la cuenta",
+      "joinFailed": "No se pudo configurar la cuenta"
     },
     "confirmed": {
       "heading": "Correo confirmado",
-      "message": "Tu correo se ha verificado correctamente. Puedes cerrar esta pestaña y volver a la anterior.",
+      "message": "Su correo se ha verificado correctamente. Puede cerrar esta pestaña y volver a la anterior.",
       "close": "Cerrar pestaña"
     },
     "aside": {
-      "quote": "Construye conocimiento. No caos.",
+      "quote": "Construya conocimiento. No caos.",
       "tagline": "Razonamiento estructurado para equipos que entregan."
     }
   },
   "common": {
-    "loading": "Cargando",
     "close": "Cerrar",
+    "moreInfo": "Más información",
+    "completed": "Completado",
     "userAvatar": "Usuario",
     "notifications": "Notificaciones",
     "errors": {
-      "network": "Problema de red. Comprueba tu conexión e inténtalo de nuevo.",
-      "permission": "No tienes permiso para hacer eso.",
+      "network": "Problema de red. Compruebe su conexión e inténtelo de nuevo.",
+      "permission": "No tiene permiso para hacer eso.",
       "notFound": "Ya no pudimos encontrar eso.",
-      "rateLimit": "Demasiados intentos. Espera un momento.",
-      "validation": "Algunos datos parecen no válidos. Revísalos e inténtalo de nuevo.",
-      "auth": "Tu sesión expiró. Inicia sesión de nuevo.",
-      "unknown": "Algo salió mal. Inténtalo de nuevo.",
+      "rateLimit": "Demasiados intentos. Espere un momento.",
+      "limitReached": "Límite alcanzado. Elimine algunos elementos e inténtelo de nuevo.",
+      "validation": "Algunos datos parecen no válidos. Revíselos e inténtelo de nuevo.",
+      "auth": "Su sesión expiró. Inicie sesión de nuevo.",
+      "unknown": "Algo salió mal. Inténtelo de nuevo.",
       "invalidCredentials": "Correo o contraseña incorrectos.",
-      "emailNotConfirmed": "Confirma tu correo antes de iniciar sesión.",
+      "emailNotConfirmed": "Confirme su correo antes de iniciar sesión.",
       "emailTaken": "Ya existe una cuenta con este correo.",
       "invalidEmail": "Ese correo electrónico no parece válido.",
-      "weakPassword": "La contraseña es demasiado débil. Usa al menos 6 caracteres.",
-      "samePassword": "La nueva contraseña debe ser diferente de la actual."
+      "weakPassword": "La contraseña es demasiado débil. Use al menos 8 caracteres.",
+      "samePassword": "La nueva contraseña debe ser diferente de la actual.",
+      "ownsSharedWorkspaces": "Transfiera o elimine los espacios que comparte con otras personas antes de eliminar su cuenta."
     },
-    "noPermission": "No tienes permiso",
     "errorTitles": {
       "createFailed": "No se pudo crear",
       "renameFailed": "No se pudo renombrar",
@@ -100,11 +115,14 @@
     },
     "errorPages": {
       "notFoundTitle": "Página no encontrada",
-      "notFoundHint": "La página que buscas no existe o fue movida.",
+      "notFoundHint": "La página que busca no existe o fue movida.",
       "backHome": "Volver al espacio",
       "errorTitle": "Algo se rompió",
-      "errorHint": "Ocurrió un error inesperado. Puedes intentarlo de nuevo.",
+      "errorHint": "Ocurrió un error inesperado. Puede intentarlo de nuevo.",
       "retry": "Intentar de nuevo"
+    },
+    "metadata": {
+      "description": "Una plataforma para debates estructurados y mapas de argumentos"
     }
   },
   "platform": {
@@ -113,15 +131,15 @@
         "title": "Invitaciones",
         "accept": "Aceptar",
         "decline": "Rechazar",
-        "accepted": "Te uniste al espacio de trabajo",
+        "accepted": "Se unió al espacio de trabajo",
         "declined": "Invitación rechazada",
         "acceptFailed": "No se pudo aceptar la invitación",
         "declineFailed": "No se pudo rechazar la invitación"
       },
-      "workspaceSettings": "Configuración del espacio de trabajo",
+      "workspaceSettings": "Ajustes del espacio de trabajo",
       "workspaces": "Espacios",
       "noWorkspaceSelected": "Ningún espacio seleccionado",
-      "noWorkspaces": "No hay espacios de trabajo. Crea uno para empezar.",
+      "noWorkspaces": "No hay espacios de trabajo. Cree uno para empezar.",
       "newWorkspace": "Nuevo espacio",
       "workspaceCreated": "Espacio creado",
       "threadCreated": "Hilo creado",
@@ -134,45 +152,52 @@
       "workspaceDeleted": "Espacio eliminado",
       "itemsDeleted": "Elementos eliminados",
       "workspacesDeleted": "Espacios eliminados",
-      "workspacesDeleteSkipped": "Algunos espacios no se eliminaron porque no los administras",
+      "workspacesDeleteSkipped": "Algunos espacios no se eliminaron porque no los administra",
       "structure": "Estructura",
       "newThread": "Nuevo hilo",
       "newFolder": "Nueva carpeta",
+      "defaultNames": {
+        "workspace": "Nuevo espacio",
+        "folder": "Nueva carpeta",
+        "thread": "Nuevo hilo"
+      },
       "signOut": "Cerrar sesión",
       "deleteWorkspaceTitle": "Eliminar espacio",
       "deleteFolderTitle": "Eliminar carpeta",
       "deleteThreadTitle": "Eliminar hilo",
-      "deleteConfirmPrefix": "¿Seguro que quieres eliminar",
+      "deleteConfirmPrefix": "¿Seguro que quiere eliminar",
       "deleteConfirmSuffix": "? Esta acción no se puede deshacer.",
       "rename": "Renombrar",
       "delete": "Eliminar",
       "cancel": "Cancelar",
       "move": "Mover",
       "treeAriaLabel": "Navegación",
-      "dragToReorder": "Arrastra para reordenar",
+      "dragToReorder": "Arrastre para reordenar",
       "resolved": "Resuelto",
-      "itemsSelected": "elementos seleccionados",
-      "workspacesSelected": "espacios seleccionados",
+      "itemsSelected": "{count, plural, one {elemento seleccionado} other {elementos seleccionados}}",
+      "workspacesSelected": "{count, plural, one {espacio seleccionado} other {espacios seleccionados}}",
       "moveToFolder": "Mover a carpeta",
+      "structureLocked": "Requiere el permiso «Gestionar hilos y carpetas»",
       "rootLevel": "Nivel raíz",
       "bulkDeleteTitle": "Eliminar elementos",
-      "bulkDeleteConfirm": "¿Seguro que quieres eliminar estos elementos? Esta acción no se puede deshacer.",
+      "bulkDeleteConfirm": "¿Seguro que quiere eliminar estos elementos? Esta acción no se puede deshacer.",
       "searchPlaceholder": "Buscar…",
+      "clearSearch": "Borrar la búsqueda",
       "noSearchResults": "Sin resultados",
       "emptyStructureTitle": "Aún no hay nada aquí",
-      "emptyStructureHint": "Crea un hilo o una carpeta para empezar a organizar tu trabajo.",
+      "emptyStructureHint": "Cree un hilo o una carpeta para empezar a organizar su trabajo.",
       "newWorkspaceTitle": "Sin espacio de trabajo",
-      "newWorkspaceHint": "Los espacios de trabajo te ayudan a separar distintos proyectos.",
-      "noWorkspaceTitle": "Elige un espacio",
-      "noWorkspaceHintCta": "Crea o selecciona un espacio para empezar."
+      "newWorkspaceHint": "Los espacios de trabajo le ayudan a separar distintos proyectos.",
+      "noWorkspaceTitle": "Elija un espacio",
+      "noWorkspaceHintCta": "Cree o seleccione un espacio para empezar."
     },
     "canvas": {
       "export": {
         "label": "Exportar lienzo",
         "description": "Todo el grafo, con el tema actual y una pequeña marca de Uniscept.",
         "loading": "Preparando exportación…",
-        "unavailable": "Abre un lienzo para exportarlo.",
-        "tooLarge": "Este grafo es demasiado grande para una imagen nítida. Elige SVG para exportarlo a cualquier tamaño.",
+        "unavailable": "Abra un lienzo para exportarlo.",
+        "tooLarge": "Este grafo es demasiado grande para una imagen nítida. Elija SVG para exportarlo a cualquier tamaño.",
         "formats": {
           "png": "Imagen de alta calidad",
           "jpg": "Archivo de imagen menor",
@@ -183,13 +208,13 @@
         "placeholder": "Buscar nodos…",
         "noResults": "Ningún nodo encontrado",
         "noMatch": "Nada coincide con \"{query}\"",
-        "hint": "Prueba con otra etiqueta o palabra clave.",
+        "hint": "Pruebe con otra etiqueta o palabra clave.",
         "actionLink": "enlazar",
         "actionNavigate": "abrir",
         "actionClose": "cerrar"
       },
       "tools": {
-        "ariaLabel": "Herramientas del canvas",
+        "ariaLabel": "Herramientas del lienzo",
         "groups": {
           "navigate": "Navegar",
           "history": "Historial",
@@ -200,61 +225,61 @@
         "items": {
           "select": {
             "label": "Seleccionar",
-            "description": "Selecciona y arrastra los nodos por el canvas."
+            "description": "Seleccione y arrastre los nodos por el lienzo."
           },
           "pan": {
             "label": "Desplazar",
-            "description": "Mantén pulsado y arrastra para desplazar la vista."
+            "description": "Mantenga pulsado y arrastre para desplazar la vista."
           },
           "zoomIn": {
             "label": "Acercar",
-            "description": "Haz clic en cualquier punto para acercar. Mantén Shift para alejar."
+            "description": "Haga clic en cualquier punto para acercar. Mantenga Shift para alejar."
           },
           "zoomOut": {
             "label": "Alejar",
-            "description": "Haz clic en cualquier punto para alejar. Mantén Shift para acercar."
+            "description": "Haga clic en cualquier punto para alejar. Mantenga Shift para acercar."
           },
           "addNode": {
             "label": "Añadir nodo",
-            "description": "Haz clic en cualquier parte del canvas para colocar un nuevo nodo."
+            "description": "Haga clic en cualquier parte del lienzo para colocar un nuevo nodo."
           },
           "connect": {
             "label": "Conectar",
-            "description": "Haz clic en dos nodos para conectarlos."
+            "description": "Haga clic en dos nodos para conectarlos."
           },
           "delete": {
             "label": "Eliminar",
-            "description": "Haz clic en un nodo o arista para eliminarlo."
+            "description": "Haga clic en un nodo o arista para eliminarlo."
           },
           "validPath": {
             "label": "Marcar válido",
-            "description": "Marca los nodos seleccionados como camino válido."
+            "description": "Marque los nodos seleccionados como camino válido."
           },
           "invalidPath": {
             "label": "Marcar inválido",
-            "description": "Marca los nodos seleccionados como camino inválido."
+            "description": "Marque los nodos seleccionados como camino inválido."
           },
           "answer": {
             "label": "Respuesta",
-            "description": "Marca un nodo como la respuesta final de la discusión."
+            "description": "Marque un nodo como la respuesta final de la discusión."
           },
           "crossReference": {
             "label": "Referencia cruzada",
-            "description": "Coloca una referencia a un nodo de otro canvas."
+            "description": "Coloque una referencia a un nodo de otro lienzo."
           },
           "undo": {
             "label": "Deshacer",
-            "description": "Vuelve atrás en tus cambios."
+            "description": "Vuelva atrás en sus cambios."
           },
           "redo": {
             "label": "Rehacer",
-            "description": "Repite el cambio que acabas de deshacer."
+            "description": "Repita el cambio que acaba de deshacer."
           }
         }
       },
       "loadError": {
-        "title": "Backend del canvas inaccesible",
-        "hint": "No se ha podido conectar con Supabase para cargar este canvas. Comprueba que la instancia local de Supabase esté en ejecución y reintenta.",
+        "title": "No se ha podido cargar este lienzo",
+        "hint": "Compruebe su conexión e inténtelo de nuevo.",
         "retry": "Reintentar"
       },
       "node": {
@@ -271,7 +296,8 @@
         "sendComment": "Enviar comentario",
         "closeComments": "Cerrar",
         "commentsHeader": "Comentarios",
-        "noComments": "Aún no hay comentarios. Empieza la conversación."
+        "noComments": "Aún no hay comentarios. Empiece la conversación.",
+        "labelAriaLabel": "Texto del nodo"
       },
       "question": {
         "badge": "Pregunta",
@@ -304,11 +330,11 @@
         "discardAriaLabel": "Descartar cambios fallidos"
       },
       "context": {
-        "ariaLabel": "Acciones del canvas",
+        "ariaLabel": "Acciones del lienzo",
         "addNode": "Añadir nodo",
         "addReference": "Añadir referencia",
         "deleteEdge": "Eliminar arista",
-        "openReferenced": "Abrir canvas referenciado",
+        "openReferenced": "Abrir lienzo referenciado",
         "deleteReference": "Eliminar referencia",
         "markValid": "Marcar válido",
         "unmarkValid": "Quitar válido",
@@ -319,11 +345,16 @@
         "needsValidParent": "Requiere la pregunta o un paso válido antes",
         "comment": "Comentar",
         "duplicate": "Duplicar",
-        "delete": "Eliminar"
+        "delete": "Eliminar",
+        "deleteNotAllowed": "Solo su autor o el propietario del espacio pueden eliminarlo"
+      },
+      "deleteBlocked": {
+        "foreignNodes": "No se ha eliminado nada. Algunos nodos seleccionados solo los pueden eliminar su autor o el propietario del espacio.",
+        "question": "No se ha eliminado nada. La pregunta no se puede eliminar. Deselecciónela e inténtelo de nuevo."
       },
       "shortcuts": {
         "title": "Atajos de teclado",
-        "subtitle": "Pulsa una tecla para cambiar de herramienta al instante.",
+        "subtitle": "Pulse una tecla para cambiar de herramienta al instante.",
         "footerHint": "Los atajos funcionan incluso con este panel abierto.",
         "closeHint": "cerrar",
         "ariaLabel": "Atajos de teclado",
@@ -333,144 +364,144 @@
     },
     "onboarding": {
       "nodiName": "Nodi",
-      "nodiAlt": "Nodi, tu guía",
+      "nodiAlt": "Nodi, su guía",
       "nodiIntro": "Nodi es un nodo del lienzo que conoce la aplicación a fondo. Se coloca junto a cada tarjeta, y el anillo resaltado muestra dónde hacer clic.",
       "ergoName": "Ergo",
       "ergoAlt": "Ergo, el amigo de Nodi",
       "menuLabel": "Ayuda",
       "menuShortcuts": "Atajos de teclado",
       "menuGuides": "Recorrido y guías",
-      "offerTitle": "¿Quieres un recorrido rápido?",
-      "offerBody": "Construye tu primer lienzo paso a paso: un hilo, una pregunta, unos cuantos nodos y un veredicto. Cada paso lo das tú, y puedes salir en cualquier momento.",
+      "offerTitle": "¿Quiere un recorrido rápido?",
+      "offerBody": "Construya su primer lienzo paso a paso: un hilo, una pregunta, unos cuantos nodos y un veredicto. Cada paso lo da usted, y puede salir en cualquier momento.",
       "offerAccept": "Empezar el recorrido",
       "offerDecline": "Ahora no",
-      "offerLater": "Puedes iniciarlo más tarde desde el menú Ayuda, en Recorrido y guías.",
+      "offerLater": "Puede iniciarlo más tarde desde el menú Ayuda, en Recorrido y guías.",
       "continueHint": {
         "afterTour": {
-          "title": "Sigue desde aquí",
-          "body": "El resto de guías te espera en Recorrido y guías, en este menú Ayuda. Elige cualquiera cuando quieras."
+          "title": "Siga desde aquí",
+          "body": "El resto de guías le espera en Recorrido y guías, en este menú Ayuda. Elija cualquiera cuando quiera."
         },
         "afterDecline": {
-          "title": "El recorrido te espera aquí",
-          "body": "Cuando quieras, abre Recorrido y guías desde este menú Ayuda."
+          "title": "El recorrido le espera aquí",
+          "body": "Cuando quiera, abra Recorrido y guías desde este menú Ayuda."
         },
         "open": "Abrir guías",
         "dismiss": "Entendido"
       },
       "pickerTitle": "Recorrido y guías",
-      "pickerBody": "El recorrido te acompaña por tu primer lienzo. Cada guía que sigue trata una parte de la aplicación, y la mayoría te hace probarla de verdad. Termínalas todas para ganar la insignia Iniciado.",
+      "pickerBody": "El recorrido le acompaña por su primer lienzo. Cada guía que sigue trata una parte de la aplicación, y la mayoría le hace probarla de verdad. Termínelas todas para ganar la insignia Iniciado.",
       "pickerProgress": "{done} de {total} completadas",
-      "pickerLocked": "Termina el primer lienzo para desbloquear esta guía.",
+      "pickerLocked": "Termine el primer lienzo para desbloquear esta guía.",
       "pickerStart": "Empezar",
       "pickerReplay": "Repetir",
       "stepCounter": "paso {index} de {total}",
       "stepNext": "Siguiente",
       "stepDone": "ya hecho",
-      "stepWaiting": "tu turno",
+      "stepWaiting": "su turno",
       "stepLostTarget": "el objetivo no se ve",
-      "blockedTitle": "Cierra esto primero",
-      "blockedBody": "Hay algo abierto encima de este paso. Ciérralo y el recorrido continúa.",
+      "blockedTitle": "Cierre esto primero",
+      "blockedBody": "Hay algo abierto encima de este paso. Ciérrelo y el recorrido continúa.",
       "blockedStatus": "esperando a que se cierre",
       "quit": "Salir del recorrido",
-      "celebrationTitle": "Has terminado todas las guías",
-      "celebrationBody": "Lo has visto todo: cómo construir un lienzo, evaluarlo y enlazar hilos entre sí, y dónde están los ajustes. La insignia Iniciado ya está en tu perfil.",
+      "celebrationTitle": "Ha terminado todas las guías",
+      "celebrationBody": "Lo ha visto todo: cómo construir un lienzo, evaluarlo y enlazar hilos entre sí, y dónde están los ajustes. La insignia Iniciado ya está en su perfil.",
       "celebrationClose": "Volver al trabajo",
       "emptyPlatformTitle": "Ningún hilo abierto",
-      "emptyPlatformBody": "Un hilo contiene una pregunta y el lienzo donde la resuelves. Crea uno nuevo o elige uno de la lista de la izquierda.",
-      "emptyViewerBody": "Un hilo contiene una pregunta y el lienzo donde se resuelve. Elige uno de la lista de la izquierda.",
+      "emptyPlatformBody": "Un hilo contiene una pregunta y el lienzo donde la resuelve. Cree uno nuevo o elija uno de la lista de la izquierda.",
+      "emptyViewerBody": "Un hilo contiene una pregunta y el lienzo donde se resuelve. Elija uno de la lista de la izquierda.",
       "emptyWorkspaceTitle": "Aún no hay espacio",
-      "emptyWorkspaceBody": "Todo está dentro de un espacio de trabajo: hilos, miembros y referencias. Crea el primero para empezar.",
+      "emptyWorkspaceBody": "Todo está dentro de un espacio de trabajo: hilos, miembros y referencias. Cree el primero para empezar.",
       "emptyPlatformAction": "hacer el recorrido",
       "hints": {
-        "needsWorkspace": "Primero necesitas un espacio de trabajo. La guía del primer lienzo empieza creando uno.",
-        "needsCanvas": "Abre un hilo para que su lienzo esté en pantalla.",
-        "needsNode": "Añade al menos un nodo a este lienzo.",
-        "needsBuildRights": "Abre un espacio donde puedas crear hilos, editar lienzos y comentar."
+        "needsWorkspace": "Primero necesita un espacio de trabajo. La guía del primer lienzo empieza creando uno.",
+        "needsCanvas": "Abra un hilo para que su lienzo esté en pantalla.",
+        "needsNode": "Añada al menos un nodo a este lienzo.",
+        "needsBuildRights": "Abra un espacio donde pueda crear hilos, editar lienzos y comentar."
       },
       "guides": {
-        "baseTitle": "Tu primer lienzo",
+        "baseTitle": "Su primer lienzo",
         "baseSummary": "Construir un lienzo completo, de la pregunta a la respuesta.",
         "canvasTitle": "Trabajar en un lienzo",
         "canvasSummary": "Herramientas, comentarios, referencias y exportación.",
         "workspaceTitle": "Espacios y estructura",
-        "workspaceSummary": "Organizar tus hilos e invitar a personas.",
+        "workspaceSummary": "Organizar sus hilos e invitar a personas.",
         "settingsTitle": "Ajustes",
-        "settingsSummary": "Recorrer cada sección y hacer tuya la aplicación.",
+        "settingsSummary": "Recorrer cada sección y hacer suya la aplicación.",
         "exampleTitle": "Ver un ejemplo",
         "exampleSummary": "Nodi y Ergo eligen una cafetera para la oficina."
       },
       "steps": {
         "baseIntro": {
           "title": "Qué es un lienzo",
-          "body": "Un hilo se construye alrededor de una sola pregunta, y su lienzo es donde la resuelves: los nodos contienen afirmaciones, los enlaces muestran qué se deduce de qué, y los veredictos marcan qué caminos se sostienen. Construyamos uno juntos."
+          "body": "Un hilo se construye alrededor de una sola pregunta, y su lienzo es donde la resuelve: los nodos contienen afirmaciones, los enlaces muestran qué se deduce de qué, y los veredictos marcan qué caminos se sostienen. Construyamos uno juntos."
         },
         "baseWorkspace": {
-          "title": "Crea un espacio de trabajo",
-          "body": "Un espacio contiene tus hilos, miembros y referencias. Nada sale de él. Crea el primero."
+          "title": "Cree un espacio de trabajo",
+          "body": "Un espacio contiene sus hilos, miembros y referencias. Nada sale de él. Cree el primero."
         },
         "baseOwnWorkspace": {
-          "title": "Crea tu propio espacio",
-          "body": "Tu rol en este espacio no te permite construir, así que el lienzo irá a un espacio tuyo. Abre el selector y crea un espacio nuevo."
+          "title": "Cree su propio espacio",
+          "body": "Su rol en este espacio no le permite construir, así que el lienzo irá a un espacio propio. Abra el selector y cree un espacio nuevo."
         },
         "baseThread": {
-          "title": "Crea un hilo",
-          "body": "Un hilo contiene una pregunta y su lienzo. Usa el botón de la barra lateral."
+          "title": "Cree un hilo",
+          "body": "Un hilo contiene una pregunta y su lienzo. Use el botón de la barra lateral."
         },
         "baseQuestion": {
-          "title": "Escribe la pregunta",
-          "body": "El nodo de la pregunta ya está en el lienzo. Haz clic en él, escribe la pregunta que de verdad quieres responder y pulsa Intro."
+          "title": "Escriba la pregunta",
+          "body": "El nodo de la pregunta ya está en el lienzo. Haga clic en él, escriba la pregunta que de verdad quiere responder y pulse Intro."
         },
         "baseArgue": {
           "title": "Cómo se construye un argumento",
           "body": "Cada afirmación se conecta a la pregunta con un enlace. Un nodo que no está conectado a nada no influye en el resultado."
         },
         "baseNode": {
-          "title": "Añade tu primera afirmación",
-          "body": "Elige la herramienta Añadir nodo y haz clic en un lugar vacío. Un nodo contiene una sola idea: una afirmación, una premisa o una objeción."
+          "title": "Añada su primera afirmación",
+          "body": "Elija la herramienta Añadir nodo y haga clic en un lugar vacío. Un nodo contiene una sola idea: una afirmación, una premisa o una objeción."
         },
         "baseNodeText": {
-          "title": "Escribe la afirmación",
-          "body": "Cambia a la herramienta Seleccionar (tecla V), haz doble clic en tu nodo nuevo, sustituye el texto provisional por tu afirmación y pulsa Intro."
+          "title": "Escriba la afirmación",
+          "body": "Cambie a la herramienta Seleccionar (tecla V), haga doble clic en su nodo nuevo, sustituya el texto provisional por su afirmación y pulse Intro."
         },
         "baseConnect": {
-          "title": "Enlázalo con la pregunta",
-          "body": "Elige la herramienta Conectar, haz clic en la pregunta y luego en tu nodo. La flecha muestra qué se deduce de qué."
+          "title": "Enlácelo con la pregunta",
+          "body": "Elija la herramienta Conectar, haga clic en la pregunta y luego en su nodo. La flecha muestra qué se deduce de qué."
         },
         "baseDirection": {
           "title": "La dirección importa",
-          "body": "Un enlace va de un nodo a lo que se construye sobre él: de la pregunta a sus respuestas, de una afirmación a lo que se deduce de ella. Rechaza un nodo, y todo lo que descansa sobre él queda en duda."
+          "body": "Un enlace va de un nodo a lo que se construye sobre él: de la pregunta a sus respuestas, de una afirmación a lo que se deduce de ella. Rechace un nodo, y todo lo que descansa sobre él queda en duda."
         },
         "baseObjection": {
-          "title": "Añade una objeción",
-          "body": "Añade un segundo nodo que argumente contra la primera afirmación y escríbelo igual. Un lienzo con un solo lado no demuestra nada."
+          "title": "Añada una objeción",
+          "body": "Añada un segundo nodo que argumente contra la primera afirmación y escríbalo igual. Un lienzo con un solo lado no demuestra nada."
         },
         "baseSecondLink": {
-          "title": "Enlázalo también",
+          "title": "Enlácelo también",
           "body": "Igual que antes: la herramienta Conectar, la pregunta y luego el nodo nuevo. Ahora de la pregunta salen dos ramas que compiten."
         },
         "baseValid": {
-          "title": "Marca la rama que se sostiene",
-          "body": "Elige la herramienta Marcar válido y haz clic en la afirmación que crees. Se ilumina todo el camino al que pertenece."
+          "title": "Marque la rama que se sostiene",
+          "body": "Elija la herramienta Marcar válido y haga clic en la afirmación que cree. Se ilumina todo el camino al que pertenece."
         },
         "baseInvalid": {
-          "title": "Marca la que no se sostiene",
-          "body": "Elige la herramienta Marcar inválido y haz clic en la otra rama. Se queda en el lienzo, marcada como rechazada."
+          "title": "Marque la que no se sostiene",
+          "body": "Elija la herramienta Marcar inválido y haga clic en la otra rama. Se queda en el lienzo, marcada como rechazada."
         },
         "baseVerdict": {
           "title": "Nada se borra",
-          "body": "Lo válido, lo inválido y lo no decidido quedan uno junto a otro. Meses después sigues viendo no solo la respuesta, sino también cada intento que no funcionó."
+          "body": "Lo válido, lo inválido y lo no decidido quedan uno junto a otro. Meses después sigue viendo no solo la respuesta, sino también cada intento que no funcionó."
         },
         "baseAnswerTool": {
-          "title": "Elige la herramienta Respuesta",
+          "title": "Elija la herramienta Respuesta",
           "body": "Un veredicto dice que un camino se sostiene. La respuesta dice qué nodo cierra la pregunta. Son cosas distintas, y la respuesta tiene que estar enlazada con la pregunta directamente o a través de un nodo válido."
         },
         "baseAnswer": {
-          "title": "Marca la respuesta",
-          "body": "Haz clic en un nodo de un camino válido. Desde ahora el hilo cuenta como resuelto. Más tarde puedes mover la respuesta a otro nodo."
+          "title": "Marque la respuesta",
+          "body": "Haga clic en un nodo de un camino válido. Desde ahora el hilo cuenta como resuelto. Más tarde puede mover la respuesta a otro nodo."
         },
         "baseResolvedMark": {
           "title": "Los hilos resueltos llevan una marca",
-          "body": "Mira la barra lateral: junto a tu hilo ha aparecido una marca. Cada hilo resuelto recibe una, así que las preguntas abiertas se ven de un vistazo."
+          "body": "Mire la barra lateral: junto a su hilo ha aparecido una marca. Cada hilo resuelto recibe una, así que las preguntas abiertas se ven de un vistazo."
         },
         "baseResolved": {
           "title": "Ese es todo el ciclo",
@@ -481,56 +512,56 @@
           "body": "Las carpetas y el anidamiento mantienen legible una lista larga. No cambian nada en el lienzo: un hilo funciona igual esté donde esté."
         },
         "structureFolder": {
-          "title": "Crea una carpeta",
+          "title": "Cree una carpeta",
           "body": "Las carpetas son opcionales. Agrupan hilos y nada más."
         },
         "structureNest": {
-          "title": "Mete un hilo dentro",
-          "body": "Crea un hilo directamente en la carpeta o arrastra uno existente hasta ella."
+          "title": "Meta un hilo dentro",
+          "body": "Cree un hilo directamente en la carpeta o arrastre uno existente hasta ella."
         },
         "structureSearch": {
-          "title": "Busca cuando la lista crezca",
-          "body": "El cuadro de búsqueda filtra todo el árbol por nombre, carpetas incluidas. Es el camino más rápido a un hilo que recuerdas a medias."
+          "title": "Busque cuando la lista crezca",
+          "body": "El cuadro de búsqueda filtra todo el árbol por nombre, carpetas incluidas. Es el camino más rápido a un hilo que recuerda a medias."
         },
         "structureMove": {
-          "title": "Mueve las cosas cuando quieras",
-          "body": "Arrastra hilos y carpetas para reordenarlos o reubicarlos. El lienzo, los comentarios y las referencias siguen igual."
+          "title": "Mueva las cosas cuando quiera",
+          "body": "Arrastre hilos y carpetas para reordenarlos o reubicarlos. El lienzo, los comentarios y las referencias siguen igual."
         },
         "referencesWhat": {
           "title": "Qué es una referencia",
           "body": "A veces un hilo se apoya en una conclusión a la que ya se llegó en otro. Una referencia trae ese nodo como una cita de solo lectura en lugar de una copia, así el original sigue siendo la única fuente."
         },
         "referencesThread": {
-          "title": "Crea un segundo hilo",
-          "body": "Una referencia necesita un nodo en otro lienzo, y ningún otro lienzo de este espacio tiene nodos todavía. Crea un hilo nuevo desde la barra lateral: el recorrido continúa allí, y harás referencia a un nodo de este lienzo."
+          "title": "Cree un segundo hilo",
+          "body": "Una referencia necesita un nodo en otro lienzo, y ningún otro lienzo de este espacio tiene nodos todavía. Cree un hilo nuevo desde la barra lateral: el recorrido continúa allí, y hará referencia a un nodo de este lienzo."
         },
         "referencesTool": {
-          "title": "Elige la herramienta Referencia cruzada",
+          "title": "Elija la herramienta Referencia cruzada",
           "body": "Trae a este lienzo un nodo de otro lienzo de este espacio, sin fusionar los dos."
         },
         "referencesPlace": {
-          "title": "Colócala en el lienzo",
-          "body": "Haz clic en un lugar vacío. Se abre un panel de búsqueda con los nodos de este espacio a los que puedes hacer referencia."
+          "title": "Colóquela en el lienzo",
+          "body": "Haga clic en un lugar vacío. Se abre un panel de búsqueda con los nodos de este espacio a los que puede hacer referencia."
         },
         "referencesPick": {
-          "title": "Elige el nodo a referenciar",
-          "body": "Busca en los otros lienzos de este espacio y elige un nodo. Aparece como un nodo de referencia de solo lectura; para enlazarlo, arrastra una conexión desde el borde de otro nodo hasta él."
+          "title": "Elija el nodo a referenciar",
+          "body": "Busque en los otros lienzos de este espacio y elija un nodo. Aparece como un nodo de referencia de solo lectura; para enlazarlo, arrastre una conexión desde el borde de otro nodo hasta él."
         },
         "referencesBoundary": {
           "title": "Se queda dentro del espacio",
-          "body": "Una referencia solo puede apuntar a lienzos de este espacio, y nunca cambia el nodo al que apunta. Elimina la referencia y el original queda intacto."
+          "body": "Una referencia solo puede apuntar a lienzos de este espacio, y nunca cambia el nodo al que apunta. Elimine la referencia y el original queda intacto."
         },
         "commentsWhat": {
           "title": "La discusión tiene su sitio junto al razonamiento",
-          "body": "Un comentario nunca se convierte en nodo ni lleva veredicto. Es donde hablas de un nodo sin tocar el argumento en sí."
+          "body": "Un comentario nunca se convierte en nodo ni lleva veredicto. Es donde habla de un nodo sin tocar el argumento en sí."
         },
         "commentsOpen": {
-          "title": "Abre los comentarios de un nodo",
-          "body": "Usa el botón de comentarios del nodo. El panel se abre a su lado."
+          "title": "Abra los comentarios de un nodo",
+          "body": "Use el botón de comentarios del nodo. El panel se abre a su lado."
         },
         "commentsWrite": {
-          "title": "Deja un comentario",
-          "body": "Escribe lo que quieras y envíalo. Los comentarios nunca cambian la estructura ni los veredictos."
+          "title": "Deje un comentario",
+          "body": "Escriba lo que quiera y envíelo. Los comentarios nunca cambian la estructura ni los veredictos."
         },
         "commentsWho": {
           "title": "Todos en el hilo pueden leerlo",
@@ -538,19 +569,19 @@
         },
         "workspacesWhat": {
           "title": "El espacio es la frontera",
-          "body": "Hilos, carpetas, miembros y referencias están en un solo espacio y nunca pasan a otro. Puedes pertenecer a varios y cambiar entre ellos libremente."
+          "body": "Hilos, carpetas, miembros y referencias están en un solo espacio y nunca pasan a otro. Puede pertenecer a varios y cambiar entre ellos libremente."
         },
         "workspacesSwitcher": {
-          "title": "Abre el selector de espacios",
+          "title": "Abra el selector de espacios",
           "body": "Es el nombre del espacio actual, en la parte superior de la barra lateral."
         },
         "workspacesSettings": {
-          "title": "Abre la configuración del espacio",
-          "body": "Pasa el cursor por la fila del espacio y haz clic en el engranaje. Esta configuración solo afecta a este espacio."
+          "title": "Abra los ajustes del espacio",
+          "body": "Pase el cursor por la fila del espacio y haga clic en el engranaje. Estos ajustes solo afectan a este espacio."
         },
         "workspacesGeneral": {
           "title": "La sección General",
-          "body": "La configuración del espacio se abre aquí: el nombre, el número de miembros, tu rol y la fecha de creación del espacio."
+          "body": "Los ajustes del espacio se abren aquí: el nombre, el número de miembros, su rol y la fecha de creación del espacio."
         },
         "workspacesOwner": {
           "title": "Siempre hay un solo propietario",
@@ -561,88 +592,88 @@
           "body": "El acceso se define una vez por espacio, no por lienzo. Un rol decide si alguien puede editar lienzos, solo comentar o solo leer."
         },
         "membersOpen": {
-          "title": "Abre la configuración del espacio",
-          "body": "Abre el selector de espacios y luego haz clic en el engranaje de la fila. Los miembros y los roles están ahí."
+          "title": "Abra los ajustes del espacio",
+          "body": "Abra el selector de espacios y luego haga clic en el engranaje de la fila. Los miembros y los roles están ahí."
         },
         "membersSection": {
-          "title": "Abre la sección Miembros",
-          "body": "Aquí invitas a personas y asignas roles. No se envía nada mientras solo miras."
+          "title": "Abra la sección Miembros",
+          "body": "Aquí invita a personas y asigna roles. No se envía nada mientras solo mira."
         },
         "membersInvite": {
           "title": "Las invitaciones van por correo",
-          "body": "Escribe una dirección y elige el rol desde el principio. Puedes revocar una invitación antes de que se acepte, y cambiar un rol en cualquier momento."
+          "body": "Escriba una dirección y elija el rol desde el principio. Puede revocar una invitación antes de que se acepte, y cambiar un rol en cualquier momento."
         },
         "membersRoles": {
-          "title": "Abre la sección Roles",
-          "body": "Los roles se definen por espacio. Propietario, Miembro y Espectador vienen integrados y no cambian; puedes crear tus propios roles y decidir exactamente qué permite cada uno."
+          "title": "Abra la sección Roles",
+          "body": "Los roles se definen por espacio. Propietario, Miembro y Espectador vienen integrados y no cambian; puede crear sus propios roles y decidir exactamente qué permite cada uno."
         },
         "membersPermissions": {
           "title": "Qué controla un rol",
           "body": "Editar el lienzo, comentar, gestionar hilos y carpetas, miembros, roles y el propio espacio. Un rol no es más que ese conjunto de interruptores."
         },
         "settingsWhat": {
-          "title": "Estos ajustes son tuyos",
-          "body": "Tu perfil es lo que tus compañeros ven junto a tu nombre. Todo lo demás aquí es solo para ti y sigue a tu cuenta en todos tus dispositivos. Recorramos cada sección."
+          "title": "Estos ajustes son suyos",
+          "body": "Su perfil es lo que sus compañeros ven junto a su nombre. Todo lo demás aquí es solo para usted y sigue a su cuenta en cualquier dispositivo. Recorramos cada sección."
         },
         "settingsOpen": {
-          "title": "Abre tus ajustes",
-          "body": "Haz clic en tu nombre en la parte inferior de la barra lateral y luego en Ajustes."
+          "title": "Abra sus ajustes",
+          "body": "Haga clic en su nombre en la parte inferior de la barra lateral y luego en Ajustes."
         },
         "settingsProfile": {
-          "title": "Cambia algo en tu perfil",
-          "body": "Cambia tu nombre o elige otro avatar y guarda. Puedes volver a dejarlo como estaba justo después. Las insignias que ganes también aparecen aquí."
+          "title": "Cambie algo en su perfil",
+          "body": "Cambie su nombre o elija otro avatar y guarde. Puede volver a dejarlo como estaba justo después. Las insignias que gane también aparecen aquí."
         },
         "settingsSecurity": {
-          "title": "Abre la sección Seguridad",
-          "body": "Aquí están tu contraseña y la eliminación de la cuenta."
+          "title": "Abra la sección Seguridad",
+          "body": "Aquí están su contraseña y la eliminación de la cuenta."
         },
         "settingsSecurityNote": {
-          "title": "Solo tú puedes hacerlo",
-          "body": "Cambiar la contraseña cierra tus otras sesiones. Eliminar la cuenta elimina también los espacios que te pertenecen."
+          "title": "Solo usted puede hacerlo",
+          "body": "Cambiar la contraseña cierra sus otras sesiones. Eliminar la cuenta elimina también los espacios que le pertenecen."
         },
         "settingsNotifications": {
-          "title": "Abre la sección Notificaciones",
+          "title": "Abra la sección Notificaciones",
           "body": "Los interruptores están aquí, pero el envío todavía no está disponible. Por ahora no se envía nada."
         },
         "settingsAppearance": {
-          "title": "Abre la sección Apariencia",
-          "body": "El idioma de la interfaz, ocho temas (Auto sigue a tu sistema con Daybreak y Eclipse) y cuatro patrones de lienzo."
+          "title": "Abra la sección Apariencia",
+          "body": "El idioma de la interfaz, ocho temas (Auto sigue a su sistema con Daybreak y Eclipse) y cuatro patrones de lienzo."
         },
         "settingsTheme": {
-          "title": "Prueba otro tema",
-          "body": "Elige uno y toda la aplicación cambia al instante, con el panel aún abierto. Solo tú ves este cambio."
+          "title": "Pruebe otro tema",
+          "body": "Elija uno y toda la aplicación cambia al instante, con el panel aún abierto. Solo usted ve este cambio."
         },
         "settingsPattern": {
-          "title": "Cambia el patrón del lienzo",
+          "title": "Cambie el patrón del lienzo",
           "body": "Puntos, líneas, cruces o una superficie lisa. Solo cambia el fondo del lienzo."
         },
         "settingsEditor": {
-          "title": "Abre la sección Editor",
-          "body": "Esta sección controla cómo se comporta el lienzo mientras trabajas."
+          "title": "Abra la sección Editor",
+          "body": "Esta sección controla cómo se comporta el lienzo mientras trabaja."
         },
         "settingsTune": {
-          "title": "Cambia uno de los ajustes",
-          "body": "Ajustar a la cuadrícula, guías inteligentes o el zoom con el que se abre un lienzo. Cambia uno y el lienzo responde de inmediato."
+          "title": "Cambie uno de los ajustes",
+          "body": "Ajustar a la cuadrícula, guías inteligentes o el zoom con el que se abre un lienzo. Cambie uno y el lienzo responde de inmediato."
         },
         "settingsPlan": {
-          "title": "Abre Plan y facturación",
-          "body": "Tu plan actual y lo que incluye cada plan, como el número de miembros y de lienzos."
+          "title": "Abra Plan y facturación",
+          "body": "Su plan actual y lo que incluye cada plan, como el número de miembros y de lienzos."
         },
         "settingsScope": {
           "title": "Esas son todas las secciones",
-          "body": "Perfil, seguridad, notificaciones, apariencia, editor, plan. Tus compañeros tienen sus propios ajustes, incluso en el mismo hilo."
+          "body": "Perfil, seguridad, notificaciones, apariencia, editor, plan. Cada compañero tiene sus propios ajustes, incluso en el mismo hilo."
         },
         "exportWhat": {
           "title": "La exportación es una instantánea",
-          "body": "El archivo muestra el lienzo exactamente como está ahora, y no se puede volver a importar. Úsalo para compartir o imprimir, no para mover trabajo entre hilos."
+          "body": "El archivo muestra el lienzo exactamente como está ahora, y no se puede volver a importar. Úselo para compartir o imprimir, no para mover trabajo entre hilos."
         },
         "exportMenu": {
-          "title": "Abre el menú de exportación",
+          "title": "Abra el menú de exportación",
           "body": "El botón de exportar está en la parte inferior de la barra de herramientas."
         },
         "exportFormat": {
-          "title": "Elige un formato",
-          "body": "PNG y JPG son imágenes, SVG se mantiene nítido a cualquier tamaño. El archivo va a tus descargas."
+          "title": "Elija un formato",
+          "body": "PNG y JPG son imágenes, SVG se mantiene nítido a cualquier tamaño. El archivo va a sus descargas."
         },
         "exportNote": {
           "title": "Qué entra en el archivo",
@@ -650,10 +681,10 @@
         },
         "toolsWhat": {
           "title": "Una herramienta a la vez",
-          "body": "Solo hay una herramienta activa a la vez, y un clic en el lienzo hace lo que hace esa herramienta. Saber qué herramienta tienes en la mano es la mitad del oficio."
+          "body": "Solo hay una herramienta activa a la vez, y un clic en el lienzo hace lo que hace esa herramienta. Saber qué herramienta tiene en la mano es la mitad del oficio."
         },
         "toolsSheet": {
-          "title": "Abre la hoja de atajos",
+          "title": "Abra la hoja de atajos",
           "body": "El menú Ayuda está en la parte inferior de la barra de herramientas, y Atajos de teclado es su primer elemento."
         },
         "toolsSheetRead": {
@@ -661,8 +692,8 @@
           "body": "Los mismos cinco grupos que la barra de herramientas: navegar, historial, construir, decidir, enlaces. Cada herramienta tiene una tecla, y las teclas siguen funcionando mientras la hoja está abierta."
         },
         "toolsClose": {
-          "title": "Cierra la hoja",
-          "body": "Haz clic en la cruz de la esquina o pulsa Escape. La hoja cubre la barra de herramientas, y ahí va el recorrido a continuación."
+          "title": "Cierre la hoja",
+          "body": "Haga clic en la cruz de la esquina o pulse Escape. La hoja cubre la barra de herramientas, y ahí va el recorrido a continuación."
         },
         "toolsSelect": {
           "title": "Seleccionar",
@@ -670,11 +701,11 @@
         },
         "toolsPan": {
           "title": "Desplazar",
-          "body": "Arrastra para mover la vista en lugar de un nodo. Tecla H."
+          "body": "Arrastre para mover la vista en lugar de un nodo. Tecla H."
         },
         "toolsZoom": {
           "title": "Zoom",
-          "body": "Un clic acerca al punto donde hiciste clic, y con Mayús aleja. Teclas más y menos."
+          "body": "Un clic acerca al punto donde hizo clic, y con Mayús aleja. Teclas más y menos."
         },
         "toolsUndo": {
           "title": "Deshacer y rehacer",
@@ -686,7 +717,7 @@
         },
         "toolsConnect": {
           "title": "Conectar",
-          "body": "Haz clic en el nodo del que parte el razonamiento y luego en el nodo al que lleva. La flecha muestra la dirección. Tecla C."
+          "body": "Haga clic en el nodo del que parte el razonamiento y luego en el nodo al que lleva. La flecha muestra la dirección. Tecla C."
         },
         "toolsDelete": {
           "title": "Eliminar",
@@ -702,15 +733,15 @@
         },
         "toolsAnswer": {
           "title": "Respuesta",
-          "body": "Marca el nodo que cierra el hilo. Una respuesta por hilo, y puedes moverla más tarde. Tecla A."
+          "body": "Marca el nodo que cierra el hilo. Una respuesta por hilo, y puede moverla más tarde. Tecla A."
         },
         "toolsReference": {
           "title": "Referencia cruzada",
           "body": "Trae un nodo de otro lienzo como una cita de solo lectura. Tecla R. Las referencias tienen su propia parte más adelante en esta guía."
         },
         "exampleIntro": {
-          "title": "Te presento a Ergo",
-          "body": "Nuestra oficina necesita una cafetera, y Ergo y yo no nos ponemos de acuerdo en cuál. Lo decidiremos en un lienzo, como harían dos compañeros. Pulsa Siguiente para seguirnos."
+          "title": "Le presento a Ergo",
+          "body": "Nuestra oficina necesita una cafetera, y Ergo y yo no nos ponemos de acuerdo en cuál. Lo decidiremos en un lienzo, como harían dos compañeros. Pulse Siguiente para seguirnos."
         },
         "exampleHello": {
           "title": "Hola, soy Ergo",
@@ -766,15 +797,15 @@
         },
         "exampleResolved": {
           "title": "Una marca en la barra lateral",
-          "body": "Mira la barra lateral: junto a nuestro hilo ha aparecido una marca. Cada hilo resuelto recibe una, así que las preguntas abiertas se ven de un vistazo."
+          "body": "Mire la barra lateral: junto a nuestro hilo ha aparecido una marca. Cada hilo resuelto recibe una, así que las preguntas abiertas se ven de un vistazo."
         },
         "exampleWrap": {
           "title": "Esa es toda la idea",
-          "body": "Una pregunta, una rama por respuesta, razones debajo de cada una, las dudas en comentarios, veredictos y una respuesta que aceptamos los dos. Tus propios hilos funcionan exactamente igual."
+          "body": "Una pregunta, una rama por respuesta, razones debajo de cada una, las dudas en comentarios, veredictos y una respuesta que aceptamos los dos. Sus propios hilos funcionan exactamente igual."
         },
         "exampleKeep": {
-          "title": "¿Conservas el ejemplo?",
-          "body": "Se queda en la barra lateral como un hilo normal que puedes abrir y cambiar. Consérvalo para verlo con calma más tarde o elimínalo ahora."
+          "title": "¿Conserva el ejemplo?",
+          "body": "Se queda en la barra lateral como un hilo normal que puede abrir y cambiar. Consérvelo para verlo con calma más tarde o elimínelo ahora."
         }
       },
       "example": {
@@ -803,7 +834,6 @@
       "close": "Cerrar ajustes",
       "comingSoon": "Próximamente",
       "languageSaving": "Guardando idioma…",
-      "languageSaveFailed": "No se ha podido guardar el idioma. Inténtalo de nuevo.",
       "groups": {
         "account": "Cuenta",
         "preferences": "Preferencias",
@@ -826,14 +856,15 @@
         "saved": "Guardado",
         "changeEmail": "Cambiar",
         "changingEmail": "Enviando…",
-        "saveFailed": "No se ha podido guardar. Inténtalo de nuevo.",
-        "emailChangeFailed": "No se ha podido cambiar el correo. Inténtalo de nuevo.",
-        "emailChangeSent": "Revisa tu nuevo correo para confirmar el cambio.",
-        "emailInvalid": "Introduce una dirección de correo válida.",
-        "namePlaceholder": "Cómo te ven los demás",
+        "saveFailed": "No se ha podido guardar. Inténtelo de nuevo.",
+        "emailChangeFailed": "No se ha podido cambiar el correo. Inténtelo de nuevo.",
+        "emailChangeSent": "Revise su nuevo correo para confirmar el cambio.",
+        "emailInvalid": "Introduzca una dirección de correo válida.",
+        "namePlaceholder": "Cómo le ven los demás",
         "avatarTitle": "Avatar",
-        "avatarOptions": "opciones",
+        "avatarOptionCount": "{count, plural, one {# opción} other {# opciones}}",
         "badgesTitle": "Insignias",
+        "badgeEarned": "Nueva insignia: {name}",
         "initialsLabel": "Iniciales",
         "avatarIcons": {
           "avatarIconCat": "Gato",
@@ -861,47 +892,45 @@
           "badgeFounder": "Fundador",
           "founderUnlock": "Se unió durante la beta temprana.",
           "badgeInitiate": "Iniciado",
-          "initiateUnlock": "Termina el recorrido y todas las guías.",
+          "initiateUnlock": "Termine el recorrido y todas las guías.",
           "badgeFirstSteps": "Primer paso",
-          "firstStepsUnlock": "Crea tu primer lienzo.",
-          "badgeArchitect": "Arquitecto",
-          "architectUnlock": "Construye un lienzo con 25 o más nodos.",
-          "badgeConnector": "Conector",
-          "connectorUnlock": "Realiza 50 conexiones entre nodos.",
-          "badgeCritic": "Crítico",
-          "criticUnlock": "Marca 25 caminos como válidos o inválidos.",
-          "badgeLinguist": "Lingüista",
-          "linguistUnlock": "Cambia el idioma de la interfaz.",
-          "badgeCurator": "Curador",
-          "curatorUnlock": "Usa una referencia entre lienzos.",
-          "badgeVoice": "Voz",
-          "voiceUnlock": "Publica tu primer comentario.",
-          "badgeExplorer": "Explorador",
-          "explorerUnlock": "Abre 10 lienzos distintos.",
-          "badgeStoryteller": "Narrador",
-          "storytellerUnlock": "Crea 5 hilos propios.",
+          "firstStepsUnlock": "Cree su primer lienzo.",
           "badgeWorkspaceBuilder": "Constructor",
-          "workspaceBuilderUnlock": "Crea tu primer espacio.",
-          "badgeNightOwl": "Búho",
-          "nightOwlUnlock": "Trabaja pasada la medianoche durante una semana.",
-          "badgeMarathoner": "Maratonista",
-          "marathonerUnlock": "Mantente activo 30 días seguidos.",
-          "badgeCollaborator": "Colaborador",
-          "collaboratorUnlock": "Únete a un espacio compartido.",
+          "workspaceBuilderUnlock": "Cree su primer espacio.",
+          "badgeArchitect": "Arquitecto",
+          "architectUnlock": "Construya un lienzo con 25 o más nodos.",
+          "badgeConnector": "Conector",
+          "connectorUnlock": "Trace 15 conexiones en un mismo lienzo.",
+          "badgeCritic": "Crítico",
+          "criticUnlock": "Marque un camino como inválido.",
           "badgeWeaver": "Tejedor",
-          "weaverUnlock": "Mezcla caminos válidos e inválidos en un lienzo.",
-          "badgeSage": "Sabio",
-          "sageUnlock": "Deja 100 comentarios reflexivos."
+          "weaverUnlock": "Mezcle caminos válidos e inválidos en un lienzo.",
+          "badgeVerdict": "Veredicto",
+          "verdictUnlock": "Marque un nodo como respuesta final.",
+          "badgeVoice": "Voz",
+          "voiceUnlock": "Publique su primer comentario.",
+          "badgeCurator": "Curador",
+          "curatorUnlock": "Use una referencia entre lienzos.",
+          "badgeCollaborator": "Colaborador",
+          "collaboratorUnlock": "Únase a un espacio compartido.",
+          "badgeLinguist": "Lingüista",
+          "linguistUnlock": "Cambie el idioma de la interfaz.",
+          "badgeStylist": "Estilista",
+          "stylistUnlock": "Cambie a otro tema.",
+          "badgeCartographer": "Cartógrafo",
+          "cartographerUnlock": "Exporte un lienzo como imagen.",
+          "badgeNightOwl": "Búho",
+          "nightOwlUnlock": "Añada un nodo entre la medianoche y las 5 de la mañana."
         }
       },
       "security": {
         "changePassword": "Cambiar contraseña",
         "passwordCaption": "Acceso a la cuenta",
-        "passwordBlurb": "Rota el secreto utilizado para iniciar sesión. La nueva contraseña se aplica en el próximo inicio.",
+        "passwordBlurb": "Rote el secreto utilizado para iniciar sesión. La nueva contraseña se aplica en el próximo inicio.",
         "passwordCardTitle": "Contraseña de la cuenta",
         "passwordCardCaption": "Mín. 8 caracteres",
         "currentPassword": "Contraseña actual",
-        "currentPasswordRequired": "Introduce tu contraseña actual",
+        "currentPasswordRequired": "Introduzca su contraseña actual",
         "currentPasswordIncorrect": "La contraseña actual es incorrecta",
         "passwordSame": "La nueva contraseña debe ser distinta de la actual",
         "newPassword": "Nueva contraseña",
@@ -913,20 +942,22 @@
         "passwordTooShort": "La contraseña debe tener al menos 8 caracteres",
         "dangerZone": "Zona peligrosa",
         "dangerZoneCaption": "irreversible",
-        "dangerZoneBlurb": "Acciones destructivas que no se pueden deshacer. Lee con atención antes de continuar.",
+        "dangerZoneBlurb": "Acciones destructivas que no se pueden deshacer. Lea con atención antes de continuar.",
         "deleteAccount": "Eliminar cuenta",
-        "deleteAccountCaption": "Borra todos tus espacios, hilos y lienzos",
-        "deleteConfirm": "¿Estás seguro? Esta acción no se puede deshacer. Todos tus datos se eliminarán permanentemente.",
+        "deleteAccountCaption": "Borra todos sus espacios, hilos y lienzos",
+        "deleteConfirm": "¿Está seguro? Esta acción no se puede deshacer. Todos sus datos se eliminarán permanentemente.",
+        "deletePassword": "Confirme con su contraseña",
+        "deleteBlocked": "Es propietario de espacios que usan otras personas. Transfiera la propiedad o elimínelos antes de eliminar su cuenta.",
         "deleteButton": "Eliminar mi cuenta",
         "deleting": "Eliminando…",
         "cancel": "Cancelar",
-        "updateFailed": "No se ha podido actualizar la contraseña. Inténtalo de nuevo.",
-        "deleteFailed": "No se ha podido eliminar la cuenta. Inténtalo de nuevo."
+        "updateFailed": "No se ha podido actualizar la contraseña. Inténtelo de nuevo.",
+        "deleteFailed": "No se ha podido eliminar la cuenta. Inténtelo de nuevo."
       },
       "appearance": {
         "theme": "Tema",
         "themeIntro": "Ocho paletas",
-        "themeBlurb": "Daybreak y Eclipse son la pareja de serie; Auto sigue a tu sistema y elige entre ellas. Las otras seis repintan todo, del lienzo a la barra de herramientas.",
+        "themeBlurb": "Daybreak y Eclipse son la pareja de serie; Auto sigue a su sistema y elige entre ellas. Las otras seis repintan todo, del lienzo a la barra de herramientas.",
         "themeDaybreak": "Daybreak",
         "themeEclipse": "Eclipse",
         "themeGraphite": "Paper",
@@ -945,10 +976,9 @@
         "themeBloom": "Bloom",
         "bloomDesc": "Porcelana cálida, acción magenta",
         "autoDesc": "Empareja Daybreak y Eclipse",
-        "adaptive": "Adaptable",
         "canvas": "Lienzo",
         "canvasIntro": "Cuatro texturas",
-        "canvasBlurb": "Elige la superficie donde viven tus ideas — del papel tranquilo a una cuadrícula trazada.",
+        "canvasBlurb": "Elija la superficie donde viven sus ideas — del papel tranquilo a una cuadrícula trazada.",
         "patternDots": "Constelación",
         "patternLines": "Plano",
         "patternCross": "Trazado",
@@ -968,22 +998,22 @@
         }
       },
       "editor": {
-        "blurb": "Ajusta cómo responde el lienzo mientras construyes.",
+        "blurb": "Ajuste cómo responde el lienzo mientras construye.",
         "behaviors": "Comportamientos del lienzo",
         "behaviorsCaption": "Ajuste, guías",
         "snapToGrid": "Ajustar a la cuadrícula",
         "snapToGridDescription": "Arrastra los nodos en pasos de 16 píxeles",
         "smartGuides": "Guías inteligentes",
-        "smartGuidesDescription": "Líneas de alineación mientras arrastras",
+        "smartGuidesDescription": "Líneas de alineación mientras arrastra",
         "zoom": "Zoom predeterminado",
         "zoomCaption": "Magnificación inicial del lienzo",
-        "zoomBlurb": "Qué tan cerca empiezas al abrir cualquier lienzo.",
+        "zoomBlurb": "Qué tan cerca empieza al abrir cualquier lienzo.",
         "defaultZoom": "Nivel de zoom por defecto"
       },
       "plan": {
-        "title": "Tu plan",
+        "title": "Su plan",
         "caption": "Suscripción",
-        "blurb": "Elige un nivel que se ajuste a cómo quieres pensar con Uniscept.",
+        "blurb": "Elija un nivel que se ajuste a cómo quiere pensar con Uniscept.",
         "current": "Actual",
         "lockedBadge": "Pronto",
         "free": "Gratis",
@@ -995,17 +1025,17 @@
       "notifications": {
         "title": "Avisarme sobre",
         "mentions": "Menciones",
-        "mentionsDescription": "Cuando alguien te menciona (@) en un comentario.",
+        "mentionsDescription": "Cuando alguien le menciona (@) en un comentario.",
         "comments": "Comentarios",
-        "commentsDescription": "Respuestas y nuevos comentarios en tus nodos y lienzos.",
+        "commentsDescription": "Respuestas y nuevos comentarios en sus nodos y lienzos.",
         "invites": "Invitaciones al espacio",
-        "invitesDescription": "Cuando te invitan a un espacio o cambia tu rol.",
+        "invitesDescription": "Cuando le invitan a un espacio o cambia su rol.",
         "digest": "Resumen semanal",
-        "digestDescription": "Un resumen de los lunes de la actividad de tus espacios."
+        "digestDescription": "Un resumen de los lunes de la actividad de sus espacios."
       }
     },
     "workspaceSettings": {
-      "close": "Cerrar la configuración del espacio de trabajo",
+      "close": "Cerrar los ajustes del espacio de trabajo",
       "groups": {
         "workspace": "Espacio de trabajo",
         "access": "Acceso"
@@ -1020,18 +1050,32 @@
         "member": "Miembro",
         "viewer": "Espectador"
       },
+      "roleIcons": {
+        "shield": "Escudo",
+        "star": "Estrella",
+        "flag": "Bandera",
+        "sparkles": "Destellos",
+        "target": "Diana",
+        "zap": "Rayo",
+        "rocket": "Cohete",
+        "award": "Premio",
+        "compass": "Brújula",
+        "crown": "Corona",
+        "penTool": "Pluma",
+        "eye": "Ojo"
+      },
       "general": {
         "nameLabel": "Nombre del espacio de trabajo",
-        "namePlaceholder": "Nombra este espacio de trabajo",
+        "namePlaceholder": "Ponga un nombre a este espacio de trabajo",
         "save": "Guardar",
         "saving": "Guardando…",
         "membersStat": "Miembros",
-        "roleStat": "Tu rol",
+        "roleStat": "Su rol",
         "createdStat": "Creado el"
       },
       "members": {
         "hint": "Personas con acceso a este espacio de trabajo.",
-        "you": "Tú",
+        "you": "Usted",
         "changeRole": "Cambiar rol",
         "remove": "Quitar",
         "removeConfirm": "Quitar",
@@ -1042,14 +1086,14 @@
         "transferTitle": "Transferir propiedad",
         "transferCritical": "Acción crítica",
         "transferConfirmPrefix": "¿Transferir la propiedad a",
-        "transferConfirmSuffix": "? Pasarás a ser miembro y esta acción no se puede deshacer.",
+        "transferConfirmSuffix": "? Pasará a ser miembro y esta acción no se puede deshacer.",
         "transferConfirm": "Transferir",
         "transferred": "Propiedad transferida",
         "transferFailed": "No se pudo transferir la propiedad",
         "cancel": "Cancelar",
         "inviteTitle": "Invitar a personas",
         "inviteHint": "Se unen la próxima vez que abran Uniscept.",
-        "emailPlaceholder": "nombre@empresa.com",
+        "emailPlaceholder": "name@example.com",
         "sendInvite": "Enviar invitación",
         "sending": "Enviando…",
         "invited": "Invitación lista",
@@ -1061,7 +1105,7 @@
       },
       "roles": {
         "hint": "Cada persona tiene un rol. Los roles definen lo que puede hacer.",
-        "membersSuffix": "miembros",
+        "memberCount": "{count, plural, one {# miembro} other {# miembros}}",
         "newRole": "Nuevo rol",
         "nameLabel": "Nombre del rol",
         "namePlaceholder": "p. ej. Revisor",
@@ -1121,7 +1165,7 @@
       "titleAccent": "estructura.",
       "subtitle1": "Cada hilo de Slack es un cementerio de ideas.",
       "subtitle2": "Cada reunión es amnesia estructurada.",
-      "tagline": "Construye conocimiento. No caos.",
+      "tagline": "Construya conocimiento. No caos.",
       "ctaPrimary": "Empezar",
       "ctaSecondary": "Saber más",
       "demo": {
@@ -1160,7 +1204,7 @@
       "subtitle": "Las herramientas superficiales producen pensamiento superficial.",
       "stream": {
         "channel": "#product-decisions",
-        "live": "live",
+        "live": "en vivo",
         "stamp": "Enterrada",
         "decision": "DECISIÓN: lanzamos la reescritura v2 en Q4",
         "lines": [
@@ -1207,11 +1251,11 @@
         },
         "validation": {
           "title": "Validación de caminos",
-          "description": "Marca una afirmación refutada y cada conclusión que se apoya en ella se recalcula al instante. Nada sobrevive en silencio."
+          "description": "Marque una afirmación refutada y cada conclusión que se apoya en ella se recalcula al instante. Nada sobrevive en silencio."
         },
         "references": {
           "title": "Referencias cruzadas",
-          "description": "Referencia una conclusión validada de otro lienzo. Demuéstrala una vez, apóyate en ella donde importe."
+          "description": "Referencie una conclusión validada de otro lienzo. Demuéstrela una vez, apóyese en ella donde importe."
         },
         "collaboration": {
           "title": "Colaboración en equipo",
@@ -1242,7 +1286,7 @@
         "question": "¿Levantamos ronda ahora o un año más a pulmón?",
         "nodeA": "La caja cubre 14 meses",
         "nodeB": "Un año más a pulmón",
-        "description": "Toma mejores decisiones. Documenta tu razonamiento. Deja de repetir los mismos argumentos cada trimestre.",
+        "description": "Tome mejores decisiones. Documente su razonamiento. Deje de repetir los mismos argumentos cada trimestre.",
         "useCases": ["Estrategia de producto", "Análisis de mercado", "Arquitectura técnica"]
       },
       "researchers": {
@@ -1250,7 +1294,7 @@
         "question": "¿El efecto se replica fuera del laboratorio?",
         "nodeA": "Replicación de campo, n=2400",
         "nodeB": "El efecto se sostiene en campo",
-        "description": "Mapea la literatura. Construye marcos. Convierte los artículos en grafos de conocimiento estructurados que tengan sentido.",
+        "description": "Mapee la literatura. Construya marcos. Convierta los artículos en grafos de conocimiento estructurados que tengan sentido.",
         "useCases": ["Síntesis literaria", "Mapeo de hipótesis", "Redes de citas"]
       },
       "engineers": {
@@ -1258,14 +1302,14 @@
         "question": "¿Monolito o servicios para la v3?",
         "nodeA": "El monolito aguanta carga 10x",
         "nodeB": "La v3 sigue monolítica",
-        "description": "Diseña sistemas. Depura lógica. Documenta las decisiones arquitectónicas que importan de verdad.",
+        "description": "Diseñe sistemas. Depure lógica. Documente las decisiones arquitectónicas que importan de verdad.",
         "useCases": ["Diseño de sistemas", "Flujos de depuración", "Decisiones técnicas"]
       }
     },
     "pricing": {
       "title": "Precios",
       "subtitle": "Sencillos. Transparentes. Justos.",
-      "footer": "Prueba gratis con el modo Demo. Sin tarjeta de crédito.",
+      "footer": "Pruebe gratis con el modo Demo. Sin tarjeta de crédito.",
       "tryDemo": "Probar demo",
       "getStarted": "Empezar",
       "popular": "Popular",
@@ -1279,9 +1323,9 @@
           "name": "Demo",
           "description": "Basado en sesión",
           "features": [
-            "Prueba el lienzo",
+            "Pruebe el lienzo",
             "Sin necesidad de cuenta",
-            "Explora las funciones",
+            "Explore las funciones",
             "Almacenamiento de sesión"
           ]
         },
@@ -1310,16 +1354,16 @@
       "subtitle": "Eso es todo.",
       "steps": {
         "ask": {
-          "title": "Pregunta",
-          "description": "Abre un hilo. El nodo central de la pregunta ya espera en el lienzo."
+          "title": "Pregunte",
+          "description": "Abra un hilo. El nodo central de la pregunta ya espera en el lienzo."
         },
         "argue": {
-          "title": "Argumenta",
-          "description": "Coloca afirmaciones alrededor. Cita, conecta, respalda: el razonamiento toma forma."
+          "title": "Argumente",
+          "description": "Coloque afirmaciones alrededor. Cite, conecte, respalde: el razonamiento toma forma."
         },
         "decide": {
-          "title": "Decide",
-          "description": "Refuta lo que falla, mira propagarse las consecuencias y fija la respuesta que resiste."
+          "title": "Decida",
+          "description": "Refute lo que falla, mire propagarse las consecuencias y fije la respuesta que resiste."
         }
       },
       "vignettes": {
@@ -1330,8 +1374,8 @@
       }
     },
     "cta": {
-      "title1": "Deja de hablar.",
-      "title2": "Empieza a construir.",
+      "title1": "Deje de hablar.",
+      "title2": "Empiece a construir.",
       "subtitle": "Para investigadores, fundadores e ingenieros que de verdad entregan.",
       "button": "Empezar gratis"
     }

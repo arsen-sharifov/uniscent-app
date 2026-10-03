@@ -1,13 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
-import type { TTheme } from '@constants';
+import type { TTheme } from '@interfaces';
 
 import { ThemesAtlas, TypographyOnTheme } from './fragments';
 
 const meta: Meta = {
   title: 'Foundations/Themes',
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:

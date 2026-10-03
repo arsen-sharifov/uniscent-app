@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { canvasEdge } from '@mocks/canvas';
-import { findLinkedNodeIds, getCanvasEdgePath, offsetAlongSide } from '@/lib/canvas';
+import { findLinkedNodeIds, getCanvasEdgePath, offsetAlongSide, withReverseEdgeIds } from '@/lib/canvas';
 
 describe('offsetAlongSide', () => {
   describe('GIVEN a point on each side of a node', () => {
@@ -107,6 +107,38 @@ describe('findLinkedNodeIds', () => {
         const edges = [canvasEdge('e1', 'question', 'claim-a')];
 
         expect(findLinkedNodeIds(edges)).toBe(findLinkedNodeIds(edges));
+      });
+    });
+  });
+});
+
+describe('withReverseEdgeIds', () => {
+  describe('GIVEN a bidirectional pair and an unrelated edge', () => {
+    const edges = [canvasEdge('ab', 'a', 'b'), canvasEdge('ba', 'b', 'a'), canvasEdge('bc', 'b', 'c')];
+
+    describe('WHEN one direction of the pair is picked', () => {
+      test('THEN its reverse twin joins the ids', () => {
+        expect(withReverseEdgeIds(edges, ['ab'])).toEqual(['ab', 'ba']);
+      });
+    });
+
+    describe('WHEN both directions of the pair are picked', () => {
+      test('THEN each id is listed once', () => {
+        expect(withReverseEdgeIds(edges, ['ab', 'ba'])).toEqual(['ab', 'ba']);
+      });
+    });
+
+    describe('WHEN the one-way edge is picked', () => {
+      test('THEN only that edge is returned', () => {
+        expect(withReverseEdgeIds(edges, ['bc'])).toEqual(['bc']);
+      });
+    });
+  });
+
+  describe('GIVEN an id that no longer matches an edge', () => {
+    describe('WHEN it is picked', () => {
+      test('THEN it is passed through without twins', () => {
+        expect(withReverseEdgeIds([canvasEdge('ab', 'a', 'b')], ['gone'])).toEqual(['gone']);
       });
     });
   });

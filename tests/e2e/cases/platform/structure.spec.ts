@@ -17,8 +17,6 @@ import {
   seedThread,
 } from '../../utils';
 
-const { sidebar } = COPY.platform;
-
 test.describe('thread creation', () => {
   test.describe('GIVEN an empty workspace', () => {
     test.beforeEach(async ({ page, workspace }) => {
@@ -41,7 +39,7 @@ test.describe('thread creation', () => {
 
     test.describe('WHEN a thread is started from the empty canvas', () => {
       test.beforeEach(async ({ page }) => {
-        await page.getByRole('main').getByRole('button', { name: sidebar.newThread }).click();
+        await page.getByRole('main').getByRole('button', { name: COPY.platform.sidebar.newThread }).click();
       });
 
       test('THEN it opens on a canvas of its own', async ({ page, workspace }) => {
@@ -55,7 +53,7 @@ test.describe('thread creation', () => {
       test.beforeEach(async ({ page }) => {
         await createFolder(page);
         await commitRename(getEditingRow(page), 'Research');
-        await runRowAction(getNavRow(page, 'Research'), sidebar.newThread);
+        await runRowAction(getNavRow(page, 'Research'), COPY.platform.sidebar.newThread);
         await commitRename(getEditingRow(page), 'Interview notes');
       });
 
@@ -77,26 +75,26 @@ test.describe('thread maintenance', () => {
 
     test.describe('WHEN the thread is renamed from its row actions', () => {
       test.beforeEach(async ({ page }) => {
-        await runRowAction(getNavRow(page, 'Roadmap'), sidebar.rename);
+        await runRowAction(getNavRow(page, 'Roadmap'), COPY.platform.sidebar.rename);
         await commitRename(getEditingRow(page), 'Roadmap 2027');
       });
 
       test('THEN the tree shows the new name and confirms the rename', async ({ page }) => {
         await expect(getNavItem(page, 'Roadmap 2027')).toBeVisible();
-        await expect(getStatusToast(page, sidebar.threadRenamed)).toBeVisible();
+        await expect(getStatusToast(page, COPY.platform.sidebar.threadRenamed)).toBeVisible();
       });
     });
 
     test.describe('WHEN the thread is deleted and the dialog is confirmed', () => {
       test.beforeEach(async ({ page }) => {
-        await runRowAction(getNavRow(page, 'Roadmap'), sidebar.delete);
+        await runRowAction(getNavRow(page, 'Roadmap'), COPY.platform.sidebar.delete);
         await confirmDelete(page);
       });
 
       test('THEN the tree falls back to its empty state', async ({ page }) => {
-        await expect(getStatusToast(page, sidebar.threadDeleted)).toBeVisible();
+        await expect(getStatusToast(page, COPY.platform.sidebar.threadDeleted)).toBeVisible();
         await expect(getNavRows(page)).toHaveCount(0);
-        await expect(getSidebar(page)).toContainText(sidebar.emptyStructureTitle);
+        await expect(getSidebar(page)).toContainText(COPY.platform.sidebar.emptyStructureTitle);
       });
     });
   });
@@ -113,26 +111,26 @@ test.describe('folder maintenance', () => {
 
     test.describe('WHEN the folder is renamed from its row actions', () => {
       test.beforeEach(async ({ page }) => {
-        await runRowAction(getNavRow(page, 'Archive box'), sidebar.rename);
+        await runRowAction(getNavRow(page, 'Archive box'), COPY.platform.sidebar.rename);
         await commitRename(getEditingRow(page), 'Cold archive');
       });
 
       test('THEN the tree shows the new name and confirms the rename', async ({ page }) => {
         await expect(getNavItem(page, 'Cold archive')).toBeVisible();
-        await expect(getStatusToast(page, sidebar.folderRenamed)).toBeVisible();
+        await expect(getStatusToast(page, COPY.platform.sidebar.folderRenamed)).toBeVisible();
       });
     });
 
     test.describe('WHEN the folder is deleted and the dialog is confirmed', () => {
       test.beforeEach(async ({ page }) => {
-        await runRowAction(getNavRow(page, 'Archive box'), sidebar.delete);
+        await runRowAction(getNavRow(page, 'Archive box'), COPY.platform.sidebar.delete);
         await confirmDelete(page);
       });
 
       test('THEN the folder and its thread are both gone', async ({ page }) => {
-        await expect(getStatusToast(page, sidebar.folderDeleted)).toBeVisible();
+        await expect(getStatusToast(page, COPY.platform.sidebar.folderDeleted)).toBeVisible();
         await expect(getNavRows(page)).toHaveCount(0);
-        await expect(getSidebar(page)).toContainText(sidebar.emptyStructureTitle);
+        await expect(getSidebar(page)).toContainText(COPY.platform.sidebar.emptyStructureTitle);
       });
     });
   });
@@ -150,15 +148,18 @@ test.describe('bulk actions', () => {
     test.describe('WHEN the thread is selected and moved into the folder', () => {
       test.beforeEach(async ({ page }) => {
         await getNavItem(page, 'Loose note').click({ modifiers: ['ControlOrMeta'] });
-        const bulkBar = getSidebar(page).locator('div').filter({ hasText: sidebar.itemsSelected }).last();
-        await bulkBar.getByTitle(sidebar.moveToFolder).click();
+        const bulkBar = getSidebar(page)
+          .locator('div')
+          .filter({ has: page.getByTitle(COPY.platform.sidebar.moveToFolder) })
+          .last();
+        await bulkBar.getByTitle(COPY.platform.sidebar.moveToFolder).click();
 
         const dialog = page
           .getByRole('dialog')
-          .filter({ has: page.getByRole('heading', { name: sidebar.moveToFolder }) });
+          .filter({ has: page.getByRole('heading', { name: COPY.platform.sidebar.moveToFolder }) });
         await expect(dialog).toBeVisible();
         await dialog.getByRole('button', { name: 'Research', exact: true }).click();
-        await dialog.getByRole('button', { name: sidebar.move, exact: true }).click();
+        await dialog.getByRole('button', { name: COPY.platform.sidebar.move, exact: true }).click();
         await expect(dialog).toBeHidden();
       });
 
@@ -172,15 +173,18 @@ test.describe('bulk actions', () => {
       test.beforeEach(async ({ page }) => {
         await getNavItem(page, 'Research').click({ modifiers: ['ControlOrMeta'] });
         await getNavItem(page, 'Loose note').click({ modifiers: ['ControlOrMeta'] });
-        const bulkBar = getSidebar(page).locator('div').filter({ hasText: sidebar.itemsSelected }).last();
-        await bulkBar.getByTitle(sidebar.delete).click();
+        const bulkBar = getSidebar(page)
+          .locator('div')
+          .filter({ has: page.getByTitle(COPY.platform.sidebar.moveToFolder) })
+          .last();
+        await bulkBar.getByTitle(COPY.platform.sidebar.delete).click();
         await confirmDelete(page);
       });
 
       test('THEN the tree falls back to its empty state', async ({ page }) => {
-        await expect(getStatusToast(page, sidebar.itemsDeleted)).toBeVisible();
+        await expect(getStatusToast(page, COPY.platform.sidebar.itemsDeleted)).toBeVisible();
         await expect(getNavRows(page)).toHaveCount(0);
-        await expect(getSidebar(page)).toContainText(sidebar.emptyStructureTitle);
+        await expect(getSidebar(page)).toContainText(COPY.platform.sidebar.emptyStructureTitle);
       });
     });
   });
@@ -197,7 +201,7 @@ test.describe('structure search', () => {
 
     test.describe('WHEN the search box narrows the tree', () => {
       test.beforeEach(async ({ page }) => {
-        await getSidebar(page).getByPlaceholder(sidebar.searchPlaceholder).fill('Alpha');
+        await getSidebar(page).getByPlaceholder(COPY.platform.sidebar.searchPlaceholder).fill('Alpha');
       });
 
       test('THEN only the matching thread stays listed', async ({ page }) => {
@@ -208,12 +212,12 @@ test.describe('structure search', () => {
 
     test.describe('WHEN the search box matches nothing', () => {
       test.beforeEach(async ({ page }) => {
-        await getSidebar(page).getByPlaceholder(sidebar.searchPlaceholder).fill('nothing matches this');
+        await getSidebar(page).getByPlaceholder(COPY.platform.sidebar.searchPlaceholder).fill('nothing matches this');
       });
 
       test('THEN the tree reports no matches', async ({ page }) => {
         await expect(getNavRows(page)).toHaveCount(0);
-        await expect(getSidebar(page)).toContainText(sidebar.noSearchResults);
+        await expect(getSidebar(page)).toContainText(COPY.platform.sidebar.noSearchResults);
       });
     });
   });

@@ -1,9 +1,9 @@
 'use client';
 
 import { clsx } from 'clsx';
-import type { KeyboardEvent, MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 
-import type { IFlattenedItem } from '@interfaces';
+import type { IFlattenedItem, IInlineEdit } from '@interfaces';
 
 import { ItemIcon } from './ItemIcon';
 import { ItemLabel } from './ItemLabel';
@@ -18,11 +18,7 @@ interface INavItemButtonProps {
   isEditing: boolean;
   isDropTarget: boolean;
   showsTools: boolean;
-  editValue: string;
-  setEditValue: (value: string) => void;
-  inputRef: (element: HTMLInputElement | null) => void;
-  commitRename: () => void;
-  handleKeyDown: (event: KeyboardEvent) => void;
+  edit: IInlineEdit;
   onClick: (event: MouseEvent) => void;
 }
 
@@ -33,11 +29,7 @@ export const NavItemButton = ({
   isEditing,
   isDropTarget,
   showsTools,
-  editValue,
-  setEditValue,
-  inputRef,
-  commitRename,
-  handleKeyDown,
+  edit,
   onClick,
 }: INavItemButtonProps) => {
   const isFolder = item.type === 'folder';
@@ -51,9 +43,9 @@ export const NavItemButton = ({
       aria-selected={isSelected || undefined}
       isActive={isActive}
       isSelected={isSelected}
+      size="regular"
       onClick={onClick}
       className={clsx(
-        'px-2 py-1.5',
         isFolder && item.childCount === 0 ? 'cursor-default' : 'cursor-pointer',
         isFolder && !isActive && 'font-medium',
         isDropTarget &&
@@ -65,15 +57,7 @@ export const NavItemButton = ({
         isHighlighted={isFolder ? isHighlighted : isActive}
         hidesOnHover={showsTools}
       />
-      <ItemLabel
-        name={item.name}
-        isEditing={isEditing}
-        editValue={editValue}
-        setEditValue={setEditValue}
-        inputRef={inputRef}
-        commitRename={commitRename}
-        handleKeyDown={handleKeyDown}
-      />
+      <ItemLabel name={item.name} isEditing={isEditing} edit={edit} />
       {!isEditing && (
         <NavItemMarks
           item={item}

@@ -2,7 +2,8 @@ import type { ICreateNodeCommentInput, INodeCommentRow } from '@interfaces';
 
 import { createClient } from '@/lib/supabase';
 
-import { getCurrentUserId } from './utils';
+import { NODE_COMMENT_SELECT } from './consts';
+import { getCurrentUserId, readRowsByIds } from './utils';
 
 export const createNodeComment = async (input: ICreateNodeCommentInput): Promise<void> => {
   const authorId = await getCurrentUserId();
@@ -27,18 +28,16 @@ export const deleteNodeComment = async (id: string): Promise<void> => {
 };
 
 export const getNodeComments = async (nodeIds: string[]): Promise<INodeCommentRow[]> => {
-  if (nodeIds.length === 0) return [];
-
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from('node_comments')
-    .select('id, node_id, author_id, text, created_at')
-    .in('node_id', nodeIds)
-    .order('created_at')
-    .returns<INodeCommentRow[]>();
-
-  if (error) throw error;
-
-  return data ?? [];
+  return readRowsByIds(nodeIds, (chunk, from, to) =>
+    supabase
+      .from('node_comments')
+      .select(NODE_COMMENT_SELECT)
+      .in('node_id', chunk)
+      .order('created_at')
+      .order('id')
+      .range(from, to)
+      .returns<INodeCommentRow[]>(),
+  );
 };

@@ -14,7 +14,7 @@ import {
   validNode,
   withCommentsNode,
 } from './consts';
-import { SingleNodeFlow } from './fragments';
+import { SingleNodeFlow } from '../../components';
 import { ARG_CATEGORIES } from '../../consts';
 import { WithCanvasStage, withCanvasStore, withPermissionsStore, WithReactFlow } from '../../decorators';
 
@@ -22,7 +22,6 @@ const meta: Meta<typeof CanvasNode> = {
   title: 'Components/Canvas/CanvasNode',
   component: CanvasNode,
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:

@@ -4,8 +4,8 @@ export const useFiltered = <T>(items: readonly T[], query: string, picker: (item
   useMemo(() => {
     if (!query.trim()) return [...items];
 
-    const q = query.toLowerCase();
+    const normalizedQuery = query.toLowerCase();
 
-    return items.filter((item) => picker(item).toLowerCase().includes(q));
+    return items.filter((item) => picker(item).toLowerCase().includes(normalizedQuery));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [items, query]);

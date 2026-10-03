@@ -1,14 +1,11 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 import { AlertTriangle } from 'lucide-react';
-import { useState } from 'react';
 import { useArgs } from 'storybook/preview-api';
 import { fn } from 'storybook/test';
 
-import type { TModalTabId } from '@story-interfaces';
 import { ConfirmDialog, Modal } from '@/components';
 
-import { MODAL_TABS } from './consts';
-import { TriggerExample } from './fragments';
+import { TabbedModalWithState, TriggerExample } from './fragments';
 import { ARG_CATEGORIES } from '../../consts';
 import { WithPad } from '../../decorators';
 
@@ -115,10 +112,10 @@ export const Scrollable: Story = {
           The modal body scrolls when content exceeds 90vh.
         </p>
         <div className="mt-4 space-y-3">
-          {Array.from({ length: 30 }).map((_, i) => (
-            <p key={i} className="text-[13px] leading-relaxed text-[color:var(--text)]">
+          {Array.from({ length: 30 }).map((_, index) => (
+            <p key={index} className="text-[13px] leading-relaxed text-[color:var(--text)]">
               <span className="font-mono-ui text-[11px] text-[color:var(--text-subtle)]">
-                ¶ {String(i + 1).padStart(2, '0')}
+                ¶ {String(index + 1).padStart(2, '0')}
               </span>{' '}
               — Long-form paragraph used to test the scroll behaviour inside the modal container. Each line wraps
               naturally on smaller widths and stacks vertically.
@@ -217,9 +214,9 @@ export const FormCase: Story = {
         <Modal open={open} onClose={() => updateArgs({ open: false })} className="max-w-md">
           <form
             className="p-6"
-            onSubmit={(e) => {
-              e.preventDefault();
-              const data = new FormData(e.currentTarget);
+            onSubmit={(event) => {
+              event.preventDefault();
+              const data = new FormData(event.currentTarget);
               onSubmit(Object.fromEntries(data.entries()));
               updateArgs({ open: false });
             }}
@@ -286,52 +283,18 @@ export const WithTabs: Story = {
     docs: {
       description: {
         story:
-          'Modal hosting a small tab navigation. Each tab swaps the body via `useState` — useful for settings shells that group related panels under one surface.',
+          'Modal hosting a small tab navigation. Each tab swaps the body — useful for settings shells that group related panels under one surface.',
       },
     },
   },
   args: { open: false, className: 'max-w-xl' },
   render: function Render(args) {
     const [{ open }, updateArgs] = useArgs<typeof args>();
-    const [activeTab, setActiveTab] = useState<TModalTabId>('overview');
-    const active = MODAL_TABS.find((t) => t.id === activeTab) ?? MODAL_TABS[0];
 
     return (
       <>
         <TriggerExample onClick={() => updateArgs({ open: true })} label="Open tabbed modal" />
-        <Modal {...args} open={open} onClose={() => updateArgs({ open: false })}>
-          <div className="px-6 pt-5 pb-2">
-            <h2 className="text-base font-bold text-[color:var(--text-strong)]">Workspace settings</h2>
-            <p className="mt-1 text-[12px] text-[color:var(--text-muted)]">
-              Inspect and tweak each area of the workspace from one panel.
-            </p>
-          </div>
-          <nav role="tablist" className="flex gap-1 border-b border-[color:var(--border)] px-4">
-            {MODAL_TABS.map((tab) => {
-              const isActive = tab.id === activeTab;
-
-              return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  role="tab"
-                  aria-selected={isActive}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={
-                    isActive
-                      ? 'rounded-t-md border-b-2 border-[color:var(--accent)] px-3 py-2 text-[12.5px] font-medium text-[color:var(--text-strong)]'
-                      : 'rounded-t-md border-b-2 border-transparent px-3 py-2 text-[12.5px] font-medium text-[color:var(--text-muted)] hover:text-[color:var(--text-strong)]'
-                  }
-                >
-                  {tab.label}
-                </button>
-              );
-            })}
-          </nav>
-          <div role="tabpanel" className="px-6 py-5">
-            <p className="text-[13px] leading-relaxed text-[color:var(--text)]">{active.body}</p>
-          </div>
-        </Modal>
+        <TabbedModalWithState {...args} open={open} onClose={() => updateArgs({ open: false })} />
       </>
     );
   },

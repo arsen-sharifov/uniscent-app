@@ -12,6 +12,7 @@ import {
   EXPORT_MIN_SCALE,
   EXPORT_SCALE,
   EXPORT_URL_LIFETIME_MS,
+  FILENAME_BIDI_CONTROL_RANGES,
   FILENAME_FORBIDDEN_PATTERN,
   FILENAME_RESERVED_PATTERN,
   FILENAME_TRAILING_CHARACTERS,
@@ -19,10 +20,13 @@ import {
 import { getCanvasContext } from './primitives';
 import { createCanvasSvg } from './svg';
 
+const isBidiControl = (code: number): boolean =>
+  FILENAME_BIDI_CONTROL_RANGES.some(({ start, end }) => code >= start && code <= end);
+
 const isPrintable = (character: string): boolean => {
   const code = character.codePointAt(0) ?? 0;
 
-  return code >= 32 && code !== 127;
+  return code >= 32 && code !== 127 && !isBidiControl(code);
 };
 
 export const getExportFilename = (threadName: string, format: TCanvasExportFormat): string => {

@@ -1,21 +1,33 @@
-import { ARIA_MODIFIER_MAP, SHORTCUT_MODIFIER_TOKENS } from '../consts';
-
-const ARIA_MODIFIER_PATTERN = new RegExp(Object.keys(ARIA_MODIFIER_MAP).join('|'), 'g');
+import {
+  ARIA_KEY_NAMES,
+  LATIN_LETTER_PATTERN,
+  LETTER_KEY_CODE_PATTERN,
+  LETTER_PATTERN,
+  SHORTCUT_MODIFIER_TOKENS,
+} from '../consts';
 
 export const renderShortcut = (shortcut: string): string[] =>
-  Array.from(shortcut).reduce<string[]>((tokens, char) => {
-    if (SHORTCUT_MODIFIER_TOKENS.has(char)) return [...tokens, char];
+  Array.from(shortcut).reduce<string[]>((tokens, character) => {
+    if (SHORTCUT_MODIFIER_TOKENS.has(character)) return [...tokens, character];
 
     const last = tokens.at(-1);
     if (last !== undefined && !SHORTCUT_MODIFIER_TOKENS.has(last)) {
-      return [...tokens.slice(0, -1), last + char];
+      return [...tokens.slice(0, -1), last + character];
     }
 
-    return [...tokens, char];
+    return [...tokens, character];
   }, []);
 
 export const toAriaShortcut = (shortcut: string | undefined): string | undefined => {
   if (!shortcut) return undefined;
 
-  return shortcut.replace(ARIA_MODIFIER_PATTERN, (token) => ARIA_MODIFIER_MAP[token] ?? token).replace(/\+\s*$/, '');
+  return renderShortcut(shortcut)
+    .map((token) => ARIA_KEY_NAMES[token] ?? token)
+    .join('+');
+};
+
+export const toShortcutKey = ({ key, code }: Pick<KeyboardEvent, 'key' | 'code'>): string => {
+  if (!LETTER_PATTERN.test(key) || LATIN_LETTER_PATTERN.test(key)) return key.toLowerCase();
+
+  return (LETTER_KEY_CODE_PATTERN.exec(code)?.[1] ?? key).toLowerCase();
 };

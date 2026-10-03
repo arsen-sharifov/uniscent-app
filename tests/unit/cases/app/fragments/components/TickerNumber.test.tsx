@@ -1,9 +1,9 @@
 import { act, cleanup, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
+import { REDUCED_MOTION_QUERY } from '@constants';
 import { stubAnimationFrame, stubIntersectionObserver, stubMediaQueries } from '@mocks/browser';
 import { TickerNumber } from '@/app/fragments/components';
-import { REDUCED_MOTION_QUERY } from '@/app/fragments/consts';
 
 let frames: ReturnType<typeof stubAnimationFrame>;
 let visibility: ReturnType<typeof stubIntersectionObserver>;

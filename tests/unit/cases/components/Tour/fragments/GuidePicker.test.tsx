@@ -9,8 +9,6 @@ import { useOnboardingStore } from '@/lib/onboarding';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
 
-const copy = TRANSLATIONS.platform.onboarding;
-
 const READY = snapshot({ workspaceCount: 1, threadId: 'thread-1', nodes: [canvasNode('n1')], referenceTargetCount: 1 });
 
 const guideRow = (title: string) =>
@@ -30,17 +28,23 @@ describe('GuidePicker', () => {
       });
 
       test('THEN only the first canvas can start and the rest explain why they wait', () => {
-        expect(guideRow(copy.guides.baseTitle)).toBeEnabled();
-        expect(guideRow(copy.guides.settingsTitle)).toBeDisabled();
-        expect(guideRow(copy.guides.settingsTitle)).toHaveTextContent(copy.pickerLocked);
+        expect(guideRow(TRANSLATIONS.platform.onboarding.guides.baseTitle)).toBeEnabled();
+        expect(guideRow(TRANSLATIONS.platform.onboarding.guides.settingsTitle)).toBeDisabled();
+        expect(guideRow(TRANSLATIONS.platform.onboarding.guides.settingsTitle)).toHaveTextContent(
+          TRANSLATIONS.platform.onboarding.pickerLocked,
+        );
         expect(screen.getByText('0 of 5 complete')).toBeInTheDocument();
+      });
+
+      test('THEN the dialog is named by its title', () => {
+        expect(screen.getByRole('dialog', { name: TRANSLATIONS.platform.onboarding.pickerTitle })).toBeInTheDocument();
       });
     });
 
     describe('WHEN the first canvas is chosen', () => {
       beforeEach(() => {
         render(<GuidePicker snapshot={READY} />);
-        fireEvent.click(guideRow(copy.guides.baseTitle));
+        fireEvent.click(guideRow(TRANSLATIONS.platform.onboarding.guides.baseTitle));
       });
 
       test('THEN its run starts and the picker closes', () => {
@@ -63,10 +67,12 @@ describe('GuidePicker', () => {
       });
 
       test('THEN the canvas guide names what it needs and the finished guide can be replayed', () => {
-        expect(guideRow(copy.guides.canvasTitle)).toBeDisabled();
-        expect(guideRow(copy.guides.canvasTitle)).toHaveTextContent(copy.hints.needsCanvas);
-        expect(guideRow(copy.guides.baseTitle)).toBeEnabled();
-        expect(screen.getByLabelText(copy.pickerReplay)).toBeInTheDocument();
+        expect(guideRow(TRANSLATIONS.platform.onboarding.guides.canvasTitle)).toBeDisabled();
+        expect(guideRow(TRANSLATIONS.platform.onboarding.guides.canvasTitle)).toHaveTextContent(
+          TRANSLATIONS.platform.onboarding.hints.needsCanvas,
+        );
+        expect(guideRow(TRANSLATIONS.platform.onboarding.guides.baseTitle)).toBeEnabled();
+        expect(screen.getByLabelText(TRANSLATIONS.platform.onboarding.pickerReplay)).toBeInTheDocument();
         expect(screen.getByText('1 of 5 complete')).toBeInTheDocument();
       });
     });

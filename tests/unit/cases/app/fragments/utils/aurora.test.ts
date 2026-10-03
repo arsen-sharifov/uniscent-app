@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
+import { REDUCED_MOTION_QUERY } from '@constants';
 import { createAuroraRenderer, draw, renderer } from '@mocks/auroraRenderer';
 import {
   stubAnimationFrame,
@@ -8,7 +9,7 @@ import {
   stubResizeObserver,
   stubWorker,
 } from '@mocks/browser';
-import { AURORA_IDLE_STOP_MS, LIGHT_SCHEME_QUERY, REDUCED_MOTION_QUERY } from '@/app/fragments/consts';
+import { AURORA_IDLE_STOP_MS, LIGHT_SCHEME_QUERY } from '@/app/fragments/consts';
 import type { attachAurora, auroraReady, detachAurora } from '@/app/fragments/utils';
 
 vi.mock('@/app/fragments/utils/auroraRenderer', () => ({ createAuroraRenderer }));

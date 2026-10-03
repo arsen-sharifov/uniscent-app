@@ -1,9 +1,9 @@
 import { act, cleanup, fireEvent, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
+import { REDUCED_MOTION_QUERY } from '@constants';
 import { stubMediaQueries } from '@mocks/browser';
 import { landingPager } from '@mocks/landing';
-import { REDUCED_MOTION_QUERY } from '@/app/fragments/consts';
 import { useSnapPager } from '@/app/fragments/hooks';
 
 const scrollTo = vi.fn();

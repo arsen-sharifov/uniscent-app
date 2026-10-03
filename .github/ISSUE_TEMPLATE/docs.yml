@@ -1,6 +1,6 @@
 name: Docs
 description: Documentation only (README, conventions, code docs)
-title: 'docs: '
+title: 'DEV: '
 labels: [docs]
 body:
   - type: textarea

@@ -1,11 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
 import { AVATAR_ICONS } from '@constants';
-import { Avatar, getInitials } from '@/components';
+import { Avatar } from '@/components';
 
 import { NAME_CASES, SCRIPT_CASES } from './consts';
 import {
   CommentThreadExample,
+  InitialsShowcase,
   PopoverTriggerExample,
   SidebarHeaderExample,
   WorkspaceMembersExample,
@@ -60,24 +61,7 @@ export const Variants: Story = {
       },
     },
   },
-  render: () => (
-    <Showcase
-      title="Initials resolution"
-      caption="getInitials()"
-      columns={3}
-      items={NAME_CASES.map((c) => ({
-        label: c.label,
-        hint: getInitials(c.name),
-        description: c.description,
-        children: (
-          <div className="flex items-center gap-3">
-            <Avatar name={c.name} />
-            <code className="font-mono-ui text-[11px] text-[color:var(--text-muted)]">{`"${c.name || ' '}"`}</code>
-          </div>
-        ),
-      }))}
-    />
-  ),
+  render: () => <InitialsShowcase title="Initials resolution" caption="getInitials()" cases={NAME_CASES} />,
 };
 
 export const CyrillicAndDiacritics: Story = {
@@ -89,24 +73,7 @@ export const CyrillicAndDiacritics: Story = {
       },
     },
   },
-  render: () => (
-    <Showcase
-      title="Non-Latin scripts"
-      caption="locale scripts"
-      columns={3}
-      items={SCRIPT_CASES.map((c) => ({
-        label: c.label,
-        hint: getInitials(c.name),
-        description: c.description,
-        children: (
-          <div className="flex items-center gap-3">
-            <Avatar name={c.name} />
-            <code className="font-mono-ui text-[11px] text-[color:var(--text-muted)]">{`"${c.name}"`}</code>
-          </div>
-        ),
-      }))}
-    />
-  ),
+  render: () => <InitialsShowcase title="Non-Latin scripts" caption="locale scripts" cases={SCRIPT_CASES} />,
 };
 
 export const Sizes: Story = {
@@ -175,7 +142,6 @@ export const IconVsInitials: Story = {
     <Showcase
       title="Icon vs initials"
       caption="matched weight"
-      columns={5}
       items={(['xs', 'sm', 'md', 'lg', 'xl'] as const).map((size) => ({
         label: size,
         hint: `size=${size}`,

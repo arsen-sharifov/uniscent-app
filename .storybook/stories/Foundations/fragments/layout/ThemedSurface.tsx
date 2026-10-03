@@ -1,7 +1,7 @@
 import { clsx } from 'clsx';
 import type { ReactNode } from 'react';
 
-import type { TTheme } from '@constants';
+import type { TTheme } from '@interfaces';
 
 interface IThemedSurfaceProps {
   themeId: TTheme;

@@ -9,8 +9,8 @@ import type {
 
 import { createClient } from '@/lib/supabase';
 
-import { getUser } from './user';
-import { toMyWorkspace, toWorkspace, toWorkspaceAccess } from './utils';
+import { WORKSPACE_SELECT } from './consts';
+import { deleteRowsByIds, getCurrentUserId, toMyWorkspace, toWorkspace, toWorkspaceAccess } from './utils';
 
 export const getMyWorkspaces = async (): Promise<IWorkspaceItem[]> => {
   const supabase = createClient();
@@ -32,11 +32,20 @@ export const getMyWorkspacePermissions = async (workspaceId: string): Promise<IW
   return row ? toWorkspaceAccess(row) : null;
 };
 
+export const getMyOwnedSharedWorkspaces = async (): Promise<Pick<IWorkspace, 'id' | 'name'>[]> => {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc('get_my_owned_shared_workspaces');
+
+  if (error) throw error;
+
+  return (data ?? []) as Pick<IWorkspace, 'id' | 'name'>[];
+};
+
 export const getWorkspace = async (id: string): Promise<IWorkspace | null> => {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('workspaces')
-    .select('id, name, owner_id, created_at')
+    .select(WORKSPACE_SELECT)
     .eq('id', id)
     .maybeSingle<IWorkspaceRow>();
 
@@ -46,28 +55,23 @@ export const getWorkspace = async (id: string): Promise<IWorkspace | null> => {
 };
 
 export const createWorkspace = async (name: string): Promise<IWorkspace | null> => {
-  const {
-    data: { user },
-  } = await getUser();
-
-  if (!user) return null;
-
+  const ownerId = await getCurrentUserId();
   const supabase = createClient();
 
-  const { data, error: insertError } = await supabase
+  const { data, error } = await supabase
     .from('workspaces')
-    .insert({ name, owner_id: user.id })
-    .select('id, name, owner_id, created_at')
+    .insert({ name, owner_id: ownerId })
+    .select(WORKSPACE_SELECT)
     .single<IWorkspaceRow>();
 
-  if (insertError) throw insertError;
+  if (error) throw error;
 
   return data ? toWorkspace(data) : null;
 };
 
 export const updateWorkspaceName = async (id: string, name: string): Promise<void> => {
   const supabase = createClient();
-  const { error } = await supabase.from('workspaces').update({ name }).eq('id', id);
+  const { error } = await supabase.from('workspaces').update({ name }).eq('id', id).select('id').single();
 
   if (error) throw error;
 };
@@ -81,14 +85,18 @@ export const deleteWorkspace = async (id: string): Promise<void> => {
 
 export const deleteWorkspaces = async (ids: string[]): Promise<void> => {
   const supabase = createClient();
-  const { error } = await supabase.from('workspaces').delete().in('id', ids);
 
-  if (error) throw error;
+  return deleteRowsByIds(ids, (chunk) => supabase.from('workspaces').delete().in('id', chunk));
 };
 
 export const moveWorkspace = async (id: string, position: number): Promise<void> => {
   const supabase = createClient();
-  const { error } = await supabase.from('workspace_members').update({ position }).eq('workspace_id', id);
+  const { error } = await supabase
+    .from('workspace_members')
+    .update({ position })
+    .eq('workspace_id', id)
+    .select('workspace_id')
+    .single();
 
   if (error) throw error;
 };

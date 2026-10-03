@@ -2,8 +2,8 @@ import { cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { IAnchorRect, TTourAnchor } from '@interfaces';
-
-import { domRect } from '@mocks/browser';
+import { REDUCED_MOTION_QUERY } from '@constants';
+import { elementAt, stubMediaQueries } from '@mocks/browser';
 import { useAnchorInView } from '@/components/Tour/hooks';
 import { useCanvasStore } from '@/lib/stores';
 
@@ -11,27 +11,26 @@ const scrollIntoView = vi.fn();
 
 const CANVAS_RECT: IAnchorRect = { top: 0, left: 300, width: 1100, height: 760 };
 
-const boxAt = (anchor: TTourAnchor, { top, left, width, height }: IAnchorRect): HTMLElement => {
-  const element = document.createElement('div');
-  element.dataset.tour = anchor;
+const boxAt = (anchor: TTourAnchor, rect: IAnchorRect): HTMLElement => {
+  const element = elementAt({ 'data-tour': anchor }, rect);
   element.scrollIntoView = scrollIntoView;
-  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(
-    domRect({ top, left, width, height, right: left + width, bottom: top + height }),
-  );
 
   return element;
 };
 
 let fitsBefore: number;
+let media: ReturnType<typeof stubMediaQueries>;
 
 beforeEach(() => {
   Object.defineProperty(window, 'innerHeight', { configurable: true, value: 900 });
+  media = stubMediaQueries();
 });
 
 afterEach(() => {
   cleanup();
   document.body.innerHTML = '';
   useCanvasStore.getState().clearCanvas();
+  vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
@@ -90,6 +89,23 @@ describe('useAnchorInView', () => {
       test('THEN it is scrolled smoothly into view by the nearest edge and the canvas is left alone', () => {
         expect(scrollIntoView).toHaveBeenCalledExactlyOnceWith({ block: 'nearest', behavior: 'smooth' });
         expect(useCanvasStore.getState().fitRequest).toBe(fitsBefore);
+      });
+    });
+  });
+
+  describe('GIVEN a sidebar anchor below the bottom of the window and a user who prefers reduced motion', () => {
+    beforeEach(() => {
+      media.change(REDUCED_MOTION_QUERY, true);
+      document.body.append(boxAt('sidebarThreadResolved', { top: 910, left: 24, width: 20, height: 20 }));
+    });
+
+    describe('WHEN a step points at it', () => {
+      beforeEach(() => {
+        renderHook(() => useAnchorInView('sidebarThreadResolved'));
+      });
+
+      test('THEN it jumps into view without the smooth scroll animation', () => {
+        expect(scrollIntoView).toHaveBeenCalledExactlyOnceWith({ block: 'nearest', behavior: 'instant' });
       });
     });
   });

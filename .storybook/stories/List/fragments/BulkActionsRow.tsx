@@ -24,8 +24,8 @@ export const BulkActionsRow = ({ label, onSelect, onMenu }: IBulkActionsRowProps
       >
         <input
           type="checkbox"
-          onClick={(e) => e.stopPropagation()}
-          onChange={(e) => onSelect(label, e.currentTarget.checked)}
+          onClick={(event) => event.stopPropagation()}
+          onChange={(inputEvent) => onSelect(label, inputEvent.currentTarget.checked)}
           className="h-3.5 w-3.5 shrink-0 accent-[color:var(--accent)]"
         />
         <button type="button" onClick={toggle} className="flex flex-1 items-center gap-2 text-left">
@@ -37,8 +37,8 @@ export const BulkActionsRow = ({ label, onSelect, onMenu }: IBulkActionsRowProps
         </button>
         <button
           type="button"
-          onClick={(e) => {
-            e.stopPropagation();
+          onClick={(event) => {
+            event.stopPropagation();
             onMenu(label);
           }}
           className="rounded-md p-1 text-[color:var(--text-subtle)] hover:bg-[color:var(--surface)] hover:text-[color:var(--text)]"

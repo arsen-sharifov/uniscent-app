@@ -2,10 +2,10 @@
 
 import { clsx } from 'clsx';
 import { Check, ChevronDown } from 'lucide-react';
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import type { IWorkspaceRole } from '@interfaces';
-
+import { useClickOutside, useMenuKeyboardNavigation } from '@hooks';
 import { SelectionStrip } from '@/components';
 import { useTranslations } from '@/i18n';
 import { roleLabel } from '@/lib/utils';
@@ -30,12 +30,20 @@ export const RoleSelect = ({ value, roles, onChange, ariaLabel, className }: IRo
   const selected = roles.find((role) => role.id === value) ?? roles[0];
   const selectedLabel = selected ? roleLabel(selected.key, selected.name, t) : '';
 
+  useClickOutside(wrapperRef, () => setOpen(false), open);
+
+  const closeToTrigger = () => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
+
+  const { focusItem, handleKeyDown } = useMenuKeyboardNavigation(menuRef, {
+    itemRole: 'option',
+    onClose: closeToTrigger,
+  });
+
   useEffect(() => {
     if (!open) return;
-
-    const onPointerDown = (event: MouseEvent) => {
-      if (!wrapperRef.current?.contains(event.target as Node)) setOpen(false);
-    };
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -45,41 +53,16 @@ export const RoleSelect = ({ value, roles, onChange, ariaLabel, className }: IRo
       }
     };
 
-    document.addEventListener('mousedown', onPointerDown);
-    window.addEventListener('keydown', onKeyDown, true);
-
-    const options = menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]');
     const selectedIndex = roles.findIndex((role) => role.id === value);
-    options?.[Math.max(selectedIndex, 0)]?.focus();
+    window.addEventListener('keydown', onKeyDown, true);
+    focusItem(Math.max(selectedIndex, 0));
 
-    return () => {
-      document.removeEventListener('mousedown', onPointerDown);
-      window.removeEventListener('keydown', onKeyDown, true);
-    };
-  }, [open, roles, value]);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
+  }, [open, roles, value, focusItem]);
 
   const select = (roleId: string) => {
-    onChange(roleId);
-    setOpen(false);
-    triggerRef.current?.focus();
-  };
-
-  const handleMenuKeyDown = (event: ReactKeyboardEvent<HTMLDivElement>) => {
-    const options = Array.from(menuRef.current?.querySelectorAll<HTMLButtonElement>('[role="option"]') ?? []);
-
-    if (options.length === 0) return;
-
-    const currentIndex = options.indexOf(document.activeElement as HTMLButtonElement);
-
-    if (event.key === 'ArrowDown') {
-      event.preventDefault();
-      options[(currentIndex + 1) % options.length]?.focus();
-    } else if (event.key === 'ArrowUp') {
-      event.preventDefault();
-      options[(currentIndex - 1 + options.length) % options.length]?.focus();
-    } else if (event.key === 'Tab') {
-      setOpen(false);
-    }
+    if (roleId !== value) onChange(roleId);
+    closeToTrigger();
   };
 
   return (
@@ -87,7 +70,7 @@ export const RoleSelect = ({ value, roles, onChange, ariaLabel, className }: IRo
       <button
         ref={triggerRef}
         type="button"
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => setOpen((previous) => !previous)}
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-label={selectedLabel ? `${ariaLabel}: ${selectedLabel}` : ariaLabel}
@@ -115,7 +98,7 @@ export const RoleSelect = ({ value, roles, onChange, ariaLabel, className }: IRo
           role="listbox"
           tabIndex={-1}
           aria-label={ariaLabel}
-          onKeyDown={handleMenuKeyDown}
+          onKeyDown={handleKeyDown}
           className="absolute top-full left-0 z-20 mt-1 max-h-56 min-w-full overflow-y-auto rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] p-1 shadow-[var(--shadow-modal)] outline-none"
         >
           {roles.map((role) => {

@@ -12,7 +12,6 @@ const meta: Meta<typeof ContextMenu> = {
   title: 'Components/Canvas/ContextMenu',
   component: ContextMenu,
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:

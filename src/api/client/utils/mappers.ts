@@ -8,6 +8,8 @@ import type {
   IMyWorkspaceRow,
   INodeCommentRow,
   INodeReference,
+  IOnboardingProgress,
+  IOnboardingRow,
   IReferenceTargetMeta,
   IThread,
   IThreadRow,
@@ -20,11 +22,12 @@ import type {
   IWorkspaceMember,
   IWorkspaceMemberRow,
   IWorkspaceRole,
+  IWorkspaceRolePermissions,
   IWorkspaceRoleRow,
   IWorkspaceRow,
 } from '@interfaces';
 
-import { isAvatarIcon } from '@/lib/utils';
+import { isAvatarIcon, isGuideId } from '@/lib/utils';
 
 export const toWorkspace = (row: IWorkspaceRow): IWorkspace => ({
   id: row.id,
@@ -63,7 +66,7 @@ export const toThread = (row: IThreadRow): IThread => ({
   folderId: row.folder_id ?? null,
   name: row.name,
   position: row.position,
-  hasAnswer: false,
+  resolved: false,
 });
 
 export const toComment = (row: INodeCommentRow): IComment => ({
@@ -72,21 +75,22 @@ export const toComment = (row: INodeCommentRow): IComment => ({
   authorId: row.author_id,
 });
 
-export const toReferenceTargetMeta = (row: ICanvasNodeWithThreadRow): IReferenceTargetMeta => ({
-  nodeLabel: row.label,
+const toNodeThreadMeta = (row: ICanvasNodeWithThreadRow): Omit<INodeReference, 'id' | 'label'> => ({
   threadId: row.threads?.id ?? row.thread_id,
   threadName: row.threads?.name ?? '',
   workspaceId: row.threads?.workspace_id ?? '',
   workspaceName: row.threads?.workspaces?.name ?? '',
 });
 
+export const toReferenceTargetMeta = (row: ICanvasNodeWithThreadRow): IReferenceTargetMeta => ({
+  nodeLabel: row.label,
+  ...toNodeThreadMeta(row),
+});
+
 export const toNodeReference = (row: ICanvasNodeWithThreadRow): INodeReference => ({
   id: row.id,
   label: row.label,
-  threadId: row.threads?.id ?? row.thread_id,
-  threadName: row.threads?.name ?? '',
-  workspaceId: row.threads?.workspace_id ?? '',
-  workspaceName: row.threads?.workspaces?.name ?? '',
+  ...toNodeThreadMeta(row),
 });
 
 export const toWorkspaceRole = (row: IWorkspaceRoleRow): IWorkspaceRole => ({
@@ -95,14 +99,17 @@ export const toWorkspaceRole = (row: IWorkspaceRoleRow): IWorkspaceRole => ({
   name: row.name,
   icon: row.icon,
   isSystem: row.is_system,
-  isOwner: row.is_owner,
-  canEditCanvas: row.can_edit_canvas,
-  canComment: row.can_comment,
-  canManageStructure: row.can_manage_structure,
-  canManageMembers: row.can_manage_members,
-  canManageRoles: row.can_manage_roles,
-  canManageWorkspace: row.can_manage_workspace,
+  ...toWorkspaceAccess(row),
   memberCount: Number(row.member_count),
+});
+
+export const toRolePermissionParams = (permissions: IWorkspaceRolePermissions) => ({
+  p_can_edit_canvas: permissions.canEditCanvas,
+  p_can_comment: permissions.canComment,
+  p_can_manage_structure: permissions.canManageStructure,
+  p_can_manage_members: permissions.canManageMembers,
+  p_can_manage_roles: permissions.canManageRoles,
+  p_can_manage_workspace: permissions.canManageWorkspace,
 });
 
 export const toWorkspaceMember = (row: IWorkspaceMemberRow): IWorkspaceMember => ({
@@ -134,4 +141,9 @@ export const toMyInvitation = (row: IMyInvitationRow): IMyInvitation => ({
   roleName: row.role_name,
   invitedByName: row.invited_by_name,
   createdAt: row.created_at,
+});
+
+export const toOnboardingProgress = (row: IOnboardingRow): IOnboardingProgress => ({
+  offerAnswered: row.offer_answered,
+  completedGuides: row.completed_guides.filter(isGuideId),
 });

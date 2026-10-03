@@ -6,9 +6,9 @@ import type { SubmitEvent } from 'react';
 import type { IComment } from '@interfaces';
 
 import { useTranslations } from '@/i18n';
+import { MAX_COMMENT_LENGTH } from '@/lib/canvas';
 import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
 
-import { isOwnComment } from '../utils';
 import { CommentItem } from './CommentItem';
 
 interface ICommentsPanelContentProps {
@@ -26,11 +26,11 @@ export const CommentsPanelContent = ({
 }: ICommentsPanelContentProps) => {
   const t = useTranslations();
 
-  const setOpenCommentsNodeId = useCanvasStore((s) => s.setOpenCommentsNodeId);
-  const addComment = useCanvasStore((s) => s.addComment);
-  const deleteComment = useCanvasStore((s) => s.deleteComment);
-  const userId = usePermissionsStore((s) => s.userId);
-  const canComment = usePermissionsStore((s) => s.canComment);
+  const setOpenCommentsNodeId = useCanvasStore((state) => state.setOpenCommentsNodeId);
+  const addComment = useCanvasStore((state) => state.addComment);
+  const deleteComment = useCanvasStore((state) => state.deleteComment);
+  const userId = usePermissionsStore((state) => state.userId);
+  const canComment = usePermissionsStore((state) => state.canComment);
 
   const handleCommentSubmit = (event: SubmitEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -63,7 +63,7 @@ export const CommentsPanelContent = ({
         </button>
       </div>
 
-      <div className="flex max-h-56 flex-col gap-1.5 overflow-y-auto px-3 py-2.5">
+      <div className="nowheel nopan flex max-h-56 flex-col gap-1.5 overflow-y-auto px-3 py-2.5">
         {comments.length === 0 ? (
           <p className="mx-auto max-w-[200px] py-4 text-center text-[11px] leading-snug text-[color:var(--text-muted)]">
             {t.platform.canvas.node.noComments}
@@ -73,7 +73,7 @@ export const CommentsPanelContent = ({
             <CommentItem
               key={comment.id}
               comment={comment}
-              canDelete={canComment && isOwnComment(comment, userId)}
+              canDelete={canComment && comment.authorId === userId}
               onDelete={(commentId) => deleteComment(nodeId, commentId)}
             />
           ))
@@ -83,10 +83,11 @@ export const CommentsPanelContent = ({
       {canComment && (
         <form
           onSubmit={handleCommentSubmit}
-          className="flex items-center gap-2 border-t border-[color:var(--border)] px-2.5 py-2"
+          className="nopan flex items-center gap-2 border-t border-[color:var(--border)] px-2.5 py-2"
         >
           <input
             value={commentText}
+            maxLength={MAX_COMMENT_LENGTH}
             onChange={(event) => onCommentTextChange(event.target.value)}
             placeholder={t.platform.canvas.node.addCommentPlaceholder}
             className="min-w-0 flex-1 bg-transparent px-1 text-[12px] text-[color:var(--text-strong)] caret-[color:var(--accent)] outline-none placeholder:text-[color:var(--text-muted)]"

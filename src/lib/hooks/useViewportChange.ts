@@ -2,12 +2,7 @@
 
 import { useEffect } from 'react';
 
-interface IUseViewportChangeOptions {
-  onScroll?: () => void;
-  onResize?: () => void;
-  enabled?: boolean;
-  capture?: boolean;
-}
+import type { IUseViewportChangeOptions } from '@interfaces';
 
 export const useViewportChange = ({
   onScroll,
@@ -17,7 +12,6 @@ export const useViewportChange = ({
 }: IUseViewportChangeOptions): void => {
   useEffect(() => {
     if (!enabled) return;
-    if (!onScroll && !onResize) return;
 
     if (onScroll) window.addEventListener('scroll', onScroll, capture);
     if (onResize) window.addEventListener('resize', onResize, capture);

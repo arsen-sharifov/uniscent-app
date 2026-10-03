@@ -1,8 +1,10 @@
 @import 'tailwindcss';
 @import './styles/themes.css';
 @import './styles/landing.css';
+@import '@xyflow/react/dist/style.css';
 @import '../components/Canvas/canvas.css';
 @import '../components/Mascot/mascot.css';
+@import '../components/Skeleton/skeleton.css';
 @import '../components/Tour/tour.css';
 
 @source '../**/*.{ts,tsx,js,jsx}';

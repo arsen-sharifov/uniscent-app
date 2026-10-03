@@ -3,7 +3,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import type { ITourSnapshot, TGuideId, TTourStepKey } from '@interfaces';
 
-import { domRect, stubAnimationFrame, stubResizeObserver } from '@mocks/browser';
+import { elementAt, stubAnimationFrame, stubResizeObserver } from '@mocks/browser';
 import { TRANSLATIONS } from '@mocks/i18n';
 import { NO_TOUR_ACCESS, snapshot } from '@mocks/onboarding';
 import { TourRun } from '@/components/Tour';
@@ -11,9 +11,7 @@ import { findGuide, useOnboardingStore } from '@/lib/onboarding';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
 
-const copy = TRANSLATIONS.platform.onboarding;
-
-const SWITCHER_RECT = domRect({ top: 20, left: 16, right: 256, bottom: 64, width: 240, height: 44 });
+const SWITCHER_RECT = { top: 20, left: 16, width: 240, height: 44 };
 
 const stepIndexOf = (guideId: TGuideId, copyKey: TTourStepKey) =>
   findGuide(guideId)?.steps.findIndex((step) => step.copyKey === copyKey) ?? -1;
@@ -57,7 +55,7 @@ describe('TourRun', () => {
 
       test('THEN the step waits to be read and offers next', () => {
         expect(useOnboardingStore.getState().run?.stepIndex).toBe(stepIndexOf('base', 'baseWorkspace'));
-        expect(screen.getByText(copy.stepNext)).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.stepNext)).toBeInTheDocument();
       });
     });
   });
@@ -71,8 +69,8 @@ describe('TourRun', () => {
 
       test('THEN it waits for the action again instead of offering next', () => {
         expect(useOnboardingStore.getState().run?.stepIndex).toBe(stepIndexOf('base', 'baseThread'));
-        expect(screen.queryByText(copy.stepNext)).not.toBeInTheDocument();
-        expect(screen.getByText(copy.stepWaiting)).toBeInTheDocument();
+        expect(screen.queryByText(TRANSLATIONS.platform.onboarding.stepNext)).not.toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.stepWaiting)).toBeInTheDocument();
       });
     });
   });
@@ -92,10 +90,7 @@ describe('TourRun', () => {
   describe('GIVEN a step whose target is on screen', () => {
     beforeEach(() => {
       const frames = stubAnimationFrame();
-      const switcher = document.createElement('div');
-      switcher.dataset.tour = 'sidebarWorkspaceSwitcher';
-      document.body.append(switcher);
-      vi.spyOn(switcher, 'getBoundingClientRect').mockReturnValue(SWITCHER_RECT);
+      document.body.append(elementAt({ 'data-tour': 'sidebarWorkspaceSwitcher' }, SWITCHER_RECT));
       runAt('base', 'baseWorkspace', snapshot());
       act(() => frames.flush());
       ring = spotlightRing();
@@ -122,7 +117,7 @@ describe('TourRun', () => {
     describe('WHEN the user leaves the tour', () => {
       beforeEach(() => {
         runAt('base', 'baseIntro', snapshot());
-        act(() => screen.getByTitle(copy.quit).click());
+        act(() => screen.getByTitle(TRANSLATIONS.platform.onboarding.quit).click());
       });
 
       test('THEN the run is dropped and the offer counts as answered', () => {

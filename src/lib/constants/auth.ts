@@ -1,8 +1,20 @@
 export const INVITE_RATE_LIMIT_WINDOW_MS = 60_000;
 export const INVITE_RATE_LIMIT_MAX_ATTEMPTS = 8;
 
+export const WORKSPACE_INVITE_RATE_LIMIT_WINDOW_MS = 3_600_000;
+export const WORKSPACE_INVITE_RATE_LIMIT_MAX_ATTEMPTS = 30;
+
+export const PASSWORD_CHECK_RATE_LIMIT_WINDOW_MS = 900_000;
+export const PASSWORD_CHECK_RATE_LIMIT_MAX_ATTEMPTS = 5;
+
+export const RATE_LIMIT_MAX_TRACKED_KEYS = 10_000;
+
+export const MAX_EMAIL_LENGTH = 254;
+
 export const MIN_PASSWORD_LENGTH = 8;
 
 export const MAX_NAME_LENGTH = 60;
 
 export const EMAIL_PATTERN = /^[^\s@]+@[^\s@][^\s@.]*\.[^\s@]+$/;
+
+export const EMAIL_TEXT_UNSAFE_PATTERN = /[\p{Cc}\u200E\u200F\u202A-\u202E\u2066-\u2069]/gu;

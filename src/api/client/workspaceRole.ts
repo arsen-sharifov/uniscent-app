@@ -2,7 +2,7 @@ import type { IWorkspaceRole, IWorkspaceRolePermissions, IWorkspaceRoleRow } fro
 
 import { createClient } from '@/lib/supabase';
 
-import { toWorkspaceRole } from './utils';
+import { toRolePermissionParams, toWorkspaceRole } from './utils';
 
 export const getWorkspaceRoles = async (workspaceId: string): Promise<IWorkspaceRole[]> => {
   const supabase = createClient();
@@ -26,12 +26,7 @@ export const createWorkspaceRole = async (
     p_workspace_id: workspaceId,
     p_name: name,
     p_icon: icon,
-    p_can_edit_canvas: permissions.canEditCanvas,
-    p_can_comment: permissions.canComment,
-    p_can_manage_structure: permissions.canManageStructure,
-    p_can_manage_members: permissions.canManageMembers,
-    p_can_manage_roles: permissions.canManageRoles,
-    p_can_manage_workspace: permissions.canManageWorkspace,
+    ...toRolePermissionParams(permissions),
   });
 
   if (error) throw error;
@@ -51,12 +46,7 @@ export const updateWorkspaceRole = async (
     p_role_id: roleId,
     p_name: name,
     p_icon: icon,
-    p_can_edit_canvas: permissions.canEditCanvas,
-    p_can_comment: permissions.canComment,
-    p_can_manage_structure: permissions.canManageStructure,
-    p_can_manage_members: permissions.canManageMembers,
-    p_can_manage_roles: permissions.canManageRoles,
-    p_can_manage_workspace: permissions.canManageWorkspace,
+    ...toRolePermissionParams(permissions),
   });
 
   if (error) throw error;

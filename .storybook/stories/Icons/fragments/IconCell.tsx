@@ -1,15 +1,12 @@
-import { Check, Copy, type icons } from 'lucide-react';
+import { clsx } from 'clsx';
+import { Check, Copy, type LucideProps, type icons } from 'lucide-react';
 import { useState } from 'react';
 
 import { COPY_FEEDBACK_DELAY_MS } from '../../../consts';
 
-interface IIconCellProps {
+interface IIconCellProps extends Pick<LucideProps, 'absoluteStrokeWidth' | 'color' | 'size' | 'strokeWidth'> {
   name: string;
   Icon: (typeof icons)[keyof typeof icons];
-  size?: number;
-  color?: string;
-  strokeWidth?: number;
-  absoluteStrokeWidth?: boolean;
   onCopy: (name: string) => void;
 }
 
@@ -41,11 +38,12 @@ export const IconCell = ({ name, Icon, size, color, strokeWidth, absoluteStrokeW
         {name}
       </span>
       <span
-        className={`absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-md transition-opacity ${
+        className={clsx(
+          'absolute top-1.5 right-1.5 flex h-5 w-5 items-center justify-center rounded-md transition-opacity',
           copied
             ? 'bg-[color:var(--status-success-soft)] text-[color:var(--status-success)] opacity-100'
-            : 'bg-[color:var(--surface-overlay)] text-[color:var(--text-subtle)] opacity-0 group-hover:opacity-100'
-        }`}
+            : 'bg-[color:var(--surface-overlay)] text-[color:var(--text-subtle)] opacity-0 group-hover:opacity-100',
+        )}
       >
         {copied ? <Check className="h-3 w-3" strokeWidth={2.5} /> : <Copy className="h-3 w-3" strokeWidth={2} />}
       </span>

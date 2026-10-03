@@ -2,6 +2,8 @@ export * from './auth';
 export * from './avatarIcons';
 export * from './badges';
 export * from './errors';
+export * from './focus';
+export * from './media';
 export * from './modal';
 export * from './onboarding';
 export * from './preferences';

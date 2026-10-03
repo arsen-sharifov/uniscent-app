@@ -6,6 +6,7 @@ import {
   toMyInvitation,
   toMyWorkspace,
   toNodeReference,
+  toOnboardingProgress,
   toReferenceTargetMeta,
   toThread,
   toWorkspace,
@@ -99,14 +100,14 @@ describe('toFolder', () => {
 describe('toThread', () => {
   describe('GIVEN a thread row', () => {
     describe('WHEN it is mapped', () => {
-      test('THEN hasAnswer defaults to false', () => {
+      test('THEN the resolved flag defaults to false', () => {
         expect(toThread(threadRow({ folder_id: 'folder-1' }))).toEqual({
           id: 'th-1',
           workspaceId: 'ws-1',
           folderId: 'folder-1',
           name: 'Thread',
           position: 0,
-          hasAnswer: false,
+          resolved: false,
         });
       });
     });
@@ -263,6 +264,21 @@ describe('toMyInvitation', () => {
           invitedByName: 'Owner',
           createdAt: '2026-01-01T00:00:00Z',
         });
+      });
+    });
+  });
+});
+
+describe('toOnboardingProgress', () => {
+  describe('GIVEN an onboarding row listing a retired guide id', () => {
+    describe('WHEN it is mapped', () => {
+      test('THEN the flags map to camel case and unknown guides are dropped', () => {
+        expect(toOnboardingProgress({ offer_answered: true, completed_guides: ['base', 'retired', 'canvas'] })).toEqual(
+          {
+            offerAnswered: true,
+            completedGuides: ['base', 'canvas'],
+          },
+        );
       });
     });
   });

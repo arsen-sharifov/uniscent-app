@@ -2,25 +2,26 @@
   "auth": {
     "signIn": {
       "heading": "Autentificare",
-      "subtitle": "Bine ai revenit",
+      "subtitle": "Bine ați revenit",
       "email": "Email",
       "password": "Parolă",
       "submit": "Autentificare",
       "submitting": "Se autentifică…",
-      "emailSent": "Verifică emailul pentru a confirma contul.",
-      "noAccount": "Nu ai cont?",
-      "signUpLink": "Înregistrează-te"
+      "emailSent": "Verificați emailul pentru a confirma contul.",
+      "invalidLink": "Linkul este invalid sau a expirat. Încercați să vă autentificați sau cereți un link nou.",
+      "noAccount": "Nu aveți cont?",
+      "signUpLink": "Înregistrați-vă"
     },
     "signUp": {
-      "heading": "Creează cont",
-      "subtitle": "Completează datele",
+      "heading": "Creați cont",
+      "subtitle": "Completați datele",
       "steps": {
         "plan": "Plan",
         "account": "Cont"
       },
       "planStep": {
-        "heading": "Alege planul",
-        "subtitle": "Selectează cum vrei să începi",
+        "heading": "Alegeți planul",
+        "subtitle": "Selectați cum doriți să începeți",
         "available": "Disponibil",
         "betaPlan": "Beta",
         "free": "Gratuit",
@@ -28,48 +29,61 @@
         "comingSoon": "În curând",
         "paidPlansNote": "Planurile plătite vor fi disponibile după perioada beta.",
         "earlyBirdNote": "Utilizatorii beta vor beneficia de prețuri preferențiale.",
-        "continue": "Continuă"
+        "continue": "Continuați"
       },
       "accountStep": {
         "name": "Nume complet",
         "inviteCode": "Cod de invitație",
-        "inviteCodeTooltip": "Necesar în perioada beta închisă. Cere echipei codul tău.",
-        "inviteCodePlaceholder": "Introdu codul de invitație",
+        "inviteCodeTooltip": "Necesar în perioada beta închisă. Cereți codul de la echipă.",
+        "inviteCodePlaceholder": "Introduceți codul de invitație",
         "email": "Email",
         "password": "Parolă",
         "back": "Înapoi",
         "submit": "Înregistrare",
         "submitting": "Se creează contul…",
-        "emailLocked": "Ai fost invitat cu acest e-mail",
-        "join": "Alătură-te",
+        "emailLocked": "Ați fost invitat cu acest e-mail",
+        "join": "Alăturați-vă",
         "joining": "Se alătură…"
       },
-      "hasAccount": "Ai deja cont?",
+      "hasAccount": "Aveți deja cont?",
       "signInLink": "Autentificare",
-      "inviteHeading": "Configurează-ți contul",
-      "inviteSubtitle": "Te alături echipei tale pe Uniscept"
+      "inviteHeading": "Configurați-vă contul",
+      "inviteSubtitle": "Vă alăturați echipei pe Uniscept"
+    },
+    "join": {
+      "heading": "Ați fost invitat",
+      "subtitle": "Acceptați invitația pentru a vă configura contul pe Uniscept.",
+      "accept": "Acceptați invitația",
+      "accepting": "Se acceptă…",
+      "signedInAs": "Sunteți autentificat ca {email}. Pentru a accepta invitația, mai întâi veți fi deconectat din acest cont.",
+      "switchAccount": "Deconectați-vă și acceptați",
+      "stay": "Rămâneți autentificat"
     },
     "placeholders": {
       "name": "Ion Popescu",
-      "email": "tu@exemplu.com",
+      "email": "name@example.com",
       "password": "••••••••"
     },
     "errors": {
-      "invalidInviteCode": "Cod de invitație invalid"
+      "invalidInviteCode": "Cod de invitație invalid",
+      "signInFailed": "Nu s-a putut face autentificarea",
+      "signUpFailed": "Nu s-a putut crea contul",
+      "joinFailed": "Nu s-a putut configura contul"
     },
     "confirmed": {
       "heading": "Email confirmat",
-      "message": "Emailul tău a fost verificat cu succes. Poți închide această filă și reveni la cea anterioară.",
-      "close": "Închide fila"
+      "message": "Emailul a fost verificat cu succes. Puteți închide această filă și reveni la cea anterioară.",
+      "close": "Închideți fila"
     },
     "aside": {
-      "quote": "Construiește cunoaștere. Nu haos.",
+      "quote": "Construiți cunoaștere. Nu haos.",
       "tagline": "Raționament structurat pentru echipele care livrează."
     }
   },
   "common": {
-    "loading": "Se încarcă",
-    "close": "Închide",
+    "close": "Închideți",
+    "moreInfo": "Mai multe informații",
+    "completed": "Finalizat",
     "userAvatar": "Utilizator",
     "notifications": "Notificări",
     "errors": {
@@ -77,6 +91,7 @@
       "permission": "Nu aveți permisiunea pentru această acțiune.",
       "notFound": "Nu am mai putut găsi acel element.",
       "rateLimit": "Prea multe încercări. Așteptați un moment.",
+      "limitReached": "Limită atinsă. Eliminați câteva elemente și încercați din nou.",
       "validation": "Unele detalii par invalide. Verificați și încercați din nou.",
       "auth": "Sesiunea a expirat. Conectați-vă din nou.",
       "unknown": "Ceva nu a mers bine. Încercați din nou.",
@@ -84,10 +99,10 @@
       "emailNotConfirmed": "Confirmați adresa de email înainte de autentificare.",
       "emailTaken": "Există deja un cont cu acest email.",
       "invalidEmail": "Această adresă de email nu pare validă.",
-      "weakPassword": "Parola este prea slabă. Folosiți cel puțin 6 caractere.",
-      "samePassword": "Parola nouă trebuie să difere de cea actuală."
+      "weakPassword": "Parola este prea slabă. Folosiți cel puțin 8 caractere.",
+      "samePassword": "Parola nouă trebuie să difere de cea actuală.",
+      "ownsSharedWorkspaces": "Transferați sau ștergeți spațiile pe care le partajați cu alții înainte de a vă șterge contul."
     },
-    "noPermission": "Nu ai permisiunea necesară",
     "errorTitles": {
       "createFailed": "Nu s-a putut crea",
       "renameFailed": "Nu s-a putut redenumi",
@@ -105,15 +120,18 @@
       "errorTitle": "Ceva s-a stricat",
       "errorHint": "A apărut o eroare neașteptată. Puteți încerca din nou.",
       "retry": "Încercați din nou"
+    },
+    "metadata": {
+      "description": "O platformă pentru discuții structurate și cartografierea argumentelor"
     }
   },
   "platform": {
     "sidebar": {
       "invitations": {
         "title": "Invitații",
-        "accept": "Acceptă",
-        "decline": "Refuză",
-        "accepted": "Te-ai alăturat spațiului de lucru",
+        "accept": "Acceptați",
+        "decline": "Refuzați",
+        "accepted": "V-ați alăturat spațiului de lucru",
         "declined": "Invitație refuzată",
         "acceptFailed": "Nu s-a putut accepta invitația",
         "declineFailed": "Nu s-a putut refuza invitația"
@@ -121,7 +139,7 @@
       "workspaceSettings": "Setări spațiu de lucru",
       "workspaces": "Spații",
       "noWorkspaceSelected": "Niciun spațiu selectat",
-      "noWorkspaces": "Niciun spațiu de lucru. Creează unul pentru a începe.",
+      "noWorkspaces": "Niciun spațiu de lucru. Creați unul pentru a începe.",
       "newWorkspace": "Spațiu nou",
       "workspaceCreated": "Spațiu creat",
       "threadCreated": "Fir creat",
@@ -138,41 +156,48 @@
       "structure": "Structură",
       "newThread": "Fir nou",
       "newFolder": "Folder nou",
+      "defaultNames": {
+        "workspace": "Spațiu nou",
+        "folder": "Folder nou",
+        "thread": "Fir nou"
+      },
       "signOut": "Deconectare",
-      "deleteWorkspaceTitle": "Șterge spațiul",
-      "deleteFolderTitle": "Șterge folderul",
-      "deleteThreadTitle": "Șterge firul",
-      "deleteConfirmPrefix": "Sigur vrei să ștergi",
+      "deleteWorkspaceTitle": "Ștergeți spațiul",
+      "deleteFolderTitle": "Ștergeți folderul",
+      "deleteThreadTitle": "Ștergeți firul",
+      "deleteConfirmPrefix": "Sigur doriți să ștergeți",
       "deleteConfirmSuffix": "? Această acțiune nu poate fi anulată.",
-      "rename": "Redenumește",
-      "delete": "Șterge",
-      "cancel": "Anulează",
-      "move": "Mută",
+      "rename": "Redenumiți",
+      "delete": "Ștergeți",
+      "cancel": "Anulați",
+      "move": "Mutați",
       "treeAriaLabel": "Navigare",
-      "dragToReorder": "Trage pentru a reordona",
+      "dragToReorder": "Trageți pentru a reordona",
       "resolved": "Rezolvat",
-      "itemsSelected": "elemente selectate",
-      "workspacesSelected": "spații selectate",
-      "moveToFolder": "Mută în folder",
+      "itemsSelected": "{count, plural, one {element selectat} few {elemente selectate} other {de elemente selectate}}",
+      "workspacesSelected": "{count, plural, one {spațiu selectat} few {spații selectate} other {de spații selectate}}",
+      "moveToFolder": "Mutați în folder",
+      "structureLocked": "Necesită permisiunea „Gestionează fire și foldere”",
       "rootLevel": "Nivel rădăcină",
-      "bulkDeleteTitle": "Șterge elementele",
-      "bulkDeleteConfirm": "Sigur vrei să ștergi aceste elemente? Acțiunea nu poate fi anulată.",
-      "searchPlaceholder": "Caută…",
+      "bulkDeleteTitle": "Ștergeți elementele",
+      "bulkDeleteConfirm": "Sigur doriți să ștergeți aceste elemente? Acțiunea nu poate fi anulată.",
+      "searchPlaceholder": "Căutați…",
+      "clearSearch": "Ștergeți căutarea",
       "noSearchResults": "Nu s-au găsit potriviri",
       "emptyStructureTitle": "Nimic aici încă",
-      "emptyStructureHint": "Creează un fir sau un folder pentru a începe organizarea.",
+      "emptyStructureHint": "Creați un fir sau un folder pentru a începe organizarea.",
       "newWorkspaceTitle": "Niciun spațiu de lucru",
-      "newWorkspaceHint": "Spațiile de lucru ajută să separi proiecte diferite.",
-      "noWorkspaceTitle": "Alege un spațiu",
-      "noWorkspaceHintCta": "Creează unul sau selectează unul existent pentru a începe."
+      "newWorkspaceHint": "Spațiile de lucru vă ajută să separați proiecte diferite.",
+      "noWorkspaceTitle": "Alegeți un spațiu",
+      "noWorkspaceHintCta": "Creați unul sau selectați unul existent pentru a începe."
     },
     "canvas": {
       "export": {
-        "label": "Exportă pânza",
+        "label": "Exportați pânza",
         "description": "Întregul graf, în tema curentă, cu o mică marcă Uniscept.",
         "loading": "Se pregătește exportul…",
-        "unavailable": "Deschide o pânză pentru a o exporta.",
-        "tooLarge": "Acest graf este prea mare pentru o imagine clară. Alege SVG pentru a-l exporta la orice dimensiune.",
+        "unavailable": "Deschideți o pânză pentru a o exporta.",
+        "tooLarge": "Acest graf este prea mare pentru o imagine clară. Alegeți SVG pentru a-l exporta la orice dimensiune.",
         "formats": {
           "png": "Imagine de înaltă calitate",
           "jpg": "Fișier imagine mai mic",
@@ -180,16 +205,16 @@
         }
       },
       "referenceSearch": {
-        "placeholder": "Caută noduri…",
+        "placeholder": "Căutați noduri…",
         "noResults": "Niciun nod găsit",
-        "noMatch": "Nimic nu corespunde „{query}”",
-        "hint": "Încearcă altă etichetă sau alt cuvânt cheie.",
+        "noMatch": "Nimic nu corespunde cu „{query}”",
+        "hint": "Încercați altă etichetă sau alt cuvânt cheie.",
         "actionLink": "leagă",
         "actionNavigate": "deschide",
         "actionClose": "închide"
       },
       "tools": {
-        "ariaLabel": "Instrumente canvas",
+        "ariaLabel": "Instrumentele pânzei",
         "groups": {
           "navigate": "Navigare",
           "history": "Istoric",
@@ -199,63 +224,63 @@
         },
         "items": {
           "select": {
-            "label": "Selectează",
-            "description": "Selectează și mută noduri pe canvas."
+            "label": "Selectați",
+            "description": "Selectați și mutați noduri pe pânză."
           },
           "pan": {
             "label": "Deplasare",
-            "description": "Ține apăsat și trage pentru a deplasa zona vizibilă."
+            "description": "Țineți apăsat și trageți pentru a deplasa zona vizibilă."
           },
           "zoomIn": {
-            "label": "Mărește",
-            "description": "Click oriunde pentru a mări spre acel punct. Ține Shift pentru a micșora."
+            "label": "Măriți",
+            "description": "Click oriunde pentru a mări spre acel punct. Țineți Shift pentru a micșora."
           },
           "zoomOut": {
-            "label": "Micșorează",
-            "description": "Click oriunde pentru a micșora din acel punct. Ține Shift pentru a mări."
+            "label": "Micșorați",
+            "description": "Click oriunde pentru a micșora din acel punct. Țineți Shift pentru a mări."
           },
           "addNode": {
-            "label": "Adaugă nod",
-            "description": "Click oriunde pe canvas pentru a plasa un nod nou."
+            "label": "Adăugați nod",
+            "description": "Click oriunde pe pânză pentru a plasa un nod nou."
           },
           "connect": {
-            "label": "Conectează",
+            "label": "Conectați",
             "description": "Click pe două noduri pentru a le lega."
           },
           "delete": {
-            "label": "Șterge",
+            "label": "Ștergeți",
             "description": "Click pe un nod sau o muchie pentru a o elimina."
           },
           "validPath": {
-            "label": "Marchează valid",
-            "description": "Marchează nodurile selectate ca traseu valid."
+            "label": "Marcați valid",
+            "description": "Marcați nodurile selectate ca traseu valid."
           },
           "invalidPath": {
-            "label": "Marchează invalid",
-            "description": "Marchează nodurile selectate ca traseu invalid."
+            "label": "Marcați invalid",
+            "description": "Marcați nodurile selectate ca traseu invalid."
           },
           "answer": {
             "label": "Răspuns",
-            "description": "Marchează un nod ca răspuns final al discuției."
+            "description": "Marcați un nod ca răspuns final al discuției."
           },
           "crossReference": {
             "label": "Referință încrucișată",
-            "description": "Plasează o referință către un nod dintr-un alt canvas."
+            "description": "Plasați o referință către un nod de pe altă pânză."
           },
           "undo": {
-            "label": "Anulează",
-            "description": "Întoarce-te la modificările anterioare."
+            "label": "Anulați",
+            "description": "Întoarceți-vă la modificările anterioare."
           },
           "redo": {
-            "label": "Refă",
-            "description": "Reia modificarea pe care tocmai ai anulat-o."
+            "label": "Refaceți",
+            "description": "Reluați modificarea pe care tocmai ați anulat-o."
           }
         }
       },
       "loadError": {
-        "title": "Backend canvas inaccesibil",
-        "hint": "Nu s-a putut conecta la Supabase pentru a încărca acest canvas. Verifică instanța locală Supabase și reîncearcă.",
-        "retry": "Reîncearcă"
+        "title": "Pânza nu a putut fi încărcată",
+        "hint": "Verificați conexiunea și încercați din nou.",
+        "retry": "Reîncercați"
       },
       "node": {
         "answerBadge": "Răspuns",
@@ -263,33 +288,34 @@
         "invalidBadge": "Invalid",
         "affectedBadge": "Afectat",
         "defaultLabel": "Nod nou",
-        "showMore": "Afișează mai mult",
-        "showLess": "Afișează mai puțin",
-        "viewComments": "Vezi comentariile",
-        "addComment": "Adaugă comentariu",
-        "addCommentPlaceholder": "Adaugă un comentariu…",
-        "sendComment": "Trimite comentariul",
-        "closeComments": "Închide",
+        "showMore": "Afișați mai mult",
+        "showLess": "Afișați mai puțin",
+        "viewComments": "Vedeți comentariile",
+        "addComment": "Adăugați comentariu",
+        "addCommentPlaceholder": "Adăugați un comentariu…",
+        "sendComment": "Trimiteți comentariul",
+        "closeComments": "Închideți",
         "commentsHeader": "Comentarii",
-        "noComments": "Niciun comentariu încă. Începe conversația."
+        "noComments": "Niciun comentariu încă. Începeți conversația.",
+        "labelAriaLabel": "Textul nodului"
       },
       "question": {
         "badge": "Întrebare",
         "placeholder": "Despre ce este această discuție?",
         "ariaLabel": "Întrebarea centrală",
-        "editLabel": "Editează întrebarea"
+        "editLabel": "Editați întrebarea"
       },
       "resolution": {
         "resolved": "Rezolvat"
       },
       "reference": {
         "badge": "Referință",
-        "openLabel": "Deschide {name}",
+        "openLabel": "Deschideți {name}",
         "workspaceFallback": "spațiu de lucru"
       },
       "comments": {
-        "deleteAriaLabel": "Șterge comentariu",
-        "deleteTitle": "Șterge comentariu"
+        "deleteAriaLabel": "Ștergeți comentariu",
+        "deleteTitle": "Ștergeți comentariu"
       },
       "save": {
         "retrying": "Se reîncearcă…",
@@ -298,179 +324,184 @@
         "offlinePending": "{count, plural, one {# modificare în așteptare} few {# modificări în așteptare} other {# de modificări în așteptare}}",
         "errorTitle": "Salvarea a eșuat",
         "errorChanges": "{count, plural, one {# modificare} few {# modificări} other {# de modificări}}",
-        "retry": "Reîncearcă",
-        "retryAriaLabel": "Reîncearcă modificările eșuate",
-        "discard": "Renunță",
-        "discardAriaLabel": "Renunță la modificările eșuate"
+        "retry": "Reîncercați",
+        "retryAriaLabel": "Reîncercați modificările eșuate",
+        "discard": "Renunțați",
+        "discardAriaLabel": "Renunțați la modificările eșuate"
       },
       "context": {
-        "ariaLabel": "Acțiuni canvas",
-        "addNode": "Adaugă nod",
-        "addReference": "Adaugă referință",
-        "deleteEdge": "Șterge muchia",
-        "openReferenced": "Deschide canvas-ul referit",
-        "deleteReference": "Șterge referința",
-        "markValid": "Marchează valid",
-        "unmarkValid": "Demarchează valid",
-        "markInvalid": "Marchează invalid",
-        "unmarkInvalid": "Demarchează invalid",
-        "markAnswer": "Marchează ca răspuns",
-        "unmarkAnswer": "Demarchează răspunsul",
+        "ariaLabel": "Acțiunile pânzei",
+        "addNode": "Adăugați nod",
+        "addReference": "Adăugați referință",
+        "deleteEdge": "Ștergeți muchia",
+        "openReferenced": "Deschideți pânza referită",
+        "deleteReference": "Ștergeți referința",
+        "markValid": "Marcați valid",
+        "unmarkValid": "Demarcați valid",
+        "markInvalid": "Marcați invalid",
+        "unmarkInvalid": "Demarcați invalid",
+        "markAnswer": "Marcați ca răspuns",
+        "unmarkAnswer": "Demarcați răspunsul",
         "needsValidParent": "Necesită întrebarea sau un pas valid înainte",
         "comment": "Comentariu",
-        "duplicate": "Duplică",
-        "delete": "Șterge"
+        "duplicate": "Duplicați",
+        "delete": "Ștergeți",
+        "deleteNotAllowed": "Doar autorul sau proprietarul spațiului îl poate șterge"
+      },
+      "deleteBlocked": {
+        "foreignNodes": "Nu s-a șters nimic. Unele noduri selectate pot fi șterse doar de autorul lor sau de proprietarul spațiului.",
+        "question": "Nu s-a șters nimic. Întrebarea nu poate fi ștearsă. Deselectați-o și încercați din nou."
       },
       "shortcuts": {
         "title": "Scurtături tastatură",
-        "subtitle": "Apasă o tastă pentru a schimba instantaneu instrumentul.",
+        "subtitle": "Apăsați o tastă pentru a schimba instantaneu instrumentul.",
         "footerHint": "Scurtăturile funcționează și când acest panou e deschis.",
         "closeHint": "închide",
         "ariaLabel": "Scurtături tastatură",
-        "closeAriaLabel": "Închide",
+        "closeAriaLabel": "Închideți",
         "activeBadge": "Activ"
       }
     },
     "onboarding": {
       "nodiName": "Nodi",
-      "nodiAlt": "Nodi, ghidul tău",
-      "nodiIntro": "Nodi este un nod de pe pânză care cunoaște aplicația ca pe propriul buzunar. Stă lângă fiecare card, iar inelul evidențiat arată unde să dai clic.",
+      "nodiAlt": "Nodi, ghidul dumneavoastră",
+      "nodiIntro": "Nodi este un nod de pe pânză care cunoaște aplicația ca pe propriul buzunar. Stă lângă fiecare card, iar inelul evidențiat arată unde să dați clic.",
       "ergoName": "Ergo",
       "ergoAlt": "Ergo, prietenul lui Nodi",
       "menuLabel": "Ajutor",
       "menuShortcuts": "Scurtături tastatură",
       "menuGuides": "Tur și ghiduri",
-      "offerTitle": "Vrei un tur rapid?",
-      "offerBody": "Construiește prima pânză pas cu pas: un fir, o întrebare, câteva noduri și un verdict. Faci fiecare pas singur și poți ieși oricând.",
-      "offerAccept": "Începe turul",
+      "offerTitle": "Doriți un tur rapid?",
+      "offerBody": "Construiți prima pânză pas cu pas: un fir, o întrebare, câteva noduri și un verdict. Faceți fiecare pas singur și puteți ieși oricând.",
+      "offerAccept": "Începeți turul",
       "offerDecline": "Nu acum",
-      "offerLater": "Îl poți porni mai târziu din meniul Ajutor, la Tur și ghiduri.",
+      "offerLater": "Îl puteți porni mai târziu din meniul Ajutor, la Tur și ghiduri.",
       "continueHint": {
         "afterTour": {
-          "title": "Continuă de aici",
-          "body": "Celelalte ghiduri te așteaptă la Tur și ghiduri, în acest meniu Ajutor. Alege oricare, când vrei."
+          "title": "Continuați de aici",
+          "body": "Celelalte ghiduri vă așteaptă la Tur și ghiduri, în acest meniu Ajutor. Alegeți oricare, când doriți."
         },
         "afterDecline": {
-          "title": "Turul te așteaptă aici",
-          "body": "Când ești gata, deschide Tur și ghiduri din acest meniu Ajutor."
+          "title": "Turul vă așteaptă aici",
+          "body": "Când sunteți gata, deschideți Tur și ghiduri din acest meniu Ajutor."
         },
-        "open": "Deschide ghidurile",
+        "open": "Deschideți ghidurile",
         "dismiss": "Am înțeles"
       },
       "pickerTitle": "Tur și ghiduri",
-      "pickerBody": "Turul te poartă prin prima pânză. Ghidurile de după el acoperă fiecare câte o parte a aplicației, iar cele mai multe te lasă să o încerci pe bune. Termină-le pe toate pentru a primi insigna Inițiat.",
+      "pickerBody": "Turul vă poartă prin prima pânză. Ghidurile de după el acoperă fiecare câte o parte a aplicației, iar cele mai multe vă lasă să o încercați pe bune. Terminați-le pe toate pentru a primi insigna Inițiat.",
       "pickerProgress": "{done} din {total} terminate",
-      "pickerLocked": "Termină prima pânză pentru a deschide acest ghid.",
-      "pickerStart": "Începe",
-      "pickerReplay": "Reia",
+      "pickerLocked": "Terminați prima pânză pentru a deschide acest ghid.",
+      "pickerStart": "Începeți",
+      "pickerReplay": "Reluați",
       "stepCounter": "pasul {index} din {total}",
       "stepNext": "Mai departe",
       "stepDone": "deja făcut",
-      "stepWaiting": "e rândul tău",
+      "stepWaiting": "e rândul dumneavoastră",
       "stepLostTarget": "ținta nu este pe ecran",
-      "blockedTitle": "Închide asta mai întâi",
-      "blockedBody": "Ceva este deschis peste acest pas. Închide-l și turul continuă.",
+      "blockedTitle": "Închideți asta mai întâi",
+      "blockedBody": "Ceva este deschis peste acest pas. Închideți-l și turul continuă.",
       "blockedStatus": "așteptăm să se închidă",
-      "quit": "Părăsește turul",
-      "celebrationTitle": "Ai terminat toate ghidurile",
-      "celebrationBody": "Ai văzut tot: cum construiești o pânză, cum o evaluezi, cum legi firele între ele și ce găsești în setări. Insigna Inițiat este acum pe profilul tău.",
+      "quit": "Părăsiți turul",
+      "celebrationTitle": "Ați terminat toate ghidurile",
+      "celebrationBody": "Ați văzut tot: cum construiți o pânză, cum o evaluați, cum legați firele între ele și ce găsiți în setări. Insigna Inițiat este acum pe profilul dumneavoastră.",
       "celebrationClose": "Înapoi la treabă",
       "emptyPlatformTitle": "Niciun fir deschis",
-      "emptyPlatformBody": "Un fir conține o întrebare și pânza unde o lămurești. Creează unul nou sau alege unul din lista din stânga.",
-      "emptyViewerBody": "Un fir conține o întrebare și pânza pe care se lămurește. Alege unul din lista din stânga.",
+      "emptyPlatformBody": "Un fir conține o întrebare și pânza unde o lămuriți. Creați unul nou sau alegeți unul din lista din stânga.",
+      "emptyViewerBody": "Un fir conține o întrebare și pânza pe care se lămurește. Alegeți unul din lista din stânga.",
       "emptyWorkspaceTitle": "Încă niciun spațiu",
-      "emptyWorkspaceBody": "Totul se află într-un spațiu de lucru: fire, membri și referințe. Creează-l pe primul pentru a începe.",
-      "emptyPlatformAction": "fă turul",
+      "emptyWorkspaceBody": "Totul se află într-un spațiu de lucru: fire, membri și referințe. Creați-l pe primul pentru a începe.",
+      "emptyPlatformAction": "faceți turul",
       "hints": {
-        "needsWorkspace": "Ai nevoie mai întâi de un spațiu de lucru. Ghidul primei pânze începe chiar cu crearea lui.",
-        "needsCanvas": "Deschide un fir, ca pânza lui să fie pe ecran.",
-        "needsNode": "Adaugă cel puțin un nod pe această pânză.",
-        "needsBuildRights": "Deschide un spațiu în care poți crea fire, edita pânze și comenta."
+        "needsWorkspace": "Aveți nevoie mai întâi de un spațiu de lucru. Ghidul primei pânze începe chiar cu crearea lui.",
+        "needsCanvas": "Deschideți un fir, ca pânza lui să fie pe ecran.",
+        "needsNode": "Adăugați cel puțin un nod pe această pânză.",
+        "needsBuildRights": "Deschideți un spațiu în care puteți crea fire, edita pânze și comenta."
       },
       "guides": {
         "baseTitle": "Prima pânză",
-        "baseSummary": "Construiește o pânză întreagă, de la întrebare la răspuns.",
+        "baseSummary": "Construiți o pânză întreagă, de la întrebare la răspuns.",
         "canvasTitle": "Lucrul pe pânză",
         "canvasSummary": "Instrumente, comentarii, referințe și export.",
         "workspaceTitle": "Spații și structură",
-        "workspaceSummary": "Organizează firele și invită oameni.",
+        "workspaceSummary": "Organizați firele și invitați oameni.",
         "settingsTitle": "Setări",
-        "settingsSummary": "Parcurge fiecare secțiune și fă aplicația a ta.",
-        "exampleTitle": "Urmărește un exemplu",
+        "settingsSummary": "Parcurgeți fiecare secțiune și personalizați aplicația.",
+        "exampleTitle": "Urmăriți un exemplu",
         "exampleSummary": "Nodi și Ergo aleg un aparat de cafea pentru birou."
       },
       "steps": {
         "baseIntro": {
           "title": "Ce este o pânză",
-          "body": "Un fir se construiește în jurul unei singure întrebări, iar pânza lui este locul unde o lămurești: nodurile conțin afirmații, legăturile arată ce decurge din ce, iar verdictele marchează căile care rezistă. Hai să construim una împreună."
+          "body": "Un fir se construiește în jurul unei singure întrebări, iar pânza lui este locul unde o lămuriți: nodurile conțin afirmații, legăturile arată ce decurge din ce, iar verdictele marchează căile care rezistă. Să construim una împreună."
         },
         "baseWorkspace": {
-          "title": "Creează un spațiu de lucru",
-          "body": "Un spațiu conține firele, membrii și referințele tale. Nimic nu iese din el. Creează-l pe primul."
+          "title": "Creați un spațiu de lucru",
+          "body": "Un spațiu conține fire, membri și referințe. Nimic nu iese din el. Creați-l pe primul."
         },
         "baseOwnWorkspace": {
-          "title": "Creează-ți propriul spațiu",
-          "body": "Rolul tău în acest spațiu nu îți permite să construiești, așa că pânza va fi într-un spațiu al tău. Deschide comutatorul și creează un spațiu nou."
+          "title": "Creați-vă propriul spațiu",
+          "body": "Rolul pe care îl aveți aici nu vă permite să construiți, așa că pânza va fi într-un spațiu propriu. Deschideți comutatorul și creați un spațiu nou."
         },
         "baseThread": {
-          "title": "Creează un fir",
-          "body": "Un fir conține o întrebare și pânza ei. Folosește butonul din bara laterală."
+          "title": "Creați un fir",
+          "body": "Un fir conține o întrebare și pânza ei. Folosiți butonul din bara laterală."
         },
         "baseQuestion": {
-          "title": "Scrie întrebarea",
-          "body": "Nodul întrebării este deja pe pânză. Dă clic pe el, scrie întrebarea la care vrei cu adevărat un răspuns și apasă Enter."
+          "title": "Scrieți întrebarea",
+          "body": "Nodul întrebării este deja pe pânză. Dați clic pe el, scrieți întrebarea la care doriți cu adevărat un răspuns și apăsați Enter."
         },
         "baseArgue": {
           "title": "Cum se construiește un argument",
           "body": "Fiecare afirmație se leagă de întrebare printr-o legătură. Un nod care nu este conectat la nimic nu influențează rezultatul."
         },
         "baseNode": {
-          "title": "Adaugă prima afirmație",
-          "body": "Alege instrumentul Adaugă nod și dă clic pe un loc liber. Un nod conține o singură idee: o afirmație, o premisă sau o obiecție."
+          "title": "Adăugați prima afirmație",
+          "body": "Alegeți instrumentul Adăugați nod și dați clic pe un loc liber. Un nod conține o singură idee: o afirmație, o premisă sau o obiecție."
         },
         "baseNodeText": {
-          "title": "Scrie afirmația",
-          "body": "Treci la instrumentul Selectează (tasta V), dă dublu clic pe nodul nou, înlocuiește textul provizoriu cu afirmația ta și apasă Enter."
+          "title": "Scrieți afirmația",
+          "body": "Treceți la instrumentul Selectați (tasta V), dați dublu clic pe nodul nou, înlocuiți textul provizoriu cu propria afirmație și apăsați Enter."
         },
         "baseConnect": {
-          "title": "Leagă-l de întrebare",
-          "body": "Alege instrumentul Conectează, dă clic pe întrebare, apoi pe nodul tău. Săgeata arată ce decurge din ce."
+          "title": "Legați-l de întrebare",
+          "body": "Alegeți instrumentul Conectați, dați clic pe întrebare, apoi pe nodul nou. Săgeata arată ce decurge din ce."
         },
         "baseDirection": {
           "title": "Direcția contează",
-          "body": "O legătură pornește de la un nod spre ce se construiește pe el: de la întrebare spre răspunsuri, de la o afirmație spre ce decurge din ea. Respinge un nod și tot ce se sprijină pe el devine îndoielnic."
+          "body": "O legătură pornește de la un nod spre ce se construiește pe el: de la întrebare spre răspunsuri, de la o afirmație spre ce decurge din ea. Respingeți un nod și tot ce se sprijină pe el devine îndoielnic."
         },
         "baseObjection": {
-          "title": "Adaugă o obiecție",
-          "body": "Adaugă un al doilea nod care contrazice prima afirmație și scrie-l la fel. O pânză cu o singură parte nu dovedește nimic."
+          "title": "Adăugați o obiecție",
+          "body": "Adăugați un al doilea nod care contrazice prima afirmație și scrieți-l la fel. O pânză cu o singură parte nu dovedește nimic."
         },
         "baseSecondLink": {
-          "title": "Leagă-l și pe acesta",
-          "body": "La fel ca înainte: instrumentul Conectează, întrebarea, apoi nodul nou. Acum două ramuri concurente pornesc din întrebare."
+          "title": "Legați-l și pe acesta",
+          "body": "La fel ca înainte: instrumentul Conectați, întrebarea, apoi nodul nou. Acum două ramuri concurente pornesc din întrebare."
         },
         "baseValid": {
-          "title": "Marchează ramura care rezistă",
-          "body": "Alege instrumentul Marchează valid și dă clic pe afirmația în care crezi. Se aprinde toată calea din care face parte."
+          "title": "Marcați ramura care rezistă",
+          "body": "Alegeți instrumentul Marcați valid și dați clic pe afirmația în care credeți. Se aprinde toată calea din care face parte."
         },
         "baseInvalid": {
-          "title": "Marcheaz-o pe cea care nu rezistă",
-          "body": "Alege instrumentul Marchează invalid și dă clic pe cealaltă ramură. Rămâne pe pânză, marcată ca respinsă."
+          "title": "Marcați-o pe cea care nu rezistă",
+          "body": "Alegeți instrumentul Marcați invalid și dați clic pe cealaltă ramură. Rămâne pe pânză, marcată ca respinsă."
         },
         "baseVerdict": {
           "title": "Nimic nu se șterge",
-          "body": "Valid, invalid și nedecis rămân unul lângă altul. Peste luni de zile vezi nu doar răspunsul, ci și fiecare încercare care nu a ținut."
+          "body": "Valid, invalid și nedecis rămân unul lângă altul. Peste luni de zile vedeți nu doar răspunsul, ci și fiecare încercare care nu a ținut."
         },
         "baseAnswerTool": {
-          "title": "Alege instrumentul Răspuns",
+          "title": "Alegeți instrumentul Răspuns",
           "body": "Un verdict spune că o cale rezistă. Răspunsul spune care nod închide întrebarea. Sunt lucruri diferite, iar răspunsul trebuie să fie legat de întrebare direct sau printr-un nod valid."
         },
         "baseAnswer": {
-          "title": "Marchează răspunsul",
-          "body": "Dă clic pe un nod de pe o cale validă. De acum firul este considerat rezolvat. Poți muta răspunsul pe alt nod mai târziu."
+          "title": "Marcați răspunsul",
+          "body": "Dați clic pe un nod de pe o cale validă. De acum firul este considerat rezolvat. Puteți muta răspunsul pe alt nod mai târziu."
         },
         "baseResolvedMark": {
           "title": "Firele rezolvate primesc o bifă",
-          "body": "Uită-te la bara laterală: lângă firul tău a apărut o bifă. O primește orice fir rezolvat, așa că întrebările deschise se văd dintr-o privire."
+          "body": "Uitați-vă la bara laterală: lângă fir a apărut o bifă. O primește orice fir rezolvat, așa că întrebările deschise se văd dintr-o privire."
         },
         "baseResolved": {
           "title": "Acesta este întregul ciclu",
@@ -481,56 +512,56 @@
           "body": "Folderele și imbricarea țin o listă lungă lizibilă. Nu schimbă nimic pe pânză: un fir funcționează la fel oriunde ar sta."
         },
         "structureFolder": {
-          "title": "Creează un folder",
+          "title": "Creați un folder",
           "body": "Folderele sunt opționale. Grupează fire și nimic mai mult."
         },
         "structureNest": {
-          "title": "Pune un fir în el",
-          "body": "Creează un fir direct în folder sau trage unul existent înăuntru."
+          "title": "Puneți un fir în el",
+          "body": "Creați un fir direct în folder sau trageți unul existent înăuntru."
         },
         "structureSearch": {
-          "title": "Caută când lista crește",
-          "body": "Câmpul de căutare filtrează întregul arbore după nume, inclusiv folderele. Este cel mai rapid drum înapoi la un fir de care îți amintești vag."
+          "title": "Căutați când lista crește",
+          "body": "Câmpul de căutare filtrează întregul arbore după nume, inclusiv folderele. Este cel mai rapid drum înapoi la un fir de care vă amintiți vag."
         },
         "structureMove": {
-          "title": "Mută lucrurile oricând",
-          "body": "Trage firele și folderele pentru a le reordona sau a le muta. Pânza, comentariile și referințele rămân neschimbate."
+          "title": "Mutați lucrurile oricând",
+          "body": "Trageți firele și folderele pentru a le reordona sau a le muta. Pânza, comentariile și referințele rămân neschimbate."
         },
         "referencesWhat": {
           "title": "Ce este o referință",
           "body": "Uneori un fir se bazează pe o concluzie la care s-a ajuns deja în alt fir. O referință aduce acel nod ca un citat doar pentru citire, nu ca o copie, așa că originalul rămâne singura sursă."
         },
         "referencesThread": {
-          "title": "Creează un al doilea fir",
-          "body": "O referință are nevoie de un nod de pe altă pânză, iar nicio altă pânză din acest spațiu nu are încă noduri. Creează un fir nou din bara laterală: turul continuă acolo, iar tu vei face referire la un nod de pe această pânză."
+          "title": "Creați un al doilea fir",
+          "body": "O referință are nevoie de un nod de pe altă pânză, iar nicio altă pânză din acest spațiu nu are încă noduri. Creați un fir nou din bara laterală: turul continuă acolo, unde veți face referire la un nod de pe această pânză."
         },
         "referencesTool": {
-          "title": "Alege instrumentul Referință încrucișată",
+          "title": "Alegeți instrumentul Referință încrucișată",
           "body": "Aduce pe această pânză un nod de pe altă pânză din acest spațiu, fără a le contopi."
         },
         "referencesPlace": {
-          "title": "Așază-l pe pânză",
-          "body": "Dă clic pe un loc liber. Se deschide un panou de căutare cu nodurile din acest spațiu la care poți face referire."
+          "title": "Așezați-l pe pânză",
+          "body": "Dați clic pe un loc liber. Se deschide un panou de căutare cu nodurile din acest spațiu la care puteți face referire."
         },
         "referencesPick": {
-          "title": "Alege nodul de referit",
-          "body": "Caută printre celelalte pânze din spațiu și alege un nod. Apare ca nod de referință doar pentru citire; ca să-l legi, trage o legătură de la marginea altui nod până la el."
+          "title": "Alegeți nodul de referit",
+          "body": "Căutați printre celelalte pânze din spațiu și alegeți un nod. Apare ca nod de referință doar pentru citire; ca să-l legați, trageți o legătură de la marginea altui nod până la el."
         },
         "referencesBoundary": {
           "title": "Rămâne în interiorul spațiului",
-          "body": "O referință poate indica doar pânze din acest spațiu și nu schimbă niciodată nodul la care trimite. Șterge referința, iar originalul rămâne neatins."
+          "body": "O referință poate indica doar pânze din acest spațiu și nu schimbă niciodată nodul la care trimite. Ștergeți referința, iar originalul rămâne neatins."
         },
         "commentsWhat": {
           "title": "Discuția stă lângă raționament",
-          "body": "Un comentariu nu devine niciodată nod și nu poartă verdict. Este locul unde discuți despre un nod fără a atinge argumentul în sine."
+          "body": "Un comentariu nu devine niciodată nod și nu poartă verdict. Este locul unde discutați despre un nod fără a atinge argumentul în sine."
         },
         "commentsOpen": {
-          "title": "Deschide comentariile unui nod",
-          "body": "Folosește butonul de comentarii de pe nod. Panoul se deschide lângă el."
+          "title": "Deschideți comentariile unui nod",
+          "body": "Folosiți butonul de comentarii de pe nod. Panoul se deschide lângă el."
         },
         "commentsWrite": {
-          "title": "Lasă un comentariu",
-          "body": "Scrie orice și trimite. Comentariile nu schimbă niciodată structura sau verdictele."
+          "title": "Lăsați un comentariu",
+          "body": "Scrieți orice și trimiteți. Comentariile nu schimbă niciodată structura sau verdictele."
         },
         "commentsWho": {
           "title": "Îl citește toată lumea din fir",
@@ -538,19 +569,19 @@
         },
         "workspacesWhat": {
           "title": "Spațiul este granița",
-          "body": "Firele, folderele, membrii și referințele se află într-un singur spațiu și nu trec niciodată în altul. Poți face parte din mai multe și poți comuta liber între ele."
+          "body": "Firele, folderele, membrii și referințele se află într-un singur spațiu și nu trec niciodată în altul. Puteți face parte din mai multe și puteți comuta liber între ele."
         },
         "workspacesSwitcher": {
-          "title": "Deschide comutatorul de spații",
+          "title": "Deschideți comutatorul de spații",
           "body": "Este numele spațiului curent, în partea de sus a barei laterale."
         },
         "workspacesSettings": {
-          "title": "Deschide setările spațiului",
-          "body": "Treci cu mouse-ul peste rândul spațiului și dă clic pe rotiță. Aceste setări se aplică doar acestui spațiu."
+          "title": "Deschideți setările spațiului",
+          "body": "Treceți cu mouse-ul peste rândul spațiului și dați clic pe rotiță. Aceste setări se aplică doar acestui spațiu."
         },
         "workspacesGeneral": {
           "title": "Secțiunea General",
-          "body": "Setările spațiului se deschid aici: numele, numărul de membri, rolul tău și data la care a fost creat spațiul."
+          "body": "Setările spațiului se deschid aici: numele, numărul de membri, rolul dumneavoastră și data la care a fost creat spațiul."
         },
         "workspacesOwner": {
           "title": "Există întotdeauna un singur proprietar",
@@ -561,72 +592,72 @@
           "body": "Accesul se stabilește o dată pentru spațiu, nu pentru fiecare pânză. Un rol decide dacă cineva poate edita pânzele, doar comenta sau doar citi."
         },
         "membersOpen": {
-          "title": "Deschide setările spațiului",
-          "body": "Deschide comutatorul de spații, apoi dă clic pe rotița de pe rând. Membrii și rolurile sunt acolo."
+          "title": "Deschideți setările spațiului",
+          "body": "Deschideți comutatorul de spații, apoi dați clic pe rotița de pe rând. Membrii și rolurile sunt acolo."
         },
         "membersSection": {
-          "title": "Deschide secțiunea Membri",
-          "body": "Aici inviți oameni și atribui roluri. Nu se trimite nimic cât timp doar te uiți."
+          "title": "Deschideți secțiunea Membri",
+          "body": "Aici invitați oameni și atribuiți roluri. Nu se trimite nimic cât timp doar vă uitați."
         },
         "membersInvite": {
           "title": "Invitațiile merg pe e-mail",
-          "body": "Introdu o adresă și alege rolul de la început. Poți retrage o invitație înainte de a fi acceptată și poți schimba un rol oricând."
+          "body": "Introduceți o adresă și alegeți rolul de la început. Puteți retrage o invitație înainte de a fi acceptată și puteți schimba un rol oricând."
         },
         "membersRoles": {
-          "title": "Deschide secțiunea Roluri",
-          "body": "Rolurile se definesc pentru fiecare spațiu. Proprietar, Membru și Vizualizator sunt predefinite și fixe; poți crea roluri proprii și decide exact ce permite fiecare."
+          "title": "Deschideți secțiunea Roluri",
+          "body": "Rolurile se definesc pentru fiecare spațiu. Proprietar, Membru și Vizualizator sunt predefinite și fixe; puteți crea roluri proprii și decide exact ce permite fiecare."
         },
         "membersPermissions": {
           "title": "Ce controlează un rol",
           "body": "Editarea pânzei, comentariile, gestionarea firelor și folderelor, a membrilor, a rolurilor și a spațiului însuși. Un rol este doar acest set de comutatoare."
         },
         "settingsWhat": {
-          "title": "Aceste setări sunt ale tale",
-          "body": "Profilul tău este ce văd colegii lângă numele tău. Restul setărilor de aici sunt doar pentru tine și te urmează pe orice dispozitiv. Hai să parcurgem fiecare secțiune."
+          "title": "Aceste setări sunt ale dumneavoastră",
+          "body": "Profilul este ce văd colegii lângă numele dumneavoastră. Restul setărilor de aici sunt personale și vă urmează pe orice dispozitiv. Să parcurgem fiecare secțiune."
         },
         "settingsOpen": {
-          "title": "Deschide setările",
-          "body": "Dă clic pe numele tău din partea de jos a barei laterale, apoi pe Setări."
+          "title": "Deschideți setările",
+          "body": "Dați clic pe numele dumneavoastră din partea de jos a barei laterale, apoi pe Setări."
         },
         "settingsProfile": {
-          "title": "Schimbă ceva în profil",
-          "body": "Schimbă-ți numele sau alege alt avatar, apoi salvează. Poți reveni imediat după. Insignele câștigate apar și ele aici."
+          "title": "Schimbați ceva în profil",
+          "body": "Schimbați-vă numele sau alegeți alt avatar, apoi salvați. Puteți reveni imediat după. Insignele câștigate apar și ele aici."
         },
         "settingsSecurity": {
-          "title": "Deschide secțiunea Securitate",
+          "title": "Deschideți secțiunea Securitate",
           "body": "Aici sunt parola și ștergerea contului."
         },
         "settingsSecurityNote": {
-          "title": "Doar tu poți face asta",
-          "body": "Schimbarea parolei închide celelalte sesiuni. Ștergerea contului șterge și spațiile pe care le deții."
+          "title": "Doar dumneavoastră puteți face asta",
+          "body": "Schimbarea parolei închide celelalte sesiuni. Ștergerea contului șterge și spațiile pe care le dețineți."
         },
         "settingsNotifications": {
-          "title": "Deschide secțiunea Notificări",
+          "title": "Deschideți secțiunea Notificări",
           "body": "Comutatoarele sunt aici, dar livrarea nu este încă gata. Deocamdată nu se trimite nimic."
         },
         "settingsAppearance": {
-          "title": "Deschide secțiunea Aspect",
+          "title": "Deschideți secțiunea Aspect",
           "body": "Limba interfeței, opt teme (Auto urmează sistemul cu Daybreak și Eclipse) și patru modele pentru pânză."
         },
         "settingsTheme": {
-          "title": "Încearcă altă temă",
-          "body": "Alege una, iar toată aplicația se schimbă pe loc, cu panoul încă deschis. Doar tu vezi schimbarea."
+          "title": "Încercați altă temă",
+          "body": "Alegeți una, iar toată aplicația se schimbă pe loc, cu panoul încă deschis. Doar dumneavoastră vedeți schimbarea."
         },
         "settingsPattern": {
-          "title": "Schimbă modelul pânzei",
+          "title": "Schimbați modelul pânzei",
           "body": "Puncte, linii, cruci sau o suprafață simplă. Se schimbă doar fundalul pânzei."
         },
         "settingsEditor": {
-          "title": "Deschide secțiunea Editor",
-          "body": "Această secțiune stabilește cum se comportă pânza în timp ce lucrezi."
+          "title": "Deschideți secțiunea Editor",
+          "body": "Această secțiune stabilește cum se comportă pânza în timp ce lucrați."
         },
         "settingsTune": {
-          "title": "Schimbă una dintre opțiuni",
-          "body": "Aliniere la grilă, ghidaje inteligente sau zoomul cu care se deschide o pânză. Comută una, iar pânza reacționează imediat."
+          "title": "Schimbați una dintre opțiuni",
+          "body": "Aliniere la grilă, ghidaje inteligente sau zoomul cu care se deschide o pânză. Comutați una, iar pânza reacționează imediat."
         },
         "settingsPlan": {
-          "title": "Deschide Plan și facturare",
-          "body": "Planul tău curent și ce include fiecare plan, de exemplu numărul de membri și de pânze."
+          "title": "Deschideți Plan și facturare",
+          "body": "Planul curent și ce include fiecare plan, de exemplu numărul de membri și de pânze."
         },
         "settingsScope": {
           "title": "Acestea sunt toate secțiunile",
@@ -634,14 +665,14 @@
         },
         "exportWhat": {
           "title": "Exportul este un instantaneu",
-          "body": "Fișierul arată pânza exact cum este acum și nu poate fi importat înapoi. Folosește-l pentru a partaja sau a tipări, nu pentru a muta lucrul între fire."
+          "body": "Fișierul arată pânza exact cum este acum și nu poate fi importat înapoi. Folosiți-l pentru a partaja sau a tipări, nu pentru a muta lucrul între fire."
         },
         "exportMenu": {
-          "title": "Deschide meniul de export",
+          "title": "Deschideți meniul de export",
           "body": "Butonul de export este în partea de jos a barei de instrumente."
         },
         "exportFormat": {
-          "title": "Alege un format",
+          "title": "Alegeți un format",
           "body": "PNG și JPG sunt imagini, SVG rămâne clar la orice dimensiune. Fișierul ajunge în descărcări."
         },
         "exportNote": {
@@ -650,10 +681,10 @@
         },
         "toolsWhat": {
           "title": "Un singur instrument la un moment dat",
-          "body": "Un singur instrument este activ, iar un clic pe pânză face ce face acel instrument. Să știi ce instrument ții în mână este jumătate din pricepere."
+          "body": "Un singur instrument este activ, iar un clic pe pânză face ce face acel instrument. Să știți ce instrument țineți în mână este jumătate din pricepere."
         },
         "toolsSheet": {
-          "title": "Deschide fișa de scurtături",
+          "title": "Deschideți fișa de scurtături",
           "body": "Meniul Ajutor este în partea de jos a barei de instrumente, iar Scurtături tastatură este primul element din el."
         },
         "toolsSheetRead": {
@@ -661,59 +692,59 @@
           "body": "Aceleași cinci grupuri ca în bara de instrumente: navigare, istoric, construire, decizie, legături. Fiecare instrument are o tastă, iar tastele funcționează și cât timp fișa este deschisă."
         },
         "toolsClose": {
-          "title": "Închide fișa",
-          "body": "Dă clic pe X din colț sau apasă Escape. Fișa acoperă bara de instrumente, iar turul merge acolo în continuare."
+          "title": "Închideți fișa",
+          "body": "Dați clic pe X din colț sau apăsați Escape. Fișa acoperă bara de instrumente, iar turul merge acolo în continuare."
         },
         "toolsSelect": {
-          "title": "Selectează",
+          "title": "Selectați",
           "body": "Instrumentul neutru: selectează și trage noduri, fără a schimba altceva. Tasta V."
         },
         "toolsPan": {
           "title": "Deplasare",
-          "body": "Trage pentru a muta zona vizibilă, nu un nod. Tasta H."
+          "body": "Trageți pentru a muta zona vizibilă, nu un nod. Tasta H."
         },
         "toolsZoom": {
           "title": "Zoom",
-          "body": "Un clic mărește zona pe care ai dat clic, iar cu Shift micșorează. Tastele plus și minus."
+          "body": "Un clic mărește zona pe care ați dat clic, iar cu Shift micșorează. Tastele plus și minus."
         },
         "toolsUndo": {
-          "title": "Anulează și refă",
+          "title": "Anulați și refaceți",
           "body": "Istoricul are butoanele lui, așa că experimentele nu costă nimic: orice pas poate fi anulat și refăcut."
         },
         "toolsAdd": {
-          "title": "Adaugă nod",
+          "title": "Adăugați nod",
           "body": "Un clic pe un loc liber adaugă un nod cu o etichetă provizorie. Tasta N."
         },
         "toolsConnect": {
-          "title": "Conectează",
-          "body": "Dă clic pe nodul de la care pornește raționamentul, apoi pe cel la care duce. Săgeata arată direcția. Tasta C."
+          "title": "Conectați",
+          "body": "Dați clic pe nodul de la care pornește raționamentul, apoi pe cel la care duce. Săgeata arată direcția. Tasta C."
         },
         "toolsDelete": {
-          "title": "Șterge",
+          "title": "Ștergeți",
           "body": "Un clic elimină un nod sau o legătură. Nodul întrebării nu poate fi șters. Tasta D."
         },
         "toolsValid": {
-          "title": "Marchează valid",
+          "title": "Marcați valid",
           "body": "Un verdict asupra căii care intră în acest nod: pasul rezistă. Tasta Y."
         },
         "toolsInvalid": {
-          "title": "Marchează invalid",
+          "title": "Marcați invalid",
           "body": "Verdictul opus: pasul nu rezistă, iar tot ce se sprijină pe el devine îndoielnic. Tasta X."
         },
         "toolsAnswer": {
           "title": "Răspuns",
-          "body": "Marchează nodul care închide firul. Un singur răspuns pe fir, pe care îl poți muta mai târziu. Tasta A."
+          "body": "Marchează nodul care închide firul. Un singur răspuns pe fir, pe care îl puteți muta mai târziu. Tasta A."
         },
         "toolsReference": {
           "title": "Referință încrucișată",
           "body": "Aduce un nod de pe altă pânză ca un citat doar pentru citire. Tasta R. Referințele au partea lor mai departe în acest ghid."
         },
         "exampleIntro": {
-          "title": "Fă cunoștință cu Ergo",
-          "body": "Biroul nostru are nevoie de un aparat de cafea, iar eu și Ergo nu cădem de acord care să fie. O lămurim pe o pânză, cum ar face doi colegi. Apasă Mai departe ca să urmărești."
+          "title": "Faceți cunoștință cu Ergo",
+          "body": "Biroul nostru are nevoie de un aparat de cafea, iar eu și Ergo nu cădem de acord care să fie. O lămurim pe o pânză, cum ar face doi colegi. Apăsați Mai departe ca să urmăriți."
         },
         "exampleHello": {
-          "title": "Salut, sunt Ergo",
+          "title": "Bună, sunt Ergo",
           "body": "Pânza e făcută exact pentru o întrebare cu mai multe răspunsuri posibile: fiecare variantă crește ca ramură proprie din întrebare, cu argumentele sub ea."
         },
         "exampleThread": {
@@ -722,7 +753,7 @@
         },
         "exampleCapsule": {
           "title": "Eu aleg capsulele",
-          "body": "Cu Adaugă nod îmi pun răspunsul, un aparat cu capsule, și îl leg de întrebare cu Conectează. Sub el pun argumentul meu: un singur buton, nimic de curățat."
+          "body": "Cu Adăugați nod îmi pun răspunsul, un aparat cu capsule, și îl leg de întrebare cu Conectați. Sub el pun argumentul meu: un singur buton, nimic de curățat."
         },
         "exampleBean": {
           "title": "Eu aș lua boabe",
@@ -746,7 +777,7 @@
         },
         "exampleDropFilter": {
           "title": "Ai dreptate",
-          "body": "Nimeni nu vrea cafea stătută. Îmi marchez varianta cu cafetiera cu Marchează invalid, iar argumentul de sub ea devine și el îndoielnic."
+          "body": "Nimeni nu vrea cafea stătută. Îmi marchez varianta cu cafetiera cu Marcați invalid, iar argumentul de sub ea devine și el îndoielnic."
         },
         "exampleWaste": {
           "title": "Încă ceva",
@@ -758,7 +789,7 @@
         },
         "exampleValid": {
           "title": "Ce a rămas rezistă",
-          "body": "Cu Marchează valid confirm ramura cu espressorul automat și ambele argumente de sub ea. Calea de la întrebare se aprinde."
+          "body": "Cu Marcați valid confirm ramura cu espressorul automat și ambele argumente de sub ea. Calea de la întrebare se aprinde."
         },
         "exampleAnswer": {
           "title": "Răspunsul nostru",
@@ -766,22 +797,22 @@
         },
         "exampleResolved": {
           "title": "O bifă în bara laterală",
-          "body": "Uită-te la bara laterală: lângă firul nostru a apărut o bifă. O primește orice fir rezolvat, așa că întrebările deschise se văd dintr-o privire."
+          "body": "Uitați-vă la bara laterală: lângă firul nostru a apărut o bifă. O primește orice fir rezolvat, așa că întrebările deschise se văd dintr-o privire."
         },
         "exampleWrap": {
           "title": "Asta e toată ideea",
-          "body": "O întrebare, câte o ramură pentru fiecare răspuns, argumente sub fiecare, îndoieli în comentarii, verdicte și un singur răspuns acceptat de amândoi. Firele tale funcționează exact la fel."
+          "body": "O întrebare, câte o ramură pentru fiecare răspuns, argumente sub fiecare, îndoieli în comentarii, verdicte și un singur răspuns acceptat de amândoi. Firele dumneavoastră funcționează exact la fel."
         },
         "exampleKeep": {
-          "title": "Păstrezi exemplul?",
-          "body": "Rămâne în bara laterală ca un fir obișnuit pe care îl poți deschide și modifica. Păstrează-l ca să te uiți mai târziu sau șterge-l acum."
+          "title": "Păstrați exemplul?",
+          "body": "Rămâne în bara laterală ca un fir obișnuit pe care îl puteți deschide și modifica. Păstrați-l ca să vă uitați mai târziu sau ștergeți-l acum."
         }
       },
       "example": {
         "threadName": "Exemplu: aparatul de cafea pentru birou",
         "question": "Ce aparat de cafea să luăm pentru birou?",
-        "keep": "Păstrează-l",
-        "remove": "Șterge-l",
+        "keep": "Păstrați-l",
+        "remove": "Ștergeți-l",
         "nodes": {
           "capsule": "Un aparat cu capsule",
           "oneButton": "Un singur buton, nimic de curățat",
@@ -800,10 +831,9 @@
     },
     "settings": {
       "title": "Setări",
-      "close": "Închide setările",
+      "close": "Închideți setările",
       "comingSoon": "În curând",
       "languageSaving": "Se salvează limba…",
-      "languageSaveFailed": "Salvarea limbii a eșuat. Încearcă din nou.",
       "groups": {
         "account": "Cont",
         "preferences": "Preferințe",
@@ -821,19 +851,20 @@
         "email": "Email",
         "displayName": "Nume afișat",
         "unnamed": "Gânditor fără nume",
-        "save": "Salvează profilul",
+        "save": "Salvați profilul",
         "saving": "Se salvează…",
         "saved": "Salvat",
-        "changeEmail": "Schimbă",
+        "changeEmail": "Schimbați",
         "changingEmail": "Se trimite…",
-        "saveFailed": "Salvarea a eșuat. Încearcă din nou.",
-        "emailChangeFailed": "Schimbarea emailului a eșuat. Încearcă din nou.",
-        "emailChangeSent": "Verifică noul email pentru a confirma schimbarea.",
-        "emailInvalid": "Introdu o adresă de email validă.",
-        "namePlaceholder": "Cum te văd ceilalți",
+        "saveFailed": "Salvarea a eșuat. Încercați din nou.",
+        "emailChangeFailed": "Schimbarea emailului a eșuat. Încercați din nou.",
+        "emailChangeSent": "Verificați noul email pentru a confirma schimbarea.",
+        "emailInvalid": "Introduceți o adresă de email validă.",
+        "namePlaceholder": "Cum vă văd ceilalți",
         "avatarTitle": "Avatar",
-        "avatarOptions": "opțiuni",
+        "avatarOptionCount": "{count, plural, one {# opțiune} few {# opțiuni} other {# de opțiuni}}",
         "badgesTitle": "Insigne",
+        "badgeEarned": "Insignă nouă: {name}",
         "initialsLabel": "Inițiale",
         "avatarIcons": {
           "avatarIconCat": "Pisică",
@@ -859,69 +890,69 @@
         },
         "badges": {
           "badgeFounder": "Fondator",
-          "founderUnlock": "Te-ai alăturat în beta-ul timpuriu.",
+          "founderUnlock": "V-ați alăturat în beta-ul timpuriu.",
           "badgeInitiate": "Inițiat",
-          "initiateUnlock": "Termină turul și toate ghidurile.",
+          "initiateUnlock": "Terminați turul și toate ghidurile.",
           "badgeFirstSteps": "Primii pași",
-          "firstStepsUnlock": "Creează primul tău canvas.",
-          "badgeArchitect": "Arhitect",
-          "architectUnlock": "Construiește un canvas cu 25 sau mai multe noduri.",
-          "badgeConnector": "Conector",
-          "connectorUnlock": "Realizează 50 de conexiuni între noduri.",
-          "badgeCritic": "Critic",
-          "criticUnlock": "Marchează 25 de căi ca valide sau invalide.",
-          "badgeLinguist": "Lingvist",
-          "linguistUnlock": "Schimbă limba interfeței.",
-          "badgeCurator": "Curator",
-          "curatorUnlock": "Folosește o referință între canvas-uri.",
-          "badgeVoice": "Voce",
-          "voiceUnlock": "Postează primul tău comentariu.",
-          "badgeExplorer": "Explorator",
-          "explorerUnlock": "Deschide 10 canvas-uri diferite.",
-          "badgeStoryteller": "Povestitor",
-          "storytellerUnlock": "Creează 5 fire proprii.",
+          "firstStepsUnlock": "Creați prima pânză.",
           "badgeWorkspaceBuilder": "Constructor",
-          "workspaceBuilderUnlock": "Creează primul tău spațiu.",
-          "badgeNightOwl": "Bufniță",
-          "nightOwlUnlock": "Lucrează după miezul nopții o săptămână.",
-          "badgeMarathoner": "Maratonist",
-          "marathonerUnlock": "Rămâi activ 30 de zile la rând.",
-          "badgeCollaborator": "Colaborator",
-          "collaboratorUnlock": "Alătură-te unui spațiu partajat.",
+          "workspaceBuilderUnlock": "Creați primul spațiu.",
+          "badgeArchitect": "Arhitect",
+          "architectUnlock": "Construiți o pânză cu 25 sau mai multe noduri.",
+          "badgeConnector": "Conector",
+          "connectorUnlock": "Trasați 15 conexiuni pe o pânză.",
+          "badgeCritic": "Critic",
+          "criticUnlock": "Marcați o cale ca invalidă.",
           "badgeWeaver": "Țesător",
-          "weaverUnlock": "Combină căi valide și invalide pe un canvas.",
-          "badgeSage": "Înțelept",
-          "sageUnlock": "Lasă 100 de comentarii relevante."
+          "weaverUnlock": "Combinați căi valide și invalide pe o pânză.",
+          "badgeVerdict": "Verdict",
+          "verdictUnlock": "Marcați un nod ca răspuns final.",
+          "badgeVoice": "Voce",
+          "voiceUnlock": "Postați primul comentariu.",
+          "badgeCurator": "Curator",
+          "curatorUnlock": "Folosiți o referință între pânze.",
+          "badgeCollaborator": "Colaborator",
+          "collaboratorUnlock": "Alăturați-vă unui spațiu partajat.",
+          "badgeLinguist": "Lingvist",
+          "linguistUnlock": "Schimbați limba interfeței.",
+          "badgeStylist": "Stilist",
+          "stylistUnlock": "Alegeți o altă temă.",
+          "badgeCartographer": "Cartograf",
+          "cartographerUnlock": "Exportați o pânză ca imagine.",
+          "badgeNightOwl": "Bufniță",
+          "nightOwlUnlock": "Adăugați un nod între miezul nopții și ora 5."
         }
       },
       "security": {
-        "changePassword": "Schimbă parola",
+        "changePassword": "Schimbați parola",
         "passwordCaption": "Acces la cont",
-        "passwordBlurb": "Schimbă secretul pentru autentificare. Noua parolă va fi activă la următoarea conectare.",
+        "passwordBlurb": "Schimbați secretul pentru autentificare. Noua parolă va fi activă la următoarea conectare.",
         "passwordCardTitle": "Parola contului",
         "passwordCardCaption": "Min. 8 caractere",
         "currentPassword": "Parola curentă",
-        "currentPasswordRequired": "Introdu parola curentă",
+        "currentPasswordRequired": "Introduceți parola curentă",
         "currentPasswordIncorrect": "Parola curentă este incorectă",
         "passwordSame": "Parola nouă trebuie să difere de cea curentă",
         "newPassword": "Parolă nouă",
-        "confirmPassword": "Confirmă parola",
-        "updatePassword": "Actualizează parola",
+        "confirmPassword": "Confirmați parola",
+        "updatePassword": "Actualizați parola",
         "updatingPassword": "Se actualizează…",
         "passwordUpdated": "Parolă actualizată",
         "passwordMismatch": "Parolele nu coincid",
         "passwordTooShort": "Parola trebuie să aibă cel puțin 8 caractere",
         "dangerZone": "Zonă periculoasă",
         "dangerZoneCaption": "ireversibil",
-        "dangerZoneBlurb": "Acțiuni distructive care nu pot fi anulate. Citește cu atenție înainte de a continua.",
-        "deleteAccount": "Șterge contul",
-        "deleteAccountCaption": "Șterge toate spațiile, firele și canvas-urile tale",
-        "deleteConfirm": "Ești sigur? Această acțiune nu poate fi anulată. Toate datele tale vor fi șterse permanent.",
-        "deleteButton": "Șterge contul meu",
+        "dangerZoneBlurb": "Acțiuni distructive care nu pot fi anulate. Citiți cu atenție înainte de a continua.",
+        "deleteAccount": "Ștergeți contul",
+        "deleteAccountCaption": "Șterge toate spațiile, firele și pânzele dumneavoastră",
+        "deleteConfirm": "Sunteți sigur? Această acțiune nu poate fi anulată. Toate datele dumneavoastră vor fi șterse permanent.",
+        "deletePassword": "Confirmați cu parola",
+        "deleteBlocked": "Dețineți spații pe care le folosesc și alte persoane. Transferați proprietatea sau ștergeți-le înainte de a vă șterge contul.",
+        "deleteButton": "Ștergeți contul meu",
         "deleting": "Se șterge…",
-        "cancel": "Anulează",
-        "updateFailed": "Actualizarea parolei a eșuat. Încearcă din nou.",
-        "deleteFailed": "Ștergerea contului a eșuat. Încearcă din nou."
+        "cancel": "Anulați",
+        "updateFailed": "Actualizarea parolei a eșuat. Încercați din nou.",
+        "deleteFailed": "Ștergerea contului a eșuat. Încercați din nou."
       },
       "appearance": {
         "theme": "Temă",
@@ -945,10 +976,9 @@
         "themeBloom": "Bloom",
         "bloomDesc": "Porțelan cald, acțiune magenta",
         "autoDesc": "Împerechează Daybreak și Eclipse",
-        "adaptive": "Adaptiv",
         "canvas": "Pânză",
         "canvasIntro": "Patru texturi",
-        "canvasBlurb": "Alege suprafața pe care trăiesc ideile tale — de la hârtie liniștită la o grilă inginerească.",
+        "canvasBlurb": "Alegeți suprafața pe care trăiesc ideile dumneavoastră — de la hârtie liniștită la o grilă inginerească.",
         "patternDots": "Constelație",
         "patternLines": "Schiță",
         "patternCross": "Coordonate",
@@ -968,22 +998,22 @@
         }
       },
       "editor": {
-        "blurb": "Reglează modul în care canvas-ul răspunde când construiești.",
-        "behaviors": "Comportament canvas",
+        "blurb": "Reglați modul în care pânza răspunde când construiți.",
+        "behaviors": "Comportamentul pânzei",
         "behaviorsCaption": "Aliniere, ghidaje",
         "snapToGrid": "Aliniere la grilă",
         "snapToGridDescription": "Trage nodurile în pași de 16 pixeli",
         "smartGuides": "Ghidaje inteligente",
         "smartGuidesDescription": "Linii de aliniere în timpul tragerii",
         "zoom": "Zoom implicit",
-        "zoomCaption": "Magnificare inițială canvas",
-        "zoomBlurb": "Cât de aproape pornești la deschiderea oricărui canvas.",
+        "zoomCaption": "Magnificarea inițială a pânzei",
+        "zoomBlurb": "Cât de aproape porniți la deschiderea oricărei pânze.",
         "defaultZoom": "Nivel zoom implicit"
       },
       "plan": {
-        "title": "Planul tău",
+        "title": "Planul dumneavoastră",
         "caption": "Abonament",
-        "blurb": "Alege un nivel care se potrivește felului în care vrei să gândești cu Uniscept.",
+        "blurb": "Alegeți un nivel care se potrivește felului în care doriți să gândiți cu Uniscept.",
         "current": "Curent",
         "lockedBadge": "Curând",
         "free": "Gratuit",
@@ -995,17 +1025,17 @@
       "notifications": {
         "title": "Anunță-mă despre",
         "mentions": "Mențiuni",
-        "mentionsDescription": "Când cineva te menționează (@) într-un comentariu.",
+        "mentionsDescription": "Când cineva vă menționează (@) într-un comentariu.",
         "comments": "Comentarii",
-        "commentsDescription": "Răspunsuri și comentarii noi la nodurile și pânzele tale.",
+        "commentsDescription": "Răspunsuri și comentarii noi la nodurile și pânzele dumneavoastră.",
         "invites": "Invitații în spațiu",
-        "invitesDescription": "Când ești invitat într-un spațiu sau rolul tău se schimbă.",
+        "invitesDescription": "Când sunteți invitat într-un spațiu sau vi se schimbă rolul.",
         "digest": "Rezumat săptămânal",
-        "digestDescription": "Un rezumat de luni al activității din spațiile tale."
+        "digestDescription": "Un rezumat de luni al activității din spațiile dumneavoastră."
       }
     },
     "workspaceSettings": {
-      "close": "Închide setările spațiului de lucru",
+      "close": "Închideți setările spațiului de lucru",
       "groups": {
         "workspace": "Spațiu de lucru",
         "access": "Acces"
@@ -1020,65 +1050,79 @@
         "member": "Membru",
         "viewer": "Vizualizator"
       },
+      "roleIcons": {
+        "shield": "Scut",
+        "star": "Stea",
+        "flag": "Steag",
+        "sparkles": "Scântei",
+        "target": "Țintă",
+        "zap": "Fulger",
+        "rocket": "Rachetă",
+        "award": "Premiu",
+        "compass": "Busolă",
+        "crown": "Coroană",
+        "penTool": "Peniță",
+        "eye": "Ochi"
+      },
       "general": {
         "nameLabel": "Numele spațiului de lucru",
-        "namePlaceholder": "Denumește acest spațiu de lucru",
-        "save": "Salvează",
+        "namePlaceholder": "Denumiți acest spațiu de lucru",
+        "save": "Salvați",
         "saving": "Se salvează…",
         "membersStat": "Membri",
-        "roleStat": "Rolul tău",
+        "roleStat": "Rolul dumneavoastră",
         "createdStat": "Creat"
       },
       "members": {
         "hint": "Persoanele cu acces la acest spațiu de lucru.",
-        "you": "Tu",
-        "changeRole": "Schimbă rolul",
-        "remove": "Elimină",
-        "removeConfirm": "Elimină",
+        "you": "Dvs.",
+        "changeRole": "Schimbați rolul",
+        "remove": "Eliminați",
+        "removeConfirm": "Eliminați",
         "removed": "Membru eliminat",
         "removeFailed": "Nu s-a putut elimina membrul",
         "roleChanged": "Rol actualizat",
         "roleChangeFailed": "Nu s-a putut schimba rolul",
-        "transferTitle": "Transferă proprietatea",
+        "transferTitle": "Transferați proprietatea",
         "transferCritical": "Acțiune critică",
-        "transferConfirmPrefix": "Transferă proprietatea către",
-        "transferConfirmSuffix": "? Vei deveni membru și această acțiune nu poate fi anulată.",
-        "transferConfirm": "Transferă",
+        "transferConfirmPrefix": "Transferați proprietatea către",
+        "transferConfirmSuffix": "? Veți deveni membru și această acțiune nu poate fi anulată.",
+        "transferConfirm": "Transferați",
         "transferred": "Proprietate transferată",
         "transferFailed": "Nu s-a putut transfera proprietatea",
-        "cancel": "Anulează",
-        "inviteTitle": "Invită persoane",
+        "cancel": "Anulați",
+        "inviteTitle": "Invitați persoane",
         "inviteHint": "Se alătură la următoarea deschidere a Uniscept.",
-        "emailPlaceholder": "nume@companie.com",
-        "sendInvite": "Trimite invitația",
+        "emailPlaceholder": "name@example.com",
+        "sendInvite": "Trimiteți invitația",
         "sending": "Se trimite…",
         "invited": "Invitație pregătită",
         "inviteFailed": "Nu s-a putut crea invitația",
         "pendingTitle": "În așteptare",
-        "revoke": "Revocă",
+        "revoke": "Revocați",
         "revoked": "Invitație revocată",
         "revokeFailed": "Nu s-a putut revoca invitația"
       },
       "roles": {
         "hint": "Fiecare are un singur rol. Rolurile stabilesc ce poate face o persoană.",
-        "membersSuffix": "membri",
+        "memberCount": "{count, plural, one {# membru} few {# membri} other {# de membri}}",
         "newRole": "Rol nou",
         "nameLabel": "Numele rolului",
         "namePlaceholder": "ex. Recenzent",
         "iconLabel": "Pictogramă",
         "permissionsLabel": "Permisiuni",
         "systemLocked": "Predefinit",
-        "save": "Salvează rolul",
+        "save": "Salvați rolul",
         "saving": "Se salvează…",
-        "create": "Creează rolul",
-        "cancel": "Anulează",
-        "edit": "Editează rolul",
-        "delete": "Șterge rolul",
+        "create": "Creați rolul",
+        "cancel": "Anulați",
+        "edit": "Editați rolul",
+        "delete": "Ștergeți rolul",
         "created": "Rol creat",
         "createFailed": "Nu s-a putut crea rolul",
         "updated": "Rol actualizat",
         "updateFailed": "Nu s-a putut actualiza rolul",
-        "deleteConfirm": "Șterge",
+        "deleteConfirm": "Ștergeți",
         "deleted": "Rol șters",
         "deleteFailed": "Nu s-a putut șterge rolul"
       },
@@ -1114,16 +1158,16 @@
     "header": {
       "logo": "Uniscept",
       "signIn": "Autentificare",
-      "getStarted": "Începe acum"
+      "getStarted": "Începeți acum"
     },
     "hero": {
       "title": "Gândirea este",
       "titleAccent": "structură.",
       "subtitle1": "Fiecare fir Slack e un cimitir de idei.",
       "subtitle2": "Fiecare ședință e amnezie structurată.",
-      "tagline": "Construiește cunoaștere. Nu haos.",
-      "ctaPrimary": "Începe acum",
-      "ctaSecondary": "Află mai multe",
+      "tagline": "Construiți cunoaștere. Nu haos.",
+      "ctaPrimary": "Începeți acum",
+      "ctaSecondary": "Aflați mai multe",
       "demo": {
         "threadBand": "Întrebare deschisă",
         "demoTag": "Demo",
@@ -1160,7 +1204,7 @@
       "subtitle": "Instrumentele superficiale produc gândire superficială.",
       "stream": {
         "channel": "#product-decisions",
-        "live": "live",
+        "live": "în direct",
         "stamp": "Îngropat",
         "decision": "DECIZIE: livrăm rescrierea v2 în Q4",
         "lines": [
@@ -1207,15 +1251,15 @@
         },
         "validation": {
           "title": "Validare a căilor",
-          "description": "Marchează o afirmație respinsă și fiecare concluzie care se sprijină pe ea se recalculează instant. Nimic nu supraviețuiește pe tăcute."
+          "description": "Marcați o afirmație respinsă și fiecare concluzie care se sprijină pe ea se recalculează instant. Nimic nu supraviețuiește pe tăcute."
         },
         "references": {
           "title": "Referințe încrucișate",
-          "description": "Referențiază o concluzie validată din alt canvas. Demonstreaz-o o dată, sprijină-te pe ea oriunde contează."
+          "description": "Referențiați o concluzie validată de pe altă pânză. Demonstrați-o o dată, sprijiniți-vă pe ea oriunde contează."
         },
         "collaboration": {
           "title": "Colaborare în echipă",
-          "description": "Roluri în workspace, comentarii pe noduri, permisiuni proprii. Argumentați deschis, decideți pe înregistrare."
+          "description": "Roluri în spațiu, comentarii pe noduri, permisiuni proprii. Argumentați deschis, decideți pe înregistrare."
         }
       },
       "vignettes": {
@@ -1225,8 +1269,8 @@
         "validationPremise": "Costurile rămân constante la scară",
         "validationConclusion": "Economia unitară se susține",
         "validationSafe": "Retenția se menține la scară",
-        "referencesCanvasA": "Canvas · Prețuri",
-        "referencesCanvasB": "Canvas · Strategie",
+        "referencesCanvasA": "Pânză · Prețuri",
+        "referencesCanvasB": "Pânză · Strategie",
         "referencesSource": "Recuperarea CAC sub 12 luni",
         "referencesBadge": "Referință",
         "collaborationClaim": "Livrăm migrarea sub feature flag",
@@ -1242,7 +1286,7 @@
         "question": "Ridicăm runda acum sau încă un an pe cont propriu?",
         "nodeA": "Rezervele acoperă 14 luni",
         "nodeB": "Încă un an pe cont propriu",
-        "description": "Ia decizii mai bune. Documentează raționamentul. Nu mai relua aceleași argumente în fiecare trimestru.",
+        "description": "Luați decizii mai bune. Documentați raționamentul. Nu mai reluați aceleași argumente în fiecare trimestru.",
         "useCases": ["Strategie de produs", "Analiză de piață", "Arhitectură tehnică"]
       },
       "researchers": {
@@ -1250,7 +1294,7 @@
         "question": "Se replică efectul în afara laboratorului?",
         "nodeA": "Replicare pe teren, n=2400",
         "nodeB": "Efectul se confirmă pe teren",
-        "description": "Mapează literatura. Construiește cadre. Transformă lucrările în grafuri structurate de cunoaștere care chiar au sens.",
+        "description": "Mapați literatura. Construiți cadre. Transformați lucrările în grafuri structurate de cunoaștere care chiar au sens.",
         "useCases": ["Sinteză literatură", "Mapare ipoteze", "Rețele de citări"]
       },
       "engineers": {
@@ -1258,16 +1302,16 @@
         "question": "Monolit sau servicii pentru v3?",
         "nodeA": "Monolitul ține sarcină 10x",
         "nodeB": "v3 rămâne monolit",
-        "description": "Proiectează sisteme. Depanează logică. Documentează deciziile arhitecturale care contează cu adevărat.",
+        "description": "Proiectați sisteme. Depanați logică. Documentați deciziile arhitecturale care contează cu adevărat.",
         "useCases": ["Proiectare sisteme", "Fluxuri de debugging", "Decizii tehnice"]
       }
     },
     "pricing": {
       "title": "Prețuri",
       "subtitle": "Simple. Transparente. Corecte.",
-      "footer": "Încearcă gratuit cu modul Demo. Fără card de credit.",
-      "tryDemo": "Încearcă demo",
-      "getStarted": "Începe acum",
+      "footer": "Încercați gratuit cu modul Demo. Fără card de credit.",
+      "tryDemo": "Încercați demo",
+      "getStarted": "Începeți acum",
       "popular": "Popular",
       "free": "Gratuit",
       "periods": {
@@ -1278,11 +1322,11 @@
         "demo": {
           "name": "Demo",
           "description": "Pe durata sesiunii",
-          "features": ["Încearcă canvasul", "Fără cont", "Explorează funcțiile", "Stocare de sesiune"]
+          "features": ["Încercați pânza", "Fără cont", "Explorați funcțiile", "Stocare de sesiune"]
         },
         "lite": {
           "name": "Lite",
-          "features": ["Canvasuri nelimitate", "Un singur utilizator", "Stocare în cloud", "Opțiuni de export"]
+          "features": ["Pânze nelimitate", "Un singur utilizator", "Stocare în cloud", "Opțiuni de export"]
         },
         "standard": {
           "name": "Standard",
@@ -1305,16 +1349,16 @@
       "subtitle": "Atât.",
       "steps": {
         "ask": {
-          "title": "Întreabă",
-          "description": "Deschide un fir. Nodul central al întrebării așteaptă deja pe canvas."
+          "title": "Întrebați",
+          "description": "Deschideți un fir. Nodul central al întrebării așteaptă deja pe pânză."
         },
         "argue": {
-          "title": "Argumentează",
-          "description": "Așază afirmațiile în jur. Citează, conectează, susține: raționamentul prinde formă."
+          "title": "Argumentați",
+          "description": "Așezați afirmațiile în jur. Citați, conectați, susțineți: raționamentul prinde formă."
         },
         "decide": {
-          "title": "Decide",
-          "description": "Respinge ce pică, urmărește cum se propagă consecințele, fixează răspunsul care rezistă."
+          "title": "Decideți",
+          "description": "Respingeți ce pică, urmăriți cum se propagă consecințele, fixați răspunsul care rezistă."
         }
       },
       "vignettes": {
@@ -1325,10 +1369,10 @@
       }
     },
     "cta": {
-      "title1": "Nu mai vorbi.",
-      "title2": "Începe să construiești.",
+      "title1": "Nu mai vorbiți.",
+      "title2": "Începeți să construiți.",
       "subtitle": "Pentru cercetători, fondatori și ingineri care chiar livrează.",
-      "button": "Începe gratuit"
+      "button": "Începeți gratuit"
     }
   }
 }

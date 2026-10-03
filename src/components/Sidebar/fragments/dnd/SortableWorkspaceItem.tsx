@@ -3,9 +3,9 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { clsx } from 'clsx';
 import { LayoutGrid, Pencil, Settings, Trash2 } from 'lucide-react';
-import type { KeyboardEvent, MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 
-import type { IWorkspaceItem, TWorkspaceDropZone } from '@interfaces';
+import type { IInlineEdit, IWorkspaceItem, TWorkspaceDropZone } from '@interfaces';
 
 import { SelectionStrip } from '@/components/SelectionStrip';
 import { useTranslations } from '@/i18n';
@@ -24,14 +24,8 @@ interface ISortableWorkspaceItemProps {
   workspace: IWorkspaceItem;
   isActive: boolean;
   isSelected: boolean;
-  isEditing: boolean;
-  editValue: string;
-  setEditValue: (value: string) => void;
-  inputRef: (element: HTMLInputElement | null) => void;
-  commitRename: () => void;
-  handleKeyDown: (event: KeyboardEvent) => void;
+  edit: IInlineEdit;
   onClick: (id: string, event: MouseEvent) => void;
-  onRequestRename: (id: string, name: string) => void;
   onRequestDelete: (id: string, name: string) => void;
   onRequestSettings: (id: string) => void;
   isDragActive: boolean;
@@ -42,21 +36,15 @@ export const SortableWorkspaceItem = ({
   workspace,
   isActive,
   isSelected,
-  isEditing,
-  editValue,
-  setEditValue,
-  inputRef,
-  commitRename,
-  handleKeyDown,
+  edit,
   onClick,
-  onRequestRename,
   onRequestDelete,
   onRequestSettings,
   isDragActive,
   dropIndicator,
 }: ISortableWorkspaceItemProps) => {
-  const translations = useTranslations();
-  const isLocked = !workspace.canManageWorkspace;
+  const t = useTranslations();
+  const isEditing = edit.editingId === workspace.id;
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
     id: workspace.id,
     disabled: isEditing,
@@ -83,21 +71,15 @@ export const SortableWorkspaceItem = ({
         )}
       >
         <ItemRowButton
+          aria-current={isActive || undefined}
           isActive={isActive}
           isSelected={isSelected}
+          size="compact"
           onClick={handleClick}
-          className="cursor-pointer px-1.5 py-1"
+          className="cursor-pointer"
         >
           <ItemIcon icon={LayoutGrid} isHighlighted={isActive} hidesOnHover={!isEditing} />
-          <ItemLabel
-            name={workspace.name}
-            isEditing={isEditing}
-            editValue={editValue}
-            setEditValue={setEditValue}
-            inputRef={inputRef}
-            commitRename={commitRename}
-            handleKeyDown={handleKeyDown}
-          />
+          <ItemLabel name={workspace.name} isEditing={isEditing} edit={edit} />
           {isSelected && !isEditing && <SelectedCheck />}
         </ItemRowButton>
 
@@ -107,9 +89,9 @@ export const SortableWorkspaceItem = ({
             attributes={attributes}
             listeners={listeners}
             isActive={isActive}
-            ariaLabel={translations.platform.sidebar.dragToReorder}
+            ariaLabel={t.platform.sidebar.dragToReorder}
+            size="compact"
             onClick={handleClick}
-            className="left-1.5"
           />
         )}
 
@@ -118,24 +100,26 @@ export const SortableWorkspaceItem = ({
             <ItemActionButton
               icon={Settings}
               tone="neutral"
-              title={translations.platform.sidebar.workspaceSettings}
+              title={t.platform.sidebar.workspaceSettings}
               tour={isActive ? 'sidebarWorkspaceRowSettings' : undefined}
               onClick={() => onRequestSettings(workspace.id)}
             />
-            <ItemActionButton
-              icon={Pencil}
-              tone="neutral"
-              title={translations.platform.sidebar.rename}
-              isLocked={isLocked}
-              onClick={() => onRequestRename(workspace.id, workspace.name)}
-            />
-            <ItemActionButton
-              icon={Trash2}
-              tone="danger"
-              title={translations.platform.sidebar.delete}
-              isLocked={isLocked}
-              onClick={() => onRequestDelete(workspace.id, workspace.name)}
-            />
+            {workspace.canManageWorkspace && (
+              <>
+                <ItemActionButton
+                  icon={Pencil}
+                  tone="neutral"
+                  title={t.platform.sidebar.rename}
+                  onClick={() => edit.startEditing(workspace.id, workspace.name)}
+                />
+                <ItemActionButton
+                  icon={Trash2}
+                  tone="danger"
+                  title={t.platform.sidebar.delete}
+                  onClick={() => onRequestDelete(workspace.id, workspace.name)}
+                />
+              </>
+            )}
           </ItemActionsToolbar>
         )}
       </div>

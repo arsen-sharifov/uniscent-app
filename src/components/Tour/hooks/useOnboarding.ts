@@ -3,7 +3,8 @@
 import { useEffect, useRef } from 'react';
 
 import { ONBOARDING_BADGE_ID } from '@constants';
-import { addUserBadge, getCurrentUserId, getOnboarding, upsertOnboarding } from '@api/client';
+import { getCurrentUserId, getOnboarding, upsertOnboarding } from '@api/client';
+import { awardBadge } from '@/lib/badges';
 import { event } from '@/lib/events';
 import { hasEarnedBadge, useOnboardingStore } from '@/lib/onboarding';
 
@@ -48,8 +49,6 @@ export const useOnboarding = () => {
 
     awardedRef.current = true;
 
-    addUserBadge(ONBOARDING_BADGE_ID).catch((error: unknown) =>
-      event.error(error, { toast: false, context: 'onboarding.badge' }),
-    );
+    awardBadge(ONBOARDING_BADGE_ID, { quiet: true });
   }, [loaded, completedGuides]);
 };

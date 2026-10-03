@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
+import { canvasNode, questionNode } from '@mocks/canvas';
 import { EDITOR, OWNER, VIEWER } from '@mocks/roles';
-import { canEditNode, roleLabel } from '@/lib/utils';
+import { canDeleteNode, canEditNode, roleLabel } from '@/lib/utils';
 import en from '@/locales/en.json';
 
 describe('canEditNode', () => {
@@ -69,6 +70,30 @@ describe('roleLabel', () => {
     describe('WHEN the label is resolved', () => {
       test('THEN the stored name is used as a fallback', () => {
         expect(roleLabel(null, 'Reviewer', en)).toBe('Reviewer');
+      });
+    });
+  });
+});
+
+describe('canDeleteNode', () => {
+  describe('GIVEN an editor who is not the workspace owner', () => {
+    describe('WHEN they delete their own node', () => {
+      test('THEN the deletion is allowed', () => {
+        expect(canDeleteNode(canvasNode('n1', { createdBy: 'user-1' }), EDITOR)).toBe(true);
+      });
+    });
+
+    describe("WHEN they delete someone else's node", () => {
+      test('THEN the deletion is denied', () => {
+        expect(canDeleteNode(canvasNode('n1', { createdBy: 'user-2' }), EDITOR)).toBe(false);
+      });
+    });
+  });
+
+  describe('GIVEN the workspace owner', () => {
+    describe('WHEN they delete the question', () => {
+      test('THEN the deletion is denied', () => {
+        expect(canDeleteNode(questionNode('q1'), OWNER)).toBe(false);
       });
     });
   });

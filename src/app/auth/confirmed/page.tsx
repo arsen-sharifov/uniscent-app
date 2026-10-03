@@ -8,7 +8,7 @@ import { Logo } from '@/components';
 import { useTranslations } from '@/i18n';
 
 const ConfirmedPage = () => {
-  const { confirmed } = useTranslations().auth;
+  const t = useTranslations();
 
   return (
     <LandingWorld className="relative flex min-h-screen flex-col items-center justify-center px-6">
@@ -19,10 +19,10 @@ const ConfirmedPage = () => {
           <CircleCheck aria-hidden className="h-8 w-8 text-[color:var(--hero-accent-text)]" />
         </div>
 
-        <AuthHeading title={confirmed.heading} subtitle={confirmed.message} />
+        <AuthHeading title={t.auth.confirmed.heading} subtitle={t.auth.confirmed.message} />
 
         <AuthButton onClick={() => window.close()} className="w-full">
-          {confirmed.close}
+          {t.auth.confirmed.close}
         </AuthButton>
       </AuthPanel>
     </LandingWorld>

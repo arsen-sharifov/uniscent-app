@@ -6,5 +6,5 @@ export const referenceSearchProps = (): Omit<IReferenceSearchPanelContentProps, 
   nodes: [nodeReference('r1'), nodeReference('r2')],
   loading: false,
   position: { x: 100, y: 200 },
-  screenPos: { x: 300, y: 400 },
+  screenPosition: { x: 300, y: 400 },
 });

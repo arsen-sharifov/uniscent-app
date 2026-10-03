@@ -5,39 +5,35 @@ import type { TLocale } from '@interfaces';
 
 import { createClient } from '@/lib/supabase/server';
 
-import { LOCALE_COOKIE, LOCALES, PUBLIC_PATHS } from './consts';
-import { negotiateLocale } from './utils';
+import { LOCALE_COOKIE, PUBLIC_PATHS } from './consts';
+import { isLocale, negotiateLocale } from './utils';
+
+const readStoredLocale = async (): Promise<TLocale | null> => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return null;
+
+  const { data } = await supabase.from('user_preferences').select('language').eq('user_id', user.id).maybeSingle();
+
+  return isLocale(data?.language) ? data.language : null;
+};
 
 const resolveLocale = async (): Promise<TLocale> => {
   const cookieLocale = (await cookies()).get(LOCALE_COOKIE)?.value;
-  if (cookieLocale && LOCALES.includes(cookieLocale as TLocale)) {
-    return cookieLocale as TLocale;
-  }
+  if (isLocale(cookieLocale)) return cookieLocale;
 
   const requestHeaders = await headers();
   const browserLocale = negotiateLocale(requestHeaders.get('accept-language'));
 
   const pathname = requestHeaders.get('x-pathname');
-  if (pathname && (PUBLIC_PATHS.includes(pathname) || pathname.startsWith('/auth/'))) {
-    return browserLocale;
-  }
+  if (pathname && (PUBLIC_PATHS.includes(pathname) || pathname.startsWith('/auth/'))) return browserLocale;
 
-  try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+  const storedLocale = await readStoredLocale().catch(() => null);
 
-    if (!user) {
-      return browserLocale;
-    }
-
-    const { data } = await supabase.from('user_preferences').select('language').eq('user_id', user.id).maybeSingle();
-
-    return (data?.language as TLocale | undefined) ?? browserLocale;
-  } catch {
-    return browserLocale;
-  }
+  return storedLocale ?? browserLocale;
 };
 
 export default getRequestConfig(async () => {

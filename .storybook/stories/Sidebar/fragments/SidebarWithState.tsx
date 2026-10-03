@@ -6,6 +6,7 @@ import {
   type ISidebarProps,
   Sidebar,
   findInTree,
+  findOutermostItems,
   insertIntoTree,
   removeFromTree,
   updateNavItemName,
@@ -17,7 +18,7 @@ export const SidebarWithState = (args: ISidebarProps) => {
   const [activeItemId, setActiveItemId] = useState(args.activeItemId);
   const [activeWorkspaceId, setActiveWorkspaceId] = useState(args.activeWorkspaceId);
   const [items, setItems] = useState<TNavItem[]>(args.items ?? []);
-  const [wsItems, setWsItems] = useState<IWorkspaceItem[]>(args.workspaces ?? []);
+  const [workspaceItems, setWorkspaceItems] = useState<IWorkspaceItem[]>(args.workspaces ?? []);
   const [editingItemId, setEditingItemId] = useState<string | null>(args.editingItemId ?? null);
   const [editingWorkspaceId, setEditingWorkspaceId] = useState<string | null>(args.editingWorkspaceId ?? null);
 
@@ -37,9 +38,9 @@ export const SidebarWithState = (args: ISidebarProps) => {
     const id = nextId('thread');
     const thread: TNavItem = { type: 'thread', id, name: 'New Thread' };
     if (folderId) {
-      setItems((prev) => insertIntoTree(prev, thread, folderId, Infinity));
+      setItems((previous) => insertIntoTree(previous, thread, folderId, Infinity));
     } else {
-      setItems((prev) => [...prev, thread]);
+      setItems((previous) => [...previous, thread]);
     }
     setEditingItemId(id);
   };
@@ -47,81 +48,75 @@ export const SidebarWithState = (args: ISidebarProps) => {
   const handleCreateFolder = () => {
     args.onCreateFolder?.();
     const id = nextId('folder');
-    setItems((prev) => [...prev, { type: 'folder', id, name: 'New Folder', items: [] }]);
+    setItems((previous) => [...previous, { type: 'folder', id, name: 'New Folder', items: [] }]);
     setEditingItemId(id);
   };
 
   const handleRenameItem: NonNullable<ISidebarProps['onRenameItem']> = (id, name) => {
     args.onRenameItem?.(id, name);
-    setItems((prev) => updateNavItemName(prev, id, name));
+    setItems((previous) => updateNavItemName(previous, id, name));
   };
 
   const handleDeleteItem = (id: string) => {
     args.onDeleteItem?.(id);
-    setItems((prev) => removeFromTree(prev, id));
+    setItems((previous) => removeFromTree(previous, id));
   };
 
   const handleBulkDelete = (ids: Set<string>) => {
     args.onBulkDelete?.(ids);
-    setItems((prev) => [...ids].reduce((acc, id) => removeFromTree(acc, id), prev));
+    setItems((previous) => [...ids].reduce((accumulator, id) => removeFromTree(accumulator, id), previous));
   };
 
   const handleBulkDeleteWorkspaces = (ids: Set<string>) => {
     args.onBulkDeleteWorkspaces?.(ids);
-    setWsItems((prev) => {
-      const remaining = prev.filter((w) => !ids.has(w.id));
-      if (activeWorkspaceId && ids.has(activeWorkspaceId)) {
-        setActiveWorkspaceId(remaining[0]?.id);
-      }
-
-      return remaining;
-    });
+    const remaining = workspaceItems.filter((workspace) => !ids.has(workspace.id));
+    setWorkspaceItems(remaining);
+    if (activeWorkspaceId && ids.has(activeWorkspaceId)) setActiveWorkspaceId(remaining[0]?.id);
   };
 
   const handleBulkMove = (ids: Set<string>, parentId: string | null, position: number) => {
     args.onBulkMove?.(ids, parentId, position);
-    setItems((prev) => {
-      const toMove = [...ids].map((id) => findInTree(prev, id)).filter((item): item is TNavItem => item !== null);
-      const removed = [...ids].reduce((acc, id) => removeFromTree(acc, id), prev);
+    setItems((previous) => {
+      const itemsToMove = findOutermostItems(previous, ids);
+      const removed = itemsToMove.reduce((accumulator, item) => removeFromTree(accumulator, item.id), previous);
 
-      return toMove.reduce((acc, item, index) => insertIntoTree(acc, item, parentId, position + index), removed);
+      return itemsToMove.reduce(
+        (accumulator, item, index) => insertIntoTree(accumulator, item, parentId, position + index),
+        removed,
+      );
     });
   };
 
-  const handleMoveItem: NonNullable<ISidebarProps['onMoveItem']> = (id, type, parentId, position) => {
-    args.onMoveItem?.(id, type, parentId, position);
-    setItems((prev) => {
-      const item = findInTree(prev, id);
-      if (!item) return prev;
-      const without = removeFromTree(prev, id);
+  const handleMoveItem: NonNullable<ISidebarProps['onMoveItem']> = (id, parentId, position) => {
+    args.onMoveItem?.(id, parentId, position);
+    setItems((previous) => {
+      const item = findInTree(previous, id);
+      if (!item) return previous;
 
-      return insertIntoTree(without, item, parentId, position);
+      return insertIntoTree(removeFromTree(previous, id), item, parentId, position);
     });
   };
 
   const handleCreateWorkspace = () => {
     args.onCreateWorkspace?.();
     const id = nextId('ws');
-    setWsItems((prev) => [...prev, { id, name: 'New Workspace' }]);
+    setWorkspaceItems((previous) => [...previous, { id, name: 'New Workspace', canManageWorkspace: true }]);
     setActiveWorkspaceId(id);
     setEditingWorkspaceId(id);
   };
 
   const handleRenameWorkspace: NonNullable<ISidebarProps['onRenameWorkspace']> = (id, name) => {
     args.onRenameWorkspace?.(id, name);
-    setWsItems((prev) => prev.map((w) => (w.id === id ? { ...w, name } : w)));
+    setWorkspaceItems((previous) =>
+      previous.map((workspace) => (workspace.id === id ? { ...workspace, name } : workspace)),
+    );
   };
 
   const handleDeleteWorkspace = (id: string) => {
     args.onDeleteWorkspace?.(id);
-    setWsItems((prev) => {
-      const remaining = prev.filter((w) => w.id !== id);
-      if (id === activeWorkspaceId && remaining.length > 0) {
-        setActiveWorkspaceId(remaining[0].id);
-      }
-
-      return remaining;
-    });
+    const remaining = workspaceItems.filter((workspace) => workspace.id !== id);
+    setWorkspaceItems(remaining);
+    if (id === activeWorkspaceId) setActiveWorkspaceId(remaining[0]?.id);
   };
 
   const handleEditingComplete = () => {
@@ -138,7 +133,7 @@ export const SidebarWithState = (args: ISidebarProps) => {
     <Sidebar
       {...args}
       items={items}
-      workspaces={wsItems}
+      workspaces={workspaceItems}
       activeItemId={activeItemId}
       activeWorkspaceId={activeWorkspaceId}
       editingItemId={editingItemId}

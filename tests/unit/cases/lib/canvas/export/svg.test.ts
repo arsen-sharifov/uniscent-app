@@ -6,6 +6,7 @@ import { EXPORT_RECTS } from '@mocks/canvasExport';
 import {
   EXPORT_FIXTURE,
   buildExportCanvas,
+  buildLabelledCanvas,
   buildMultilineCanvas,
   buildOrphanEdgeCanvas,
   buildPlaceholderCanvas,
@@ -19,6 +20,8 @@ const STAGE_SELECTOR = '[data-canvas-export-stage]';
 
 let root: HTMLElement;
 let image: ICanvasExportImage;
+
+const parseSvg = (svg: string): Document => new DOMParser().parseFromString(svg, 'image/svg+xml');
 
 const edgePath = (id: string, start: string) => `data-edge-id="${id}" data-tone="valid" d="${start}`;
 
@@ -115,6 +118,46 @@ describe('createCanvasSvg', () => {
         expect(image.svg).toContain(`>${first.toUpperCase()}</text>`);
         expect(image.svg).toContain(`>${second.toUpperCase()}</text>`);
         expect(image.svg).not.toContain('\n');
+      });
+    });
+  });
+
+  describe('GIVEN a label and a thread name that carry markup', () => {
+    beforeEach(async () => {
+      root = buildLabelledCanvas(EXPORT_FIXTURE.markupLabel);
+      image = await createCanvasSvg(root, EXPORT_FIXTURE.markupThread);
+    });
+
+    describe('WHEN the exported file is opened as SVG', () => {
+      test('THEN the markup stays literal text and never becomes elements', () => {
+        const document = parseSvg(image.svg);
+
+        expect(document.querySelector('parsererror')).toBeNull();
+        expect(document.getElementsByTagName('script')).toHaveLength(0);
+        expect(document.getElementsByTagName('a')).toHaveLength(0);
+        expect(document.querySelector('title')?.textContent).toBe(EXPORT_FIXTURE.markupThread);
+        expect(document.querySelector('[data-node-id="source"]')?.textContent).toContain(
+          EXPORT_FIXTURE.markupLabel.toUpperCase(),
+        );
+      });
+    });
+  });
+
+  describe('GIVEN a label and a thread name with characters XML forbids', () => {
+    beforeEach(async () => {
+      root = buildLabelledCanvas(EXPORT_FIXTURE.controlLabel);
+      image = await createCanvasSvg(root, EXPORT_FIXTURE.controlLabel);
+    });
+
+    describe('WHEN the exported file is opened as SVG', () => {
+      test('THEN it still parses and keeps the readable text', () => {
+        const document = parseSvg(image.svg);
+
+        expect(document.querySelector('parsererror')).toBeNull();
+        expect(document.querySelector('title')?.textContent).toBe(EXPORT_FIXTURE.controlSafeLabel);
+        expect(document.querySelector('[data-node-id="source"]')?.textContent).toContain(
+          EXPORT_FIXTURE.controlSafeLabel.toUpperCase(),
+        );
       });
     });
   });

@@ -13,16 +13,19 @@ import {
   XCircle,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useCallback, useEffect, useRef, type ReactNode } from 'react';
+import { type ReactNode, useEffect, useRef } from 'react';
 
 import { ECanvasNodeType, type ICanvasNodeData, type TCanvasContextMenu } from '@interfaces';
 import { useClickOutside, useEscapeKey, useMenuKeyboardNavigation } from '@hooks';
 import { useTranslations } from '@/i18n';
+import { hasValidatedParent, isCanvasNodeData } from '@/lib/canvas';
 import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
 import { canEditNode } from '@/lib/utils';
 
-import { buildReferenceTargetUrl, hasValidatedParent, isCanvasNodeData } from '../utils';
-import { MenuDivider, MenuItem } from './MenuItem';
+import { useViewportClamp } from '../hooks';
+import { buildReferenceTargetUrl } from '../utils';
+import { MenuDivider } from './MenuDivider';
+import { MenuItem } from './MenuItem';
 
 interface IContextMenuProps {
   menu: TCanvasContextMenu;
@@ -41,37 +44,30 @@ export const ContextMenu = ({ menu, onClose }: IContextMenuProps) => {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const addNode = useCanvasStore((s) => s.addNode);
-  const setReferenceSearchPosition = useCanvasStore((s) => s.setReferenceSearchPosition);
-  const setNodesStatus = useCanvasStore((s) => s.setNodesStatus);
-  const duplicateNode = useCanvasStore((s) => s.duplicateNode);
-  const deleteNode = useCanvasStore((s) => s.deleteNode);
-  const deleteEdge = useCanvasStore((s) => s.deleteEdge);
-  const setOpenCommentsNodeId = useCanvasStore((s) => s.setOpenCommentsNodeId);
-  const setEditingNodeId = useCanvasStore((s) => s.setEditingNodeId);
-  const setNodeAnswer = useCanvasStore((s) => s.setNodeAnswer);
+  const addNode = useCanvasStore((state) => state.addNode);
+  const setReferenceSearchPosition = useCanvasStore((state) => state.setReferenceSearchPosition);
+  const setNodeStatus = useCanvasStore((state) => state.setNodeStatus);
+  const duplicateNode = useCanvasStore((state) => state.duplicateNode);
+  const deleteNode = useCanvasStore((state) => state.deleteNode);
+  const deleteEdge = useCanvasStore((state) => state.deleteEdge);
+  const setOpenCommentsNodeId = useCanvasStore((state) => state.setOpenCommentsNodeId);
+  const setEditingNodeId = useCanvasStore((state) => state.setEditingNodeId);
+  const setNodeAnswer = useCanvasStore((state) => state.setNodeAnswer);
 
-  const targetExists = useCanvasStore((s) => {
-    if (menu.type === 'node') return s.nodes.some((n) => n.id === menu.nodeId);
-    if (menu.type === 'edge') return s.edges.some((e) => e.id === menu.edgeId);
+  const targetExists = useCanvasStore((state) => {
+    if (menu.type === 'node') return state.nodes.some((node) => node.id === menu.nodeId);
+    if (menu.type === 'edge') return state.edges.some((edge) => edge.id === menu.edgeId);
 
     return true;
   });
 
-  useEffect(() => {
-    if (!targetExists) onClose();
-  }, [targetExists, onClose]);
-
   useEscapeKey(onClose);
   useClickOutside(containerRef, onClose);
 
-  const close = useCallback(
-    (action: () => void) => () => {
-      action();
-      onClose();
-    },
-    [onClose],
-  );
+  const close = (action: () => void) => () => {
+    action();
+    onClose();
+  };
 
   const { focusItem, handleKeyDown } = useMenuKeyboardNavigation(containerRef, { onClose });
 
@@ -82,7 +78,7 @@ export const ContextMenu = ({ menu, onClose }: IContextMenuProps) => {
   const renderPaneItems = (flowX: number, flowY: number): ReactNode[] => [
     <MenuItem
       key="add-node"
-      icon={<Plus className="h-3 w-3" strokeWidth={2.25} />}
+      icon={Plus}
       label={t.platform.canvas.context.addNode}
       shortcut="N"
       onClick={close(() => addNode({ x: flowX, y: flowY }, t.platform.canvas.node.defaultLabel))}
@@ -90,7 +86,7 @@ export const ContextMenu = ({ menu, onClose }: IContextMenuProps) => {
     />,
     <MenuItem
       key="add-reference"
-      icon={<Link2 className="h-3 w-3" strokeWidth={2.25} />}
+      icon={Link2}
       label={t.platform.canvas.context.addReference}
       shortcut="R"
       onClick={close(() => setReferenceSearchPosition({ x: flowX, y: flowY }))}
@@ -101,45 +97,50 @@ export const ContextMenu = ({ menu, onClose }: IContextMenuProps) => {
   const renderEdgeItems = (edgeId: string): ReactNode[] => [
     <MenuItem
       key="delete-edge"
-      icon={<Trash2 className="h-3 w-3" strokeWidth={2.25} />}
+      icon={Trash2}
       label={t.platform.canvas.context.deleteEdge}
       onClick={close(() => deleteEdge(edgeId))}
       accent="red"
     />,
   ];
 
-  const renderReferenceItems = (nodeId: string, targetUrl: string | null, canEdit: boolean): ReactNode[] =>
-    joinSections({
+  const renderReferenceItems = (nodeId: string, targetUrl: string | null, canEdit: boolean): ReactNode[] => {
+    const { canEditCanvas } = usePermissionsStore.getState();
+
+    return joinSections({
       navigate: targetUrl
         ? [
             <MenuItem
               key="open-referenced"
-              icon={<ExternalLink className="h-3 w-3" strokeWidth={2.25} />}
+              icon={ExternalLink}
               label={t.platform.canvas.context.openReferenced}
               onClick={close(() => router.push(targetUrl))}
               accent="cyan"
             />,
           ]
         : [],
-      remove: canEdit
+      remove: canEditCanvas
         ? [
             <MenuItem
               key="delete-reference"
-              icon={<Trash2 className="h-3 w-3" strokeWidth={2.25} />}
+              icon={Trash2}
               label={t.platform.canvas.context.deleteReference}
               onClick={close(() => deleteNode(nodeId))}
               accent="red"
+              disabled={!canEdit}
+              hint={t.platform.canvas.context.deleteNotAllowed}
             />,
           ]
         : [],
     });
+  };
 
   const renderQuestionItems = (nodeId: string, canEdit: boolean): ReactNode[] =>
     canEdit
       ? [
           <MenuItem
             key="edit-question"
-            icon={<Pencil className="h-3 w-3" strokeWidth={2.25} />}
+            icon={Pencil}
             label={t.platform.canvas.question.editLabel}
             onClick={close(() => setEditingNodeId(nodeId))}
           />,
@@ -153,25 +154,25 @@ export const ContextMenu = ({ menu, onClose }: IContextMenuProps) => {
   ): ReactNode[] => [
     <MenuItem
       key="mark-valid"
-      icon={<CheckCircle className="h-3 w-3" strokeWidth={2.25} />}
+      icon={CheckCircle}
       label={status === 'valid' ? t.platform.canvas.context.unmarkValid : t.platform.canvas.context.markValid}
       shortcut="Y"
-      onClick={close(() => setNodesStatus([nodeId], 'valid'))}
+      onClick={close(() => setNodeStatus(nodeId, 'valid'))}
       accent="emerald"
       disabled={status !== 'valid' && !validatedParent}
       hint={t.platform.canvas.context.needsValidParent}
     />,
     <MenuItem
       key="mark-invalid"
-      icon={<XCircle className="h-3 w-3" strokeWidth={2.25} />}
+      icon={XCircle}
       label={status === 'invalid' ? t.platform.canvas.context.unmarkInvalid : t.platform.canvas.context.markInvalid}
       shortcut="X"
-      onClick={close(() => setNodesStatus([nodeId], 'invalid'))}
+      onClick={close(() => setNodeStatus(nodeId, 'invalid'))}
       accent="red"
     />,
     <MenuItem
       key="mark-answer"
-      icon={<Flag className="h-3 w-3" strokeWidth={2.25} />}
+      icon={Flag}
       label={isAnswer ? t.platform.canvas.context.unmarkAnswer : t.platform.canvas.context.markAnswer}
       shortcut="A"
       onClick={close(() => setNodeAnswer(nodeId))}
@@ -191,9 +192,8 @@ export const ContextMenu = ({ menu, onClose }: IContextMenuProps) => {
           ? [
               <MenuItem
                 key="comment"
-                icon={<MessageSquare className="h-3 w-3" strokeWidth={2.25} />}
+                icon={MessageSquare}
                 label={t.platform.canvas.context.comment}
-                shortcut="M"
                 onClick={close(() => setOpenCommentsNodeId(nodeId))}
               />,
             ]
@@ -203,21 +203,23 @@ export const ContextMenu = ({ menu, onClose }: IContextMenuProps) => {
         ? [
             <MenuItem
               key="duplicate"
-              icon={<Copy className="h-3 w-3" strokeWidth={2.25} />}
+              icon={Copy}
               label={t.platform.canvas.context.duplicate}
               onClick={close(() => duplicateNode(nodeId))}
             />,
           ]
         : [],
-      remove: canEdit
+      remove: canEditCanvas
         ? [
             <MenuItem
               key="delete"
-              icon={<Trash2 className="h-3 w-3" strokeWidth={2.25} />}
+              icon={Trash2}
               label={t.platform.canvas.context.delete}
               shortcut="⌫"
               onClick={close(() => deleteNode(nodeId))}
               accent="red"
+              disabled={!canEdit}
+              hint={t.platform.canvas.context.deleteNotAllowed}
             />,
           ]
         : [],
@@ -225,7 +227,7 @@ export const ContextMenu = ({ menu, onClose }: IContextMenuProps) => {
   };
 
   const renderNodeItems = (nodeId: string): ReactNode[] => {
-    const node = useCanvasStore.getState().nodes.find((n) => n.id === nodeId);
+    const node = useCanvasStore.getState().nodes.find((node) => node.id === nodeId);
     if (!node) return [];
 
     const canEdit = canEditNode(node.data.createdBy, usePermissionsStore.getState());
@@ -250,9 +252,11 @@ export const ContextMenu = ({ menu, onClose }: IContextMenuProps) => {
   const items = renderItems();
   const isEmpty = items.length === 0;
 
+  useViewportClamp(containerRef, { x: menu.x, y: menu.y }, !isEmpty);
+
   useEffect(() => {
-    if (isEmpty) onClose();
-  }, [isEmpty, onClose]);
+    if (!targetExists || isEmpty) onClose();
+  }, [targetExists, isEmpty, onClose]);
 
   if (isEmpty) return null;
 
@@ -263,7 +267,6 @@ export const ContextMenu = ({ menu, onClose }: IContextMenuProps) => {
       tabIndex={-1}
       aria-label={t.platform.canvas.context.ariaLabel}
       onKeyDown={handleKeyDown}
-      style={{ left: menu.x, top: menu.y }}
       className="fixed z-50 flex w-56 animate-rise-down flex-col rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] p-1 font-grotesk text-[color:var(--text)] shadow-[var(--shadow-modal)] outline-none select-none motion-reduce:animate-none"
     >
       {items}

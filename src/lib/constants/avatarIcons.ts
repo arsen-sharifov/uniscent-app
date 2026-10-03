@@ -22,9 +22,9 @@ import {
   Turtle,
 } from 'lucide-react';
 
-import type { TAvatarIcon, TAvatarIconLabelKey } from '@interfaces';
+import type { IAvatarIconOption, TAvatarIcon } from '@interfaces';
 
-export const AVATAR_ICONS: readonly { id: TAvatarIcon; icon: LucideIcon; labelKey: TAvatarIconLabelKey }[] = [
+export const AVATAR_ICONS: readonly IAvatarIconOption[] = [
   { id: 'cat', icon: Cat, labelKey: 'avatarIconCat' },
   { id: 'dog', icon: Dog, labelKey: 'avatarIconDog' },
   { id: 'panda', icon: Panda, labelKey: 'avatarIconPanda' },

@@ -9,6 +9,5 @@ export const updateEmail = vi.fn();
 export const updatePassword = vi.fn();
 export const updateUserMetadata = vi.fn();
 export const upsertPreferences = vi.fn();
-export const verifyPassword = vi.fn();
 
 export const USER_UNAVAILABLE = { data: { user: null }, error: null };

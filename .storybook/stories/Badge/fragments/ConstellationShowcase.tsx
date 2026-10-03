@@ -6,12 +6,12 @@ import { Showcase } from '../../../components';
 import { EARNED_DEMO } from '../consts';
 
 export const ConstellationShowcase = () => {
-  const { badges } = useTranslations().platform.settings.profile;
+  const t = useTranslations();
   const earnedSet = new Set(EARNED_DEMO);
   const pips = BADGES.map((definition) => ({
     id: definition.id,
     icon: definition.icon,
-    label: badges[definition.labelKey],
+    label: t.platform.settings.profile.badges[definition.labelKey],
     earned: earnedSet.has(definition.id),
   }));
 

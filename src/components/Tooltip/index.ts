@@ -1,2 +1,2 @@
 export * from './Tooltip';
-export * from './SmartTooltip';
+export * from './fragments';

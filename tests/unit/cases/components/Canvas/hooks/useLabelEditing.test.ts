@@ -5,6 +5,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { THREAD_ID, canvasNode } from '@mocks/canvas';
 import { EDIT_ACCESS } from '@mocks/roles';
 import { useLabelEditing } from '@/components/Canvas/hooks';
+import { subscribeCanvasOperations } from '@/lib/canvas';
 import { useOnboardingStore } from '@/lib/onboarding';
 import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
 
@@ -21,6 +22,10 @@ const keyWith = (key: string, value: string, shiftKey = false) =>
 const storedLabel = () => useCanvasStore.getState().nodes.find((node) => node.id === 'n1')?.data.label;
 const labelledSignal = () => useOnboardingStore.getState().signals.has('nodeLabelled');
 
+const onOperation = vi.fn();
+
+const unsubscribers: Array<() => void> = [];
+
 let editor: { current: ReturnType<typeof useLabelEditing> };
 
 beforeEach(() => {
@@ -34,23 +39,24 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  unsubscribers.splice(0).forEach((unsubscribe) => unsubscribe());
   useOnboardingStore.getState().forget();
   useCanvasStore.getState().clearCanvas();
   usePermissionsStore.getState().clearAccess();
 });
 
 describe('useLabelEditing', () => {
-  describe('GIVEN a label textarea that is not being edited yet', () => {
+  describe('GIVEN an editor opened on a node that is not measured yet', () => {
     let textarea: HTMLTextAreaElement;
-    let rerenderEditor: (props: { isEditing: boolean }) => void;
+    let rerenderEditor: (props: { measured: boolean }) => void;
 
     beforeEach(() => {
       textarea = document.createElement('textarea');
       textarea.value = 'Idea';
       document.body.append(textarea);
 
-      const view = renderHook(({ isEditing }) => useLabelEditing('n1', 'Idea', isEditing), {
-        initialProps: { isEditing: false },
+      const view = renderHook(({ measured }) => useLabelEditing({ id: 'n1', label: 'Idea', measured }), {
+        initialProps: { measured: false },
       });
 
       view.result.current.inputRef.current = textarea;
@@ -61,9 +67,9 @@ describe('useLabelEditing', () => {
       textarea.remove();
     });
 
-    describe('WHEN editing starts', () => {
+    describe('WHEN the node is measured', () => {
       beforeEach(() => {
-        rerenderEditor({ isEditing: true });
+        rerenderEditor({ measured: true });
       });
 
       test('THEN the textarea takes focus with the caret after the text', () => {
@@ -72,11 +78,33 @@ describe('useLabelEditing', () => {
         expect(textarea.selectionEnd).toBe(4);
       });
     });
+
+    describe('WHEN the node is measured while the user is typing in another field', () => {
+      let renameInput: HTMLInputElement;
+
+      beforeEach(() => {
+        renameInput = document.createElement('input');
+        document.body.append(renameInput);
+        renameInput.focus();
+        rerenderEditor({ measured: true });
+      });
+
+      afterEach(() => {
+        renameInput.remove();
+      });
+
+      test('THEN the other field keeps its focus', () => {
+        expect(renameInput).toHaveFocus();
+        expect(textarea).not.toHaveFocus();
+      });
+    });
   });
 
   describe('GIVEN a node label being edited while a guide is running', () => {
     beforeEach(() => {
-      editor = renderHook(() => useLabelEditing('n1', 'Idea', true)).result;
+      editor = renderHook(() =>
+        useLabelEditing({ id: 'n1', label: 'Idea', measured: true, signalLabelled: true }),
+      ).result;
     });
 
     describe('WHEN the textarea blurs with a new padded label', () => {
@@ -154,6 +182,36 @@ describe('useLabelEditing', () => {
       test('THEN editing continues untouched', () => {
         expect(storedLabel()).toBe('Idea');
         expect(useCanvasStore.getState().editingNodeId).toBe('n1');
+      });
+    });
+
+    describe('WHEN the textarea blurs with the unchanged label', () => {
+      beforeEach(() => {
+        unsubscribers.push(subscribeCanvasOperations(onOperation));
+        act(() => editor.current.handleLabelBlur(blurWith('Idea')));
+      });
+
+      test('THEN editing ends without writing the label again', () => {
+        expect(useCanvasStore.getState().editingNodeId).toBeNull();
+        expect(onOperation).not.toHaveBeenCalled();
+        expect(labelledSignal()).toBe(false);
+      });
+    });
+  });
+
+  describe('GIVEN a label edited by a node that does not report to the guide', () => {
+    beforeEach(() => {
+      editor = renderHook(() => useLabelEditing({ id: 'n1', label: 'Idea', measured: true })).result;
+    });
+
+    describe('WHEN a new label is committed', () => {
+      beforeEach(() => {
+        act(() => editor.current.handleLabelBlur(blurWith('Question text')));
+      });
+
+      test('THEN the label is saved without the labelled signal', () => {
+        expect(storedLabel()).toBe('Question text');
+        expect(labelledSignal()).toBe(false);
       });
     });
   });

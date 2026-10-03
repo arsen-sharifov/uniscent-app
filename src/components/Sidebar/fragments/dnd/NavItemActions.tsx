@@ -26,7 +26,7 @@ export const NavItemActions = ({
   onRequestDelete,
   onCreateThread,
 }: INavItemActionsProps) => {
-  const translations = useTranslations();
+  const t = useTranslations();
 
   return (
     <ItemActionsToolbar isActive={isActive} isSelected={isSelected}>
@@ -34,20 +34,20 @@ export const NavItemActions = ({
         <ItemActionButton
           icon={Plus}
           tone="accent"
-          title={translations.platform.sidebar.newThread}
+          title={t.platform.sidebar.newThread}
           onClick={() => onCreateThread?.(item.id)}
         />
       )}
       <ItemActionButton
         icon={Pencil}
         tone="neutral"
-        title={translations.platform.sidebar.rename}
+        title={t.platform.sidebar.rename}
         onClick={() => startEditing(item.id, item.name)}
       />
       <ItemActionButton
         icon={Trash2}
         tone="danger"
-        title={translations.platform.sidebar.delete}
+        title={t.platform.sidebar.delete}
         onClick={() => onRequestDelete?.(item.id, item.name, item.type)}
       />
     </ItemActionsToolbar>

@@ -2,44 +2,54 @@ import {
   ECanvasNodeType,
   type ICanvasNodeWithThreadRow,
   type ICanvasSnapshot,
-  type INodeCommentRow,
   type INodeReference,
   type IReferenceTargetMeta,
 } from '@interfaces';
 
 import { createClient } from '@/lib/supabase';
+import { groupBy } from '@/lib/utils';
 
 import { getCanvasEdges } from './canvasEdge';
 import { getCanvasNodes } from './canvasNode';
 import { REFERENCE_SEARCH_LIMIT, REFERENCE_TARGET_COUNT_SELECT, REFERENCE_TARGET_SELECT } from './consts';
 import { getNodeComments } from './nodeComment';
-import { rowToEdge, rowToNode, toNodeReference, toReferenceTargetMeta } from './utils';
+import { readRowsByIds, rowToEdge, rowToNode, toNodeReference, toReferenceTargetMeta } from './utils';
 
 const getReferenceTargetsByIds = async (nodeIds: string[]): Promise<Record<string, IReferenceTargetMeta>> => {
-  if (nodeIds.length === 0) return {};
-
   const supabase = createClient();
 
-  const { data, error } = await supabase
-    .from('canvas_nodes')
-    .select(REFERENCE_TARGET_SELECT)
-    .in('id', nodeIds)
-    .returns<ICanvasNodeWithThreadRow[]>();
+  const rows = await readRowsByIds(nodeIds, (chunk, from, to) =>
+    supabase
+      .from('canvas_nodes')
+      .select(REFERENCE_TARGET_SELECT)
+      .in('id', chunk)
+      .order('id')
+      .range(from, to)
+      .returns<ICanvasNodeWithThreadRow[]>(),
+  );
 
-  if (error) throw error;
-
-  return Object.fromEntries((data ?? []).map((row) => [row.id, toReferenceTargetMeta(row)]));
+  return Object.fromEntries(rows.map((row) => [row.id, toReferenceTargetMeta(row)]));
 };
 
-const groupCommentsByNode = (comments: INodeCommentRow[]): Record<string, INodeCommentRow[]> =>
-  comments.reduce<Record<string, INodeCommentRow[]>>((acc, comment) => {
-    acc[comment.node_id] = [...(acc[comment.node_id] ?? []), comment];
+const assertWorkspaceThread = async (workspaceId: string, threadId: string): Promise<void> => {
+  const supabase = createClient();
 
-    return acc;
-  }, {});
+  const { error } = await supabase
+    .from('threads')
+    .select('id')
+    .eq('id', threadId)
+    .eq('workspace_id', workspaceId)
+    .single();
 
-export const getCanvasContent = async (threadId: string): Promise<ICanvasSnapshot> => {
-  const [nodeRows, edgeRows] = await Promise.all([getCanvasNodes(threadId), getCanvasEdges(threadId)]);
+  if (error) throw error;
+};
+
+export const getCanvasContent = async (workspaceId: string, threadId: string): Promise<ICanvasSnapshot> => {
+  const [, nodeRows, edgeRows] = await Promise.all([
+    assertWorkspaceThread(workspaceId, threadId),
+    getCanvasNodes([threadId]),
+    getCanvasEdges([threadId]),
+  ]);
 
   const nodeIds = nodeRows.map((node) => node.id);
   const referenceTargetIds = nodeRows.flatMap((node) =>
@@ -51,13 +61,13 @@ export const getCanvasContent = async (threadId: string): Promise<ICanvasSnapsho
     getReferenceTargetsByIds(referenceTargetIds),
   ]);
 
-  const commentsByNode = groupCommentsByNode(commentRows);
+  const commentsByNode = groupBy(commentRows, (comment) => comment.node_id);
 
   return {
     nodes: nodeRows.map((row) =>
       rowToNode(
         row,
-        commentsByNode[row.id] ?? [],
+        commentsByNode.get(row.id) ?? [],
         row.source_node_id ? referenceTargets[row.source_node_id] : undefined,
       ),
     ),

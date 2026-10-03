@@ -1,12 +1,5 @@
-import type {
-  IColorGroup,
-  IRadiusToken,
-  IShadowToken,
-  ISpacingToken,
-  IThemeMeta,
-  ITypeRow,
-  TPatternVariant,
-} from '@story-interfaces';
+import type { TCanvasPattern } from '@interfaces';
+import type { IColorGroup, IRadiusToken, IShadowToken, ISpacingToken, IThemeMeta, ITypeRow } from '@story-interfaces';
 
 export const THEME_LIST: readonly IThemeMeta[] = [
   { id: 'daybreak', name: 'Daybreak', caption: 'Mist ground, white surfaces, lime action', mode: 'light' },
@@ -269,10 +262,7 @@ export const SPACING_TOKENS: readonly ISpacingToken[] = [
   { label: '10', className: 'p-10', rem: '2.5rem', pixels: '40px', usage: 'Modal body padding' },
 ];
 
-export const PATTERN_VARIANTS = ['dots', 'lines', 'cross', 'none'] as const;
-export type TPatternVariant = (typeof PATTERN_VARIANTS)[number];
-
-export const PATTERN_CAPTIONS: Record<TPatternVariant, { label: string; description: string }> = {
+export const PATTERN_CAPTIONS: Record<TCanvasPattern, { label: string; description: string }> = {
   dots: { label: 'Dots', description: 'Soft pips, quiet horizon — the workspace default.' },
   lines: { label: 'Lines', description: 'Engineer’s graph paper — precise, gridded thinking.' },
   cross: { label: 'Cross', description: 'Surveyor’s crosshatch — feels like a map.' },

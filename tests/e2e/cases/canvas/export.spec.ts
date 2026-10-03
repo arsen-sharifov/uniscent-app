@@ -4,8 +4,6 @@ import { COPY, EXPORT_THREAD_NAME, JPEG_SIGNATURE, PNG_SIGNATURE } from '../../c
 import { expect, test } from '../../fixtures';
 import { downloadExport, seedEdge, seedNodes, seedThread, waitForCanvas } from '../../utils';
 
-const { canvas } = COPY.platform;
-
 test.describe('canvas export', () => {
   test.describe('GIVEN a graph whose far node sits outside the visible viewport', () => {
     test.beforeEach(async ({ page, workspace, account }) => {
@@ -24,7 +22,7 @@ test.describe('canvas export', () => {
       let markup: string;
 
       test.beforeEach(async ({ page }) => {
-        const download = await downloadExport(page, canvas.export.formats.svg);
+        const download = await downloadExport(page, COPY.platform.canvas.export.formats.svg);
         filename = download.suggestedFilename();
         markup = await readFile(await download.path(), 'utf8');
       });
@@ -48,7 +46,7 @@ test.describe('canvas export', () => {
       let bytes: Buffer;
 
       test.beforeEach(async ({ page }) => {
-        const download = await downloadExport(page, canvas.export.formats.png);
+        const download = await downloadExport(page, COPY.platform.canvas.export.formats.png);
         filename = download.suggestedFilename();
         bytes = await readFile(await download.path());
       });
@@ -64,7 +62,7 @@ test.describe('canvas export', () => {
       let bytes: Buffer;
 
       test.beforeEach(async ({ page }) => {
-        const download = await downloadExport(page, canvas.export.formats.jpg);
+        const download = await downloadExport(page, COPY.platform.canvas.export.formats.jpg);
         filename = download.suggestedFilename();
         bytes = await readFile(await download.path());
       });

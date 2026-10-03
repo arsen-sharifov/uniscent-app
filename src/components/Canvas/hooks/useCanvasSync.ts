@@ -1,56 +1,56 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 
-import type { ICanvasSnapshot, ISaveState } from '@interfaces';
+import type { ICanvasSnapshot, IUseCanvasSyncResult } from '@interfaces';
 import { getCanvasContent } from '@api/client';
+import { isToolDisabled } from '@/components/Toolbar';
+import { ECanvasTool } from '@/components/tools';
 import {
   enqueueOperation,
   flushNow,
   getSaveState,
+  hasUnsavedChanges,
   resetQueue,
   subscribeCanvasOperations,
   subscribeSaveState,
 } from '@/lib/canvas';
 import { event } from '@/lib/events';
-import { useCanvasStore } from '@/lib/stores';
+import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
 
-interface IUseCanvasSyncResult {
-  saveState: ISaveState;
-  loadError: Error | null;
-}
+import { HISTORY_ACCESS_KEYS, LOAD_TIMEOUT_MESSAGE, LOAD_TIMEOUT_MS } from '../consts';
 
-const LOAD_TIMEOUT_MS = 15000;
-const TIMEOUT_ERROR_MESSAGE = 'Request timed out';
-
-const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> =>
+const loadCanvasContent = (workspaceId: string, threadId: string): Promise<ICanvasSnapshot> =>
   Promise.race([
-    promise,
-    new Promise<T>((_, reject) => setTimeout(() => reject(new Error(TIMEOUT_ERROR_MESSAGE)), ms)),
+    getCanvasContent(workspaceId, threadId),
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error(LOAD_TIMEOUT_MESSAGE)), LOAD_TIMEOUT_MS)),
   ]);
 
-const loadCanvasFromBackend = (threadId: string): Promise<ICanvasSnapshot> =>
-  withTimeout(getCanvasContent(threadId), LOAD_TIMEOUT_MS);
+export const useCanvasSync = (workspaceId: string, threadId: string): IUseCanvasSyncResult => {
+  const saveState = useSyncExternalStore(subscribeSaveState, getSaveState, getSaveState);
+  const [loadFailed, setLoadFailed] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
-const toError = (value: unknown): Error => (value instanceof Error ? value : new Error(String(value)));
+  useEffect(() => subscribeCanvasOperations(enqueueOperation), []);
 
-export const useCanvasSync = (threadId: string): IUseCanvasSyncResult => {
-  const [saveState, setSaveState] = useState<ISaveState>(() => getSaveState());
-  const [loadError, setLoadError] = useState<Error | null>(null);
+  useEffect(
+    () =>
+      usePermissionsStore.subscribe((access, previous) => {
+        if (HISTORY_ACCESS_KEYS.every((key) => access[key] === previous[key])) return;
 
-  useEffect(() => {
-    return subscribeSaveState(setSaveState);
-  }, []);
+        useCanvasStore.temporal.getState().clear();
 
-  useEffect(() => {
-    return subscribeCanvasOperations(enqueueOperation);
-  }, []);
+        const { activeTool, setActiveTool } = useCanvasStore.getState();
+        if (isToolDisabled(activeTool, { canUndo: false, canRedo: false, canEditCanvas: access.canEditCanvas })) {
+          setActiveTool(ECanvasTool.Select);
+        }
+      }),
+    [],
+  );
 
   useEffect(() => {
     const onBeforeUnload = (beforeUnloadEvent: BeforeUnloadEvent) => {
-      const { pendingCount, failedCount } = getSaveState();
-      if (pendingCount === 0 && failedCount === 0) return;
-      beforeUnloadEvent.preventDefault();
+      if (hasUnsavedChanges()) beforeUnloadEvent.preventDefault();
     };
 
     window.addEventListener('beforeunload', onBeforeUnload);
@@ -61,31 +61,35 @@ export const useCanvasSync = (threadId: string): IUseCanvasSyncResult => {
   useEffect(() => {
     let cancelled = false;
 
-    loadCanvasFromBackend(threadId)
+    loadCanvasContent(workspaceId, threadId)
       .then((snapshot) => {
         if (cancelled) return;
         useCanvasStore.getState().loadCanvas(threadId, snapshot);
-        setLoadError(null);
+        setLoadFailed(false);
       })
       .catch((error: unknown) => {
         if (cancelled) return;
-        setLoadError(toError(error));
+        setLoadFailed(true);
         event.error(error, { toast: false, context: 'canvas.load' });
       });
 
     return () => {
       cancelled = true;
-      const currentThreadId = threadId;
+      if (useCanvasStore.getState().threadId !== threadId) return;
 
+      useCanvasStore.getState().clearCanvas();
       flushNow().finally(() => {
-        const stillSameThread = useCanvasStore.getState().threadId === currentThreadId;
-        if (stillSameThread) {
-          useCanvasStore.getState().clearCanvas();
-          resetQueue();
-        }
+        if (useCanvasStore.getState().threadId === null && !hasUnsavedChanges()) resetQueue();
       });
     };
-  }, [threadId]);
+  }, [workspaceId, threadId, loadAttempt]);
 
-  return { saveState, loadError };
+  return {
+    saveState,
+    loadFailed,
+    retryLoad: () => {
+      setLoadFailed(false);
+      setLoadAttempt((previous) => previous + 1);
+    },
+  };
 };

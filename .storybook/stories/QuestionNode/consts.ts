@@ -1,13 +1,8 @@
 import type { TCanvasNode } from '@interfaces';
 
-import { CanvasEdge, QuestionNode } from '@/components';
-
 import { createQuestionNode } from '../../utils';
 
 export const SB_QUESTION_ID = 'sb-question-1';
-
-export const NODE_TYPES = { 'question-node': QuestionNode };
-export const EDGE_TYPES = { default: CanvasEdge };
 
 export const defaultQuestion: TCanvasNode = createQuestionNode(
   SB_QUESTION_ID,

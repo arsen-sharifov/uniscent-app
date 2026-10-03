@@ -2,7 +2,7 @@
 
 import type { ICanvasExportContext, IExportTextLine } from '@interfaces';
 
-import { svgElement } from './primitives';
+import { svgElement, toXmlText } from './primitives';
 
 const GRAPHEME_SEGMENTER = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
 
@@ -62,7 +62,7 @@ export const renderExportText = (
   const { fontBoundingBoxAscent: ascent, fontBoundingBoxDescent: descent } = scratch.measureText(node.data);
 
   return measureLines(node).map((line) => {
-    const text = transformText(line.text, style.textTransform);
+    const text = toXmlText(transformText(line.text, style.textTransform));
     collectGlyphs(text, context, style.fontFamily);
 
     const element = svgElement('text', {

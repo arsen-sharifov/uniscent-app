@@ -5,6 +5,8 @@ import type { ITourGeometry } from '@interfaces';
 import {
   dismissOverlays,
   findAnchorElement,
+  joinAnchors,
+  parseAnchors,
   readTourGeometry,
   readVisibleAnchors,
   sameRect,
@@ -112,6 +114,24 @@ describe('findAnchorElement', () => {
   });
 });
 
+describe('joinAnchors', () => {
+  describe('GIVEN an ordered list of anchors', () => {
+    describe('WHEN it is joined into a key and parsed back', () => {
+      test('THEN the anchors come back in the same order', () => {
+        expect(parseAnchors(joinAnchors(['toolbarHelp', 'toolbar']))).toEqual(['toolbarHelp', 'toolbar']);
+      });
+    });
+  });
+
+  describe('GIVEN no anchors', () => {
+    describe('WHEN they are joined', () => {
+      test('THEN the key is empty', () => {
+        expect(joinAnchors()).toBe('');
+      });
+    });
+  });
+});
+
 describe('sameRect', () => {
   describe('GIVEN two rects', () => {
     describe('WHEN they are compared', () => {
@@ -181,6 +201,24 @@ describe('dismissOverlays', () => {
   describe('GIVEN a native app dialog left open', () => {
     beforeEach(() => {
       mount('<dialog open><p>settings</p></dialog>');
+      document.addEventListener('keydown', onKeyDown);
+    });
+
+    describe('WHEN the tour takes over the screen', () => {
+      beforeEach(() => {
+        dismissOverlays();
+      });
+
+      test('THEN it asks the app to close it', () => {
+        expect(onKeyDown).toHaveBeenCalledOnce();
+        expect(onKeyDown.mock.calls[0]?.[0]).toMatchObject({ key: 'Escape' });
+      });
+    });
+  });
+
+  describe('GIVEN an app alert dialog left open', () => {
+    beforeEach(() => {
+      mount('<div role="alertdialog"><p>transfer ownership</p></div>');
       document.addEventListener('keydown', onKeyDown);
     });
 

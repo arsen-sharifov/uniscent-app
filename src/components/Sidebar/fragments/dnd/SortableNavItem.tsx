@@ -2,9 +2,9 @@
 
 import { useSortable } from '@dnd-kit/sortable';
 import { clsx } from 'clsx';
-import type { KeyboardEvent, MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
 
-import type { IFlattenedItem, TDropZone, TNavItemType } from '@interfaces';
+import type { IFlattenedItem, IInlineEdit, TDropZone, TNavItemType } from '@interfaces';
 
 import { SelectionStrip } from '@/components/SelectionStrip';
 import { useTranslations } from '@/i18n';
@@ -21,13 +21,7 @@ interface ISortableNavItemProps {
   item: IFlattenedItem;
   activeItemId?: string;
   isActivelyDragged: boolean;
-  editingId: string | null;
-  editValue: string;
-  setEditValue: (value: string) => void;
-  inputRef: (element: HTMLInputElement | null) => void;
-  commitRename: () => void;
-  handleKeyDown: (event: KeyboardEvent) => void;
-  startEditing: (id: string, name: string) => void;
+  edit: IInlineEdit;
   isSelected: boolean;
   isBulkDragActive: boolean;
   onItemClick?: (id: string, event: MouseEvent) => void;
@@ -45,13 +39,7 @@ export const SortableNavItem = ({
   isActivelyDragged,
   isSelected,
   isBulkDragActive,
-  editingId,
-  editValue,
-  setEditValue,
-  inputRef,
-  commitRename,
-  handleKeyDown,
-  startEditing,
+  edit,
   onItemClick,
   onRequestDelete,
   onCreateThread,
@@ -60,9 +48,9 @@ export const SortableNavItem = ({
   dropDepth,
   isDragActive,
 }: ISortableNavItemProps) => {
-  const translations = useTranslations();
-  const canManageStructure = usePermissionsStore((s) => s.canManageStructure);
-  const isEditing = editingId === item.id;
+  const t = useTranslations();
+  const canManageStructure = usePermissionsStore((state) => state.canManageStructure);
+  const isEditing = edit.editingId === item.id;
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
     id: item.id,
     disabled: isEditing || !canManageStructure,
@@ -72,7 +60,8 @@ export const SortableNavItem = ({
   const showsTools = !isEditing && canManageStructure;
 
   const handleClick = (event: MouseEvent) => {
-    if (item.type === 'thread' || event.ctrlKey || event.metaKey || event.shiftKey) onItemClick?.(item.id, event);
+    const selects = event.ctrlKey || event.metaKey || event.shiftKey;
+    if (item.type === 'thread' || selects) onItemClick?.(item.id, event);
     else if (item.childCount > 0) onToggleCollapse(item.id);
   };
 
@@ -108,11 +97,7 @@ export const SortableNavItem = ({
           isEditing={isEditing}
           isDropTarget={dropIndicator === 'inside'}
           showsTools={showsTools}
-          editValue={editValue}
-          setEditValue={setEditValue}
-          inputRef={inputRef}
-          commitRename={commitRename}
-          handleKeyDown={handleKeyDown}
+          edit={edit}
           onClick={handleClick}
         />
 
@@ -122,9 +107,9 @@ export const SortableNavItem = ({
             attributes={attributes}
             listeners={listeners}
             isActive={isActive}
-            ariaLabel={translations.platform.sidebar.dragToReorder}
+            ariaLabel={t.platform.sidebar.dragToReorder}
+            size="regular"
             onClick={handleClick}
-            className="left-2"
           />
         )}
 
@@ -133,7 +118,7 @@ export const SortableNavItem = ({
             item={item}
             isActive={isActive}
             isSelected={isSelected}
-            startEditing={startEditing}
+            startEditing={edit.startEditing}
             onRequestDelete={onRequestDelete}
             onCreateThread={onCreateThread}
           />
