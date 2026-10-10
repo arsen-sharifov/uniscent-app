@@ -3,7 +3,7 @@
 import { clsx } from 'clsx';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
-import type { IToolGroup, IToolItem } from '@interfaces';
+import type { IToolGroup, IToolHoverState, IToolItem } from '@interfaces';
 
 import { Skeleton } from '@/components/Skeleton';
 import { useTranslations } from '@/i18n';
@@ -11,12 +11,6 @@ import { useTranslations } from '@/i18n';
 import { TOOLTIP_DELAY_MS } from './consts';
 import { ExportMenu, HelpMenu, ShortcutsHelp, ToolButton, ToolbarSkeleton, ToolTooltip } from './fragments';
 import { useToolbarShortcuts } from './hooks';
-import { isTypingTarget } from './utils';
-
-interface IToolHoverState {
-  tool: IToolItem;
-  top: number;
-}
 
 const noop = () => {};
 
@@ -24,25 +18,29 @@ export interface IToolbarProps {
   threadId?: string;
   threadName?: string;
   groups?: IToolGroup[];
-  pendingGroupSizes?: number[];
+  pendingGroups?: IToolGroup[];
   activeTool?: string;
   onToolClick?: (id: string) => void;
 }
 
 export const Toolbar = ({
   groups = [],
-  pendingGroupSizes = [],
+  pendingGroups = [],
   activeTool,
   onToolClick,
   threadId,
   threadName,
 }: IToolbarProps) => {
-  useToolbarShortcuts();
-
   const t = useTranslations();
-  const pending = pendingGroupSizes.length > 0;
+  const pending = pendingGroups.length > 0;
+  const hasToolsAbove = pending || groups.length > 0;
+  const showsExport = !pending && Boolean(threadId && threadName);
   const [hover, setHover] = useState<IToolHoverState | null>(null);
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+
+  const toggleShortcuts = useCallback(() => setShortcutsOpen((previous) => !previous), []);
+
+  useToolbarShortcuts(toggleShortcuts);
 
   const showTimerRef = useRef<number | null>(null);
   const visibleRef = useRef(false);
@@ -55,8 +53,15 @@ export const Toolbar = ({
 
   useEffect(() => clearShowTimer, [clearShowTimer]);
 
-  const showHover = useCallback(
-    (next: IToolHoverState) => {
+  const hideHover = useCallback(() => {
+    clearShowTimer();
+    visibleRef.current = false;
+    setHover(null);
+  }, [clearShowTimer]);
+
+  const handleToolEnter = useCallback(
+    (rect: DOMRect, tool: IToolItem) => {
+      const next = { tool, top: rect.top + rect.height / 2 };
       clearShowTimer();
 
       if (visibleRef.current) {
@@ -73,33 +78,6 @@ export const Toolbar = ({
     [clearShowTimer],
   );
 
-  const hideHover = useCallback(() => {
-    clearShowTimer();
-    visibleRef.current = false;
-    setHover(null);
-  }, [clearShowTimer]);
-
-  const handleToolEnter = useCallback(
-    (rect: DOMRect, tool: IToolItem) => {
-      showHover({ tool, top: rect.top + rect.height / 2 });
-    },
-    [showHover],
-  );
-
-  useEffect(() => {
-    const onKey = (event: globalThis.KeyboardEvent) => {
-      if (event.key !== '?') return;
-      if (isTypingTarget(event.target)) return;
-
-      event.preventDefault();
-      setShortcutsOpen((prev) => !prev);
-    };
-
-    window.addEventListener('keydown', onKey);
-
-    return () => window.removeEventListener('keydown', onKey);
-  }, []);
-
   return (
     <>
       <aside
@@ -108,16 +86,15 @@ export const Toolbar = ({
         onMouseLeave={hideHover}
         className="app-glass relative z-40 flex h-full w-14 shrink-0 flex-col items-stretch rounded-2xl border border-[color:var(--border)] transition-[background-color,border-color] duration-200 ease-out select-none motion-reduce:transition-none"
       >
-        {pending && <ToolbarSkeleton groupSizes={pendingGroupSizes} />}
+        {pending && <ToolbarSkeleton groups={pendingGroups} />}
 
         <div hidden={pending} className="flex flex-1 flex-col items-stretch px-2 pt-1">
           {groups.map((group, index) => (
-            <div
+            <fieldset
               key={group.id}
-              role="group"
               aria-label={group.label}
               className={clsx(
-                'flex flex-col items-stretch gap-1 py-2',
+                'flex min-w-0 flex-col items-stretch gap-1 py-2',
                 index > 0 && 'border-t border-[color:var(--border)]',
               )}
             >
@@ -131,17 +108,26 @@ export const Toolbar = ({
                   onPointerLeave={hideHover}
                 />
               ))}
-            </div>
+            </fieldset>
           ))}
         </div>
 
         {!pending && threadId && threadName && (
-          <div className="mx-2 border-t border-[color:var(--border)] py-2" onPointerEnter={hideHover}>
+          <div
+            className={clsx('mx-2 py-2', hasToolsAbove && 'border-t border-[color:var(--border)]')}
+            onPointerEnter={hideHover}
+          >
             <ExportMenu key={threadId} threadId={threadId} threadName={threadName} />
           </div>
         )}
 
-        <div onPointerEnter={hideHover} className="mx-2 flex justify-center border-t border-[color:var(--border)] py-2">
+        <div
+          onPointerEnter={hideHover}
+          className={clsx(
+            'mx-2 flex justify-center py-2',
+            (hasToolsAbove || showsExport) && 'border-t border-[color:var(--border)]',
+          )}
+        >
           {pending ? (
             <span aria-hidden className="flex h-9 w-9 items-center justify-center">
               <Skeleton className="h-[17px] w-[17px]" />

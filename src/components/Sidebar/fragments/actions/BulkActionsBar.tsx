@@ -1,8 +1,7 @@
 'use client';
 
 import { clsx } from 'clsx';
-import type { LucideIcon } from 'lucide-react';
-import { FolderInput, Trash2, X } from 'lucide-react';
+import { FolderInput, type LucideIcon, Trash2, X } from 'lucide-react';
 
 import { SelectionStrip } from '@/components/SelectionStrip';
 import { useTranslations } from '@/i18n';
@@ -11,9 +10,10 @@ interface IBulkActionsBarProps {
   count: number;
   icon: LucideIcon;
   label: string;
-  onDelete: () => void;
+  onDelete?: () => void;
   onMove?: () => void;
   onClear: () => void;
+  lockedHint?: string;
   className?: string;
 }
 
@@ -24,6 +24,7 @@ export const BulkActionsBar = ({
   onDelete,
   onMove,
   onClear,
+  lockedHint,
   className,
 }: IBulkActionsBarProps) => {
   const t = useTranslations();
@@ -46,21 +47,37 @@ export const BulkActionsBar = ({
         {onMove && (
           <button
             type="button"
-            onClick={onMove}
-            className="cursor-pointer rounded-lg p-1 text-[color:var(--text-muted)] transition-colors duration-150 hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--accent-text)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--accent-soft)] active:text-[color:var(--accent-text)] motion-reduce:transition-none"
-            title={t.platform.sidebar.moveToFolder}
+            onClick={lockedHint ? undefined : onMove}
+            aria-disabled={lockedHint ? true : undefined}
+            aria-label={t.platform.sidebar.moveToFolder}
+            className={clsx(
+              'rounded-lg p-1 text-[color:var(--text-muted)] transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none motion-reduce:transition-none',
+              lockedHint
+                ? 'cursor-not-allowed opacity-40'
+                : 'cursor-pointer hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--accent-text)] active:bg-[color:var(--accent-soft)] active:text-[color:var(--accent-text)]',
+            )}
+            title={lockedHint ?? t.platform.sidebar.moveToFolder}
           >
             <FolderInput className="h-3.5 w-3.5" />
           </button>
         )}
-        <button
-          type="button"
-          onClick={onDelete}
-          className="cursor-pointer rounded-lg p-1 text-[color:var(--text-muted)] transition-colors duration-150 hover:bg-[color:var(--status-error-bg)] hover:text-[color:var(--status-error)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--status-error-soft)] active:text-[color:var(--status-error)] motion-reduce:transition-none"
-          title={t.platform.sidebar.delete}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </button>
+        {onDelete && (
+          <button
+            type="button"
+            onClick={lockedHint ? undefined : onDelete}
+            aria-disabled={lockedHint ? true : undefined}
+            aria-label={t.platform.sidebar.delete}
+            className={clsx(
+              'rounded-lg p-1 text-[color:var(--text-muted)] transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none motion-reduce:transition-none',
+              lockedHint
+                ? 'cursor-not-allowed opacity-40'
+                : 'cursor-pointer hover:bg-[color:var(--status-error-bg)] hover:text-[color:var(--status-error)] active:bg-[color:var(--status-error-soft)] active:text-[color:var(--status-error)]',
+            )}
+            title={lockedHint ?? t.platform.sidebar.delete}
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        )}
         <button
           type="button"
           onClick={onClear}

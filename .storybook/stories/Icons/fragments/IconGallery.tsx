@@ -38,7 +38,7 @@ export const IconGallery = ({ size, color, strokeWidth, absoluteStrokeWidth, onC
             type="text"
             placeholder="Search icons (e.g. arrow, user, lock)…"
             value={search}
-            onChange={(e) => handleSearch(e.target.value)}
+            onChange={(inputEvent) => handleSearch(inputEvent.target.value)}
             className="w-[260px] bg-transparent text-[12.5px] text-[color:var(--text)] placeholder:text-[color:var(--text-subtle)] focus:outline-none"
           />
           {search && (
@@ -61,9 +61,9 @@ export const IconGallery = ({ size, color, strokeWidth, absoluteStrokeWidth, onC
 
       <div
         className="min-h-0 flex-1 overflow-y-auto rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] p-3"
-        onScroll={(e) => {
-          setScrollTop(e.currentTarget.scrollTop);
-          setViewportHeight(e.currentTarget.clientHeight);
+        onScroll={(event) => {
+          setScrollTop(event.currentTarget.scrollTop);
+          setViewportHeight(event.currentTarget.clientHeight);
         }}
       >
         {filtered.length === 0 ? (
@@ -72,8 +72,8 @@ export const IconGallery = ({ size, color, strokeWidth, absoluteStrokeWidth, onC
           </div>
         ) : (
           <div style={{ height: totalRows * GALLERY_ROW_HEIGHT, position: 'relative' } as CSSProperties}>
-            {Array.from({ length: toRow - fromRow }, (_, i) => {
-              const row = fromRow + i;
+            {Array.from({ length: toRow - fromRow }, (_, index) => {
+              const row = fromRow + index;
 
               return (
                 <div

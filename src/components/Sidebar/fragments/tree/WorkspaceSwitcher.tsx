@@ -2,15 +2,15 @@
 
 import { clsx } from 'clsx';
 import { ChevronsUpDown, LayoutGrid, Plus } from 'lucide-react';
-import { useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { useRef, useState, type MouseEvent } from 'react';
 
-import type { IMyInvitation, IWorkspaceItem } from '@interfaces';
+import type { IInlineEdit, IMyInvitation, IWorkspaceItem } from '@interfaces';
 
 import { getInitials } from '@/components/Avatar';
 import { Popover } from '@/components/Popover';
 import { useTranslations } from '@/i18n';
-import { roleLabel } from '@/lib/utils';
 
+import { InvitationCard } from './InvitationCard';
 import { WorkspaceItems } from './WorkspaceItems';
 import { BulkActionsBar } from '../actions/BulkActionsBar';
 
@@ -18,16 +18,9 @@ interface IWorkspaceSwitcherProps {
   workspaces: IWorkspaceItem[];
   activeWorkspaceId?: string;
   selectedIds: Set<string>;
-  editingId: string | null;
-  editValue: string;
-  setEditValue: (value: string) => void;
-  inputRef: (element: HTMLInputElement | null) => void;
-  commitRename: () => void;
-  cancelEditing: () => void;
-  handleKeyDown: (event: KeyboardEvent) => void;
+  edit: IInlineEdit;
   onWorkspaceClick: (id: string, event: MouseEvent) => void;
   onCreateWorkspace?: () => void;
-  onRequestRename: (id: string, name: string) => void;
   onRequestDelete: (id: string, name: string) => void;
   onRequestSettings: (id: string) => void;
   onMoveWorkspace?: (id: string, position: number) => void;
@@ -42,16 +35,9 @@ export const WorkspaceSwitcher = ({
   workspaces,
   activeWorkspaceId,
   selectedIds,
-  editingId,
-  editValue,
-  setEditValue,
-  inputRef,
-  commitRename,
-  cancelEditing,
-  handleKeyDown,
+  edit,
   onWorkspaceClick,
   onCreateWorkspace,
-  onRequestRename,
   onRequestDelete,
   onRequestSettings,
   onMoveWorkspace,
@@ -63,27 +49,36 @@ export const WorkspaceSwitcher = ({
 }: IWorkspaceSwitcherProps) => {
   const t = useTranslations();
   const [open, setOpen] = useState(false);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const active = workspaces.find((workspace) => workspace.id === activeWorkspaceId);
+  const canDeleteSelection = workspaces.some(
+    (workspace) => workspace.canManageWorkspace && selectedIds.has(workspace.id),
+  );
 
   return (
     <Popover
-      open={open || editingId !== null}
+      open={open || edit.editingId !== null}
       onOpenChange={(nextOpen) => {
         if (nextOpen) {
           setOpen(true);
 
           return;
         }
-        if (editingId !== null) cancelEditing();
+        if (edit.editingId !== null) edit.cancelEditing();
         if (selectedIds.size > 0) onClearSelection();
         setOpen(false);
       }}
       placement="bottom-start"
       offset={6}
       panelClassName="w-60 max-h-[60vh] overflow-y-auto [scrollbar-width:thin]"
-      trigger={
+      renderTrigger={(trigger) => (
         <button
           type="button"
+          {...trigger}
+          ref={(element) => {
+            trigger.ref(element);
+            triggerRef.current = element;
+          }}
           data-tour="sidebarWorkspaceSwitcher"
           className={clsx(
             'group flex w-full min-w-0 cursor-pointer items-center gap-2 rounded-lg px-2 py-1.5 text-left transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--accent-soft)] motion-reduce:transition-none',
@@ -114,7 +109,7 @@ export const WorkspaceSwitcher = ({
             )}
           />
         </button>
-      }
+      )}
     >
       {invitations.length > 0 && (
         <div className="border-b border-[color:var(--border)] px-2 py-2">
@@ -123,36 +118,15 @@ export const WorkspaceSwitcher = ({
           </span>
           <div className="space-y-1.5">
             {invitations.map((invitation) => (
-              <div
+              <InvitationCard
                 key={invitation.id}
-                className="rounded-xl border border-[color:var(--status-warning-border)] bg-[color:var(--status-warning-bg)] px-2.5 py-2"
-              >
-                <p className="truncate font-grotesk text-xs font-semibold text-[color:var(--text-strong)]">
-                  {invitation.workspaceName}
-                </p>
-                <p className="truncate font-mono-ui text-[10px] text-[color:var(--text-label)] lowercase">
-                  {roleLabel(invitation.roleKey, invitation.roleName, t)}
-                </p>
-                <div className="mt-1.5 flex gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onAcceptInvitation?.(invitation);
-                      setOpen(false);
-                    }}
-                    className="flex-1 cursor-pointer rounded-lg bg-[color:var(--accent)] px-2 py-1 font-grotesk text-[11px] font-semibold text-[color:var(--on-accent)] shadow-[0_10px_28px_-12px_var(--accent-glow)] transition-colors duration-150 hover:bg-[color:var(--accent-strong)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--accent-strong)] motion-reduce:transition-none"
-                  >
-                    {t.platform.sidebar.invitations.accept}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => onDeclineInvitation?.(invitation)}
-                    className="cursor-pointer rounded-lg border border-[color:var(--border-strong)] px-2 py-1 font-grotesk text-[11px] font-medium text-[color:var(--text-muted)] transition-colors duration-150 hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--surface-overlay)] active:text-[color:var(--text-strong)] motion-reduce:transition-none"
-                  >
-                    {t.platform.sidebar.invitations.decline}
-                  </button>
-                </div>
-              </div>
+                invitation={invitation}
+                onAccept={() => {
+                  onAcceptInvitation?.(invitation);
+                  setOpen(false);
+                }}
+                onDecline={() => onDeclineInvitation?.(invitation)}
+              />
             ))}
           </div>
         </div>
@@ -172,10 +146,7 @@ export const WorkspaceSwitcher = ({
         <button
           type="button"
           data-tour="sidebarWorkspaceCreate"
-          onClick={() => {
-            onCreateWorkspace?.();
-            setOpen(false);
-          }}
+          onClick={() => onCreateWorkspace?.()}
           className="flex shrink-0 cursor-pointer items-center gap-1 rounded-lg px-1.5 py-1 font-grotesk text-[11px] font-medium whitespace-nowrap text-[color:var(--accent-text)] transition-colors duration-150 hover:bg-[color:var(--accent-soft)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--accent-soft)] motion-reduce:transition-none"
           title={t.platform.sidebar.newWorkspace}
         >
@@ -196,10 +167,7 @@ export const WorkspaceSwitcher = ({
             <button
               type="button"
               data-tour="sidebarWorkspaceCreate"
-              onClick={() => {
-                onCreateWorkspace?.();
-                setOpen(false);
-              }}
+              onClick={() => onCreateWorkspace?.()}
               className="cursor-pointer rounded-lg bg-[color:var(--accent)] px-3 py-1.5 font-grotesk text-xs font-semibold text-[color:var(--on-accent)] shadow-[0_10px_28px_-12px_var(--accent-glow)] transition-colors duration-150 hover:bg-[color:var(--accent-strong)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--accent-strong)] motion-reduce:transition-none"
             >
               {t.platform.sidebar.newWorkspace}
@@ -210,19 +178,14 @@ export const WorkspaceSwitcher = ({
             workspaces={workspaces}
             activeWorkspaceId={activeWorkspaceId}
             selectedIds={selectedIds}
-            editingId={editingId}
-            editValue={editValue}
-            setEditValue={setEditValue}
-            inputRef={inputRef}
-            commitRename={commitRename}
-            handleKeyDown={handleKeyDown}
+            edit={edit}
             onClick={(id, event) => {
               onWorkspaceClick(id, event);
               if (!event.shiftKey && !event.ctrlKey && !event.metaKey) setOpen(false);
             }}
-            onRequestRename={onRequestRename}
             onRequestDelete={onRequestDelete}
             onRequestSettings={(id) => {
+              triggerRef.current?.focus();
               onRequestSettings(id);
               setOpen(false);
             }}
@@ -236,8 +199,8 @@ export const WorkspaceSwitcher = ({
           <BulkActionsBar
             count={selectedIds.size}
             icon={LayoutGrid}
-            label={t.platform.sidebar.workspacesSelected}
-            onDelete={onBulkDelete}
+            label={t('platform.sidebar.workspacesSelected', { count: selectedIds.size })}
+            onDelete={canDeleteSelection ? onBulkDelete : undefined}
             onClear={onClearSelection}
           />
         </div>

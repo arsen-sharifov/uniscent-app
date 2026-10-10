@@ -2,12 +2,13 @@
 
 import { clsx } from 'clsx';
 import { X } from 'lucide-react';
-import { type MouseEvent, type ReactNode, type TransitionEvent, useEffect, useRef, useState } from 'react';
+import { type ReactNode, type TransitionEvent, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
-import { useFocusTrap } from '@hooks';
+import { useEscapeKey, useFocusTrap, useReturnFocus } from '@hooks';
 import { useTranslations } from '@/i18n';
 
+import { Scrim } from './fragments/Scrim';
 import { adjustScrollLock } from './utils';
 
 interface IModalProps {
@@ -18,6 +19,9 @@ interface IModalProps {
   width?: string;
   overflowHidden?: boolean;
   layerClassName?: string;
+  role?: 'alertdialog';
+  labelledBy?: string;
+  describedBy?: string;
 }
 
 export const Modal = ({
@@ -28,79 +32,58 @@ export const Modal = ({
   width = 'max-w-lg',
   overflowHidden,
   layerClassName = 'z-50',
+  role,
+  labelledBy,
+  describedBy,
 }: IModalProps) => {
   const t = useTranslations();
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
-  const onCloseRef = useRef(onClose);
+  const panelRef = useRef<HTMLDialogElement>(null);
 
   const [showing, setShowing] = useState(open);
   if (open && !showing) {
     setShowing(true);
   }
 
+  useEscapeKey(onClose, open);
   useFocusTrap(panelRef, open);
+  useReturnFocus(open);
 
   useEffect(() => {
-    onCloseRef.current = onClose;
-  }, [onClose]);
+    if (!open) return;
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
+    if (!panelRef.current?.contains(document.activeElement)) panelRef.current?.focus();
 
-    previousFocusRef.current = document.activeElement as HTMLElement;
-    panelRef.current?.focus();
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
-        onCloseRef.current();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
     adjustScrollLock(1);
 
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      adjustScrollLock(-1);
-      previousFocusRef.current?.focus();
-    };
+    return () => adjustScrollLock(-1);
   }, [open]);
 
-  if (!showing) {
-    return null;
-  }
+  if (!showing) return null;
 
-  const handleBackdropClick = (e: MouseEvent) => {
-    if (e.target === overlayRef.current) {
-      onClose();
-    }
-  };
-
-  const handleTransitionEnd = (e: TransitionEvent) => {
-    if (e.target === e.currentTarget && !open) {
+  const handleTransitionEnd = (transitionEvent: TransitionEvent) => {
+    if (transitionEvent.target === transitionEvent.currentTarget && !open) {
       setShowing(false);
     }
   };
 
   return createPortal(
     <div
-      ref={overlayRef}
-      onClick={handleBackdropClick}
       onTransitionEnd={handleTransitionEnd}
       className={clsx(
-        'fixed inset-0 flex items-center justify-center bg-[color:var(--scrim)] transition-opacity duration-200 ease-out starting:opacity-0',
+        'fixed inset-0 flex items-center justify-center transition-opacity duration-200 ease-out starting:opacity-0',
         layerClassName,
         open ? 'opacity-100' : 'pointer-events-none opacity-0',
       )}
     >
-      <div
+      <Scrim onClick={onClose} />
+
+      <dialog
+        open
         ref={panelRef}
-        role="dialog"
+        role={role}
         aria-modal="true"
+        aria-labelledby={labelledBy}
+        aria-describedby={describedBy}
         tabIndex={-1}
         className={clsx(
           'app-panel relative max-h-[90vh] w-full rounded-2xl border border-[color:var(--border)] text-[color:var(--text)] transition-[opacity,translate,scale] duration-200 ease-out outline-none motion-reduce:transition-none starting:translate-y-2 starting:scale-95 starting:opacity-0',
@@ -121,7 +104,7 @@ export const Modal = ({
           </button>
         )}
         {children}
-      </div>
+      </dialog>
     </div>,
     document.body,
   );

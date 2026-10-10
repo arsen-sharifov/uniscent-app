@@ -9,7 +9,6 @@ const meta: Meta<typeof ResolutionBar> = {
   title: 'Components/Canvas/ResolutionBar',
   component: ResolutionBar,
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:

@@ -17,7 +17,7 @@ export const useTourGeometry = (anchorKey: string, openKey: string): ITrackedGeo
     const openAnchors = parseAnchors(openKey);
     const rank = (anchor: TTourAnchor | null) => (anchor === null ? order.length : order.indexOf(anchor));
 
-    let frame = 0;
+    let animationFrameId = 0;
     let shown: ITourGeometry = EMPTY_GEOMETRY;
     let wasLost = false;
     let fadingSince = 0;
@@ -47,12 +47,12 @@ export const useTourGeometry = (anchorKey: string, openKey: string): ITrackedGeo
 
     const track = () => {
       update();
-      frame = requestAnimationFrame(track);
+      animationFrameId = requestAnimationFrame(track);
     };
 
-    frame = requestAnimationFrame(track);
+    animationFrameId = requestAnimationFrame(track);
 
-    return () => cancelAnimationFrame(frame);
+    return () => cancelAnimationFrame(animationFrameId);
   }, [anchorKey, openKey]);
 
   return tracked.key === anchorKey ? tracked : { ...EMPTY_GEOMETRY, lastRect: tracked.lastRect, lost: false };

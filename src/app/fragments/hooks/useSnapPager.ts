@@ -43,7 +43,10 @@ export const useSnapPager = (containerRef: RefObject<HTMLElement | null>) => {
       const targets = screens.map((screen) => Math.max(screen.offsetTop - SNAP_HEADER_OFFSET_PX, 0));
       const top = container.scrollTop;
       const direction = event.deltaY > 0 ? 1 : -1;
-      const current = targets.reduce((acc, target, index) => (target <= top + SNAP_EDGE_TOLERANCE_PX ? index : acc), 0);
+      const current = targets.reduce(
+        (accumulator, target, index) => (target <= top + SNAP_EDGE_TOLERANCE_PX ? index : accumulator),
+        0,
+      );
       const screen = screens[current];
       const currentTarget = targets[current];
       if (!screen || currentTarget === undefined) return;

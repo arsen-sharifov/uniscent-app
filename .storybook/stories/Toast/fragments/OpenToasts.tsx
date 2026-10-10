@@ -3,7 +3,7 @@ import { useEffect } from 'react';
 import { Toaster } from '@/components';
 import { event, useToastStore } from '@/lib/events';
 
-const PINNED_DURATION_MS = 600_000;
+import { PINNED_DURATION_MS } from '../consts';
 
 export const OpenToasts = () => {
   useEffect(() => {

@@ -1,17 +1,16 @@
 'use client';
 
-import { clsx } from 'clsx';
 import { Folder, FolderOpen, Home } from 'lucide-react';
-import { useState, useMemo } from 'react';
+import { useId, useState, useMemo } from 'react';
 
 import type { TNavItem } from '@interfaces';
 
 import { Modal } from '@/components/Modal';
-import { SelectionStrip } from '@/components/SelectionStrip';
 import { useTranslations } from '@/i18n';
 
-import { INDENTATION_WIDTH } from '../../consts';
-import { flattenTree } from '../../utils';
+import { MoveTargetOption } from './MoveTargetOption';
+import { MAX_DEPTH } from '../../consts';
+import { flattenTree, getMaxSubtreeDepth, removeChildrenOf } from '../../utils';
 
 interface IMoveDialogProps {
   open: boolean;
@@ -23,15 +22,16 @@ interface IMoveDialogProps {
 
 export const MoveDialog = ({ open, items, selectedIds, onMove, onCancel }: IMoveDialogProps) => {
   const t = useTranslations();
+  const titleId = useId();
   const [targetId, setTargetId] = useState<string | null>(null);
 
-  const allFolders = useMemo(() => {
-    const flat = flattenTree(items, new Set());
+  const folders = useMemo(() => {
+    const movedDepth = getMaxSubtreeDepth(items, selectedIds);
 
-    return flat.filter((item) => item.type === 'folder');
-  }, [items]);
-
-  const folders = useMemo(() => allFolders.filter((folder) => !selectedIds.has(folder.id)), [allFolders, selectedIds]);
+    return removeChildrenOf(flattenTree(items, new Set()), selectedIds).filter(
+      (item) => item.type === 'folder' && !selectedIds.has(item.id) && item.depth + 1 + movedDepth <= MAX_DEPTH,
+    );
+  }, [items, selectedIds]);
 
   const handleConfirm = () => {
     onMove(targetId);
@@ -44,56 +44,30 @@ export const MoveDialog = ({ open, items, selectedIds, onMove, onCancel }: IMove
   };
 
   return (
-    <Modal open={open} onClose={handleCancel} className="!rounded-xl">
+    <Modal open={open} onClose={handleCancel} className="!rounded-xl" labelledBy={titleId}>
       <div className="p-6">
-        <h2 className="mb-4 font-grotesk text-lg font-semibold text-[color:var(--text-strong)]">
+        <h2 id={titleId} className="mb-4 font-grotesk text-lg font-semibold text-[color:var(--text-strong)]">
           {t.platform.sidebar.moveToFolder}
         </h2>
 
         <div className="mb-4 max-h-60 space-y-0.5 overflow-y-auto rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-soft)] p-1.5">
-          <button
-            type="button"
-            onClick={() => setTargetId(null)}
-            className={clsx(
-              'relative flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 font-grotesk text-sm transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none focus-visible:ring-inset active:bg-[color:var(--accent-soft)] active:text-[color:var(--text-strong)] motion-reduce:transition-none',
-              targetId === null
-                ? 'bg-[color:var(--accent-soft)] font-medium text-[color:var(--text-strong)]'
-                : 'text-[color:var(--text)] hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)]',
-            )}
-          >
-            {targetId === null && <SelectionStrip />}
-            <Home
-              className={clsx(
-                'h-4 w-4 shrink-0',
-                targetId === null ? 'text-[color:var(--accent-text)]' : 'text-[color:var(--text-muted)]',
-              )}
-            />
-            <span>{t.platform.sidebar.rootLevel}</span>
-          </button>
+          <MoveTargetOption
+            icon={Home}
+            label={t.platform.sidebar.rootLevel}
+            depth={0}
+            selected={targetId === null}
+            onSelect={() => setTargetId(null)}
+          />
 
           {folders.map((folder) => (
-            <button
-              type="button"
+            <MoveTargetOption
               key={folder.id}
-              onClick={() => setTargetId(folder.id)}
-              style={{ paddingLeft: folder.depth * INDENTATION_WIDTH + 12 }}
-              className={clsx(
-                'relative flex w-full cursor-pointer items-center gap-2 rounded-lg py-2 pr-3 font-grotesk text-sm transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none focus-visible:ring-inset active:bg-[color:var(--accent-soft)] active:text-[color:var(--text-strong)] motion-reduce:transition-none',
-                targetId === folder.id
-                  ? 'bg-[color:var(--accent-soft)] font-medium text-[color:var(--text-strong)]'
-                  : 'text-[color:var(--text)] hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)]',
-              )}
-            >
-              {targetId === folder.id ? (
-                <>
-                  <SelectionStrip />
-                  <FolderOpen className="h-4 w-4 shrink-0 text-[color:var(--accent-text)]" />
-                </>
-              ) : (
-                <Folder className="h-4 w-4 shrink-0 text-[color:var(--text-muted)]" />
-              )}
-              <span className="truncate">{folder.name}</span>
-            </button>
+              icon={targetId === folder.id ? FolderOpen : Folder}
+              label={folder.name}
+              depth={folder.depth}
+              selected={targetId === folder.id}
+              onSelect={() => setTargetId(folder.id)}
+            />
           ))}
         </div>
 

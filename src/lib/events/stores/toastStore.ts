@@ -4,7 +4,7 @@ import { create } from 'zustand';
 
 import type { TToast, TToastDraft } from '@interfaces';
 
-const MAX_VISIBLE_TOASTS = 4;
+import { MAX_VISIBLE_TOASTS } from '../consts';
 
 interface IToastStore {
   toasts: TToast[];

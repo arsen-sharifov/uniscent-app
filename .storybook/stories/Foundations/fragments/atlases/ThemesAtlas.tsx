@@ -1,4 +1,4 @@
-import type { TTheme } from '@constants';
+import type { TTheme } from '@interfaces';
 
 import { COLOR_GROUPS, CONTRAST_PAIRS, THEME_LIST, THEMES_SECTIONS } from '../../consts';
 import { orderedSpecimens } from '../../utils';
@@ -38,8 +38,8 @@ export const ThemesAtlas = ({ activeTheme }: IThemesAtlasProps) => {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1.55fr_1fr]">
           <ThemeSpecimen theme={hero} size="hero" />
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            {rest.map((t) => (
-              <ThemeSpecimen key={t.id} theme={t} size="tile" />
+            {rest.map((theme) => (
+              <ThemeSpecimen key={theme.id} theme={theme} size="tile" />
             ))}
           </div>
         </div>
@@ -52,7 +52,7 @@ export const ThemesAtlas = ({ activeTheme }: IThemesAtlasProps) => {
         description="Every CSS variable resolved against the active theme."
         trailing={
           <span className="font-mono-ui text-[9.5px] tracking-[0.18em] text-[color:var(--text-subtle)] uppercase">
-            {COLOR_GROUPS.reduce((acc, g) => acc + g.tokens.length, 0)} variables
+            {COLOR_GROUPS.reduce((accumulator, group) => accumulator + group.tokens.length, 0)} variables
           </span>
         }
       >
@@ -91,12 +91,12 @@ export const ThemesAtlas = ({ activeTheme }: IThemesAtlasProps) => {
             <span className="font-mono-ui text-[9.5px] font-semibold tracking-[0.22em] text-[color:var(--text-subtle)] uppercase">
               Theme
             </span>
-            {CONTRAST_PAIRS.map((p) => (
+            {CONTRAST_PAIRS.map((pair) => (
               <span
-                key={p.caption}
+                key={pair.caption}
                 className="truncate font-mono-ui text-[9.5px] font-semibold tracking-[0.22em] text-[color:var(--text-subtle)] uppercase"
               >
-                {p.caption}
+                {pair.caption}
               </span>
             ))}
           </div>
@@ -118,8 +118,8 @@ export const ThemesAtlas = ({ activeTheme }: IThemesAtlasProps) => {
                     {theme.mode}
                   </span>
                 </div>
-                {CONTRAST_PAIRS.map((p) => (
-                  <ContrastTile key={p.caption} {...p} />
+                {CONTRAST_PAIRS.map((pair) => (
+                  <ContrastTile key={pair.caption} {...pair} />
                 ))}
               </div>
             </ThemedSurface>

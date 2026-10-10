@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 
 import type { IGuideDefinition, IStepArrival, ITourSnapshot } from '@interfaces';
-import { ANCHOR_SEPARATOR } from '@constants';
-import { useOnboardingStore } from '@/lib/onboarding';
+
+import { joinAnchors, useOnboardingStore } from '@/lib/onboarding';
 
 import { TourSpotlight } from './TourSpotlight';
 import { TourStepCard } from './TourStepCard';
@@ -32,8 +32,8 @@ export const TourRun = ({ guide, stepIndex, snapshot }: ITourRunProps) => {
   if (arrival.index === stepIndex && arrival.done && !doneNow) setArrival({ index: stepIndex, done: false });
 
   const done = arrival.index === stepIndex && arrival.done;
-  const anchorKey = step?.anchors?.(snapshot).join(ANCHOR_SEPARATOR) ?? '';
-  const openKey = step?.openAnchors?.join(ANCHOR_SEPARATOR) ?? '';
+  const anchorKey = joinAnchors(step?.anchors?.(snapshot));
+  const openKey = joinAnchors(step?.openAnchors);
   const { rect, anchor, blocked, lit, open, lastRect, lost } = useTourGeometry(anchorKey, openKey);
   const inTheWay = step?.isDone && !done ? blocked : null;
 

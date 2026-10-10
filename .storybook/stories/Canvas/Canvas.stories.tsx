@@ -4,13 +4,12 @@ import { Canvas } from '@/components';
 
 import { denseCanvas, emptyCanvas, evaluatedCanvas, reasoningCanvas, resolvedCanvas } from './consts';
 import { ARG_CATEGORIES } from '../../consts';
-import { WithCanvasStage, WithReactFlow, withCanvasStore } from '../../decorators';
+import { WithCanvasStage, WithFittedCanvas, WithReactFlow, withCanvasStore } from '../../decorators';
 
 const meta: Meta<typeof Canvas> = {
   title: 'Components/Canvas',
   component: Canvas,
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:
@@ -30,7 +29,7 @@ const meta: Meta<typeof Canvas> = {
       table: { category: ARG_CATEGORIES.CONTENT },
     },
   },
-  decorators: [WithCanvasStage, WithReactFlow],
+  decorators: [WithFittedCanvas, WithCanvasStage, WithReactFlow],
 };
 
 export default meta;
@@ -84,7 +83,7 @@ export const ResolvedDiscussion: Story = {
     docs: {
       description: {
         story:
-          'A resolved discussion: a validated reasoning chain (each step marked valid) runs from the question to the node marked as the final answer (purple). Edge tones reflect those statuses, so the validated route reads green while the unrelated branch stays neutral. Validity is set manually and gated, never auto-derived from the answer.',
+          'A resolved discussion: a validated reasoning chain (each step marked valid) runs from the question to the node marked as the final answer (purple). Every edge on that route takes the answer tone, so the path to the answer reads purple while the unrelated branch stays neutral. Validity is set manually and gated, never auto-derived from the answer.',
       },
     },
   },

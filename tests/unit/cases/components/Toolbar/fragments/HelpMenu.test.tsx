@@ -7,10 +7,9 @@ import { useOnboardingStore } from '@/lib/onboarding';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
 
-const copy = TRANSLATIONS.platform.onboarding;
 const onShortcuts = vi.fn();
 
-const helpButton = () => screen.getByRole('button', { name: copy.menuLabel });
+const helpButton = () => screen.getByRole('button', { name: TRANSLATIONS.platform.onboarding.menuLabel });
 const menuItem = (name: string) => screen.getByRole('menuitem', { name });
 const openWithPointer = () => fireEvent.click(helpButton(), { detail: 1 });
 
@@ -28,8 +27,8 @@ describe('HelpMenu', () => {
 
       test('THEN the menu opens with the shortcuts and one entry for the tour and guides, and takes focus itself', () => {
         expect(screen.getAllByRole('menuitem').map((item) => item.textContent)).toEqual([
-          copy.menuShortcuts,
-          copy.menuGuides,
+          TRANSLATIONS.platform.onboarding.menuShortcuts,
+          TRANSLATIONS.platform.onboarding.menuGuides,
         ]);
         expect(screen.getByRole('menu')).toHaveFocus();
         expect(helpButton()).toHaveAttribute('aria-expanded', 'true');
@@ -42,7 +41,7 @@ describe('HelpMenu', () => {
       });
 
       test('THEN the shortcuts item is focused', () => {
-        expect(menuItem(copy.menuShortcuts)).toHaveFocus();
+        expect(menuItem(TRANSLATIONS.platform.onboarding.menuShortcuts)).toHaveFocus();
       });
     });
 
@@ -52,32 +51,33 @@ describe('HelpMenu', () => {
       });
 
       test('THEN the menu opens on the shortcuts item', () => {
-        expect(menuItem(copy.menuShortcuts)).toHaveFocus();
+        expect(menuItem(TRANSLATIONS.platform.onboarding.menuShortcuts)).toHaveFocus();
       });
     });
 
     describe('WHEN the shortcuts item is chosen', () => {
       beforeEach(() => {
         openWithPointer();
-        fireEvent.click(menuItem(copy.menuShortcuts));
+        fireEvent.click(menuItem(TRANSLATIONS.platform.onboarding.menuShortcuts));
       });
 
-      test('THEN the sheet is requested and the menu closes without pulling focus back from it', () => {
+      test('THEN the sheet is requested, the menu closes and the help button holds focus for the sheet to return to', () => {
         expect(onShortcuts).toHaveBeenCalledTimes(1);
         expect(screen.queryByRole('menu')).not.toBeInTheDocument();
-        expect(helpButton()).not.toHaveFocus();
+        expect(helpButton()).toHaveFocus();
       });
     });
 
     describe('WHEN the tour and guides entry is chosen', () => {
       beforeEach(() => {
         openWithPointer();
-        fireEvent.click(menuItem(copy.menuGuides));
+        fireEvent.click(menuItem(TRANSLATIONS.platform.onboarding.menuGuides));
       });
 
-      test('THEN the picker opens and the menu closes', () => {
+      test('THEN the picker opens, the menu closes and the help button holds focus for the picker to return to', () => {
         expect(useOnboardingStore.getState().pickerOpen).toBe(true);
         expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+        expect(helpButton()).toHaveFocus();
       });
     });
 

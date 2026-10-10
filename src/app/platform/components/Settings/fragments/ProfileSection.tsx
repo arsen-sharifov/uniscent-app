@@ -1,19 +1,21 @@
 'use client';
 
 import type { User } from '@supabase/supabase-js';
-import { useId, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 
 import type { IUserMetadata, IUserProfileUpdate, TAvatarIcon } from '@interfaces';
 import { AVATAR_ICONS, BADGES, EMAIL_PATTERN, MAX_NAME_LENGTH } from '@constants';
 import { useAsyncAction } from '@hooks';
 import { Avatar, Badge, BadgeConstellation, getInitials } from '@/components';
 import { useTranslations } from '@/i18n';
+import { useBadgeStore } from '@/lib/badges';
 import { event } from '@/lib/events';
 import { isAvatarIcon, resolveEarnedBadges } from '@/lib/utils';
 
 import { PickerCard } from './PickerCard';
-import { SettingsInput } from '../SettingsInput';
-import { SettingsPrimaryButton } from '../SettingsPrimaryButton';
+import { SectionHeader } from './SectionHeader';
+import { SettingsInput } from './SettingsInput';
+import { SettingsPrimaryButton } from './SettingsPrimaryButton';
 
 interface IProfileSectionProps {
   user: User | null;
@@ -23,7 +25,6 @@ interface IProfileSectionProps {
 
 export const ProfileSection = ({ user, onUpdateProfile, onUpdateEmail }: IProfileSectionProps) => {
   const t = useTranslations();
-  const { profile } = t.platform.settings;
 
   const metadata = user?.user_metadata as IUserMetadata | undefined;
   const userName = metadata?.name ?? '';
@@ -31,7 +32,8 @@ export const ProfileSection = ({ user, onUpdateProfile, onUpdateEmail }: IProfil
   const storedAvatarIcon = metadata?.avatarIcon;
   const userAvatarIcon: TAvatarIcon | null = isAvatarIcon(storedAvatarIcon) ? storedAvatarIcon : null;
   const storedBadges = metadata?.badges;
-  const earnedBadges = useMemo(() => resolveEarnedBadges(storedBadges), [storedBadges]);
+  const sessionBadges = useBadgeStore((state) => state.earned);
+  const earnedBadges = useMemo(() => sessionBadges ?? resolveEarnedBadges(storedBadges), [sessionBadges, storedBadges]);
 
   const [name, setName] = useState(userName);
   const [avatarIcon, setAvatarIcon] = useState<TAvatarIcon | null>(userAvatarIcon);
@@ -54,17 +56,13 @@ export const ProfileSection = ({ user, onUpdateProfile, onUpdateEmail }: IProfil
       BADGES.map((definition) => ({
         id: definition.id,
         icon: definition.icon,
-        label: profile.badges[definition.labelKey],
+        label: t.platform.settings.profile.badges[definition.labelKey],
         earned: earnedSet.has(definition.id),
       })),
-    [profile.badges, earnedSet],
+    [t.platform.settings.profile.badges, earnedSet],
   );
 
   const initialsPreview = getInitials(trimmedName || userEmail);
-
-  const id = useId();
-  const nameId = `${id}-name`;
-  const emailId = `${id}-email`;
 
   return (
     <div className="space-y-4">
@@ -82,7 +80,7 @@ export const ProfileSection = ({ user, onUpdateProfile, onUpdateEmail }: IProfil
           />
           <div className="min-w-0 flex-1">
             <p className="truncate font-grotesk text-[18px] leading-tight font-semibold tracking-tight text-[color:var(--text-strong)]">
-              {trimmedName || profile.unnamed}
+              {trimmedName || t.platform.settings.profile.unnamed}
             </p>
             <p className="mt-0.5 truncate text-[12px] tracking-tight text-[color:var(--text-muted)]">{userEmail}</p>
           </div>
@@ -98,53 +96,52 @@ export const ProfileSection = ({ user, onUpdateProfile, onUpdateEmail }: IProfil
       <section>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div>
-            <header className="mb-1.5 flex items-baseline justify-between">
-              <h3 className="font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-                {profile.displayName}
-              </h3>
-              <span className="font-mono-ui text-[10px] tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-                {trimmedName.length}/{MAX_NAME_LENGTH}
-              </span>
-            </header>
+            <SectionHeader
+              title={t.platform.settings.profile.displayName}
+              caption={`${trimmedName.length}/${MAX_NAME_LENGTH}`}
+              className="mb-1.5"
+            />
             <SettingsInput
-              id={nameId}
               type="text"
               value={name}
               maxLength={MAX_NAME_LENGTH}
-              placeholder={profile.namePlaceholder}
-              onChange={(event) => setName(event.target.value)}
+              aria-label={t.platform.settings.profile.displayName}
+              placeholder={t.platform.settings.profile.namePlaceholder}
+              onChange={(inputEvent) => setName(inputEvent.target.value)}
             />
           </div>
           <div>
             <header className="mb-1.5 flex items-baseline justify-between">
               <h3 className="font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-                {profile.email}
+                {t.platform.settings.profile.email}
               </h3>
               {emailChanged && !emailIsValid && (
                 <span className="font-mono-ui text-[10px] tracking-[0.14em] text-[color:var(--status-error)] uppercase">
-                  {profile.emailInvalid}
+                  {t.platform.settings.profile.emailInvalid}
                 </span>
               )}
             </header>
             <div className="flex gap-2">
               <div className="min-w-0 flex-1">
                 <SettingsInput
-                  id={emailId}
                   type="email"
                   value={email}
-                  onChange={(event) => setEmail(event.target.value)}
+                  aria-label={t.platform.settings.profile.email}
+                  onChange={(inputEvent) => setEmail(inputEvent.target.value)}
                 />
               </div>
               <SettingsPrimaryButton
                 onClick={() =>
                   emailChange.run(async () => {
                     await onUpdateEmail(email.trim());
-                    event.info(profile.emailChangeSent);
-                  }, profile.emailChangeFailed)
+                    event.info(t.platform.settings.profile.emailChangeSent);
+                  }, t.platform.settings.profile.emailChangeFailed)
                 }
                 disabled={emailChange.loading || !emailChanged || !emailIsValid}
               >
-                {emailChange.loading ? profile.changingEmail : profile.changeEmail}
+                {emailChange.loading
+                  ? t.platform.settings.profile.changingEmail
+                  : t.platform.settings.profile.changeEmail}
               </SettingsPrimaryButton>
             </div>
           </div>
@@ -152,19 +149,20 @@ export const ProfileSection = ({ user, onUpdateProfile, onUpdateEmail }: IProfil
       </section>
 
       <section className="border-t border-[color:var(--border)] pt-3.5">
-        <header className="mb-3 flex items-baseline justify-between">
-          <h3 className="font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {profile.avatarTitle}
-          </h3>
-          <span className="font-mono-ui text-[10px] tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {AVATAR_ICONS.length + 1} {profile.avatarOptions}
-          </span>
-        </header>
+        <SectionHeader
+          title={t.platform.settings.profile.avatarTitle}
+          caption={t('platform.settings.profile.avatarOptionCount', { count: AVATAR_ICONS.length + 1 })}
+          className="mb-3"
+        />
 
-        <div role="radiogroup" aria-label={profile.avatarTitle} className="grid grid-cols-3 gap-3 sm:grid-cols-7">
+        <div
+          role="radiogroup"
+          aria-label={t.platform.settings.profile.avatarTitle}
+          className="grid grid-cols-3 gap-3 sm:grid-cols-7"
+        >
           <PickerCard
             active={avatarIcon === null}
-            label={profile.initialsLabel}
+            label={t.platform.settings.profile.initialsLabel}
             onSelect={() => setAvatarIcon(null)}
             variant="initials"
           >
@@ -177,7 +175,7 @@ export const ProfileSection = ({ user, onUpdateProfile, onUpdateEmail }: IProfil
             <PickerCard
               key={id}
               active={id === avatarIcon}
-              label={profile.avatarIcons[labelKey]}
+              label={t.platform.settings.profile.avatarIcons[labelKey]}
               onSelect={() => setAvatarIcon(id)}
             >
               <AvatarIcon size={24} strokeWidth={1.75} className="shrink-0" aria-hidden />
@@ -187,22 +185,19 @@ export const ProfileSection = ({ user, onUpdateProfile, onUpdateEmail }: IProfil
       </section>
 
       <section className="border-t border-[color:var(--border)] pt-3.5">
-        <header className="mb-3 flex items-baseline justify-between">
-          <h3 className="font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {profile.badgesTitle}
-          </h3>
-          <span className="font-mono-ui text-[10px] tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {earnedCount}/{BADGES.length}
-          </span>
-        </header>
+        <SectionHeader
+          title={t.platform.settings.profile.badgesTitle}
+          caption={`${earnedCount}/${BADGES.length}`}
+          className="mb-3"
+        />
 
         <div className="grid grid-cols-4 gap-3 sm:grid-cols-8">
           {BADGES.map((definition) => (
             <Badge
               key={definition.id}
               icon={definition.icon}
-              label={profile.badges[definition.labelKey]}
-              unlock={profile.badges[definition.unlockKey]}
+              label={t.platform.settings.profile.badges[definition.labelKey]}
+              unlock={t.platform.settings.profile.badges[definition.unlockKey]}
               earned={earnedSet.has(definition.id)}
             />
           ))}
@@ -211,9 +206,9 @@ export const ProfileSection = ({ user, onUpdateProfile, onUpdateEmail }: IProfil
 
       <section className="flex items-center justify-end gap-3 border-t border-[color:var(--border)] pt-3.5">
         <div className="min-w-0 flex-1 truncate text-[11.5px] leading-snug">
-          {save.success && <span className="text-[color:var(--status-success)]">{profile.saved}</span>}
-          {save.error && <span className="text-[color:var(--status-error)]">{save.error}</span>}
-          {emailChange.error && <span className="text-[color:var(--status-error)]">{emailChange.error}</span>}
+          {save.success && (
+            <span className="text-[color:var(--status-success)]">{t.platform.settings.profile.saved}</span>
+          )}
         </div>
         <SettingsPrimaryButton
           onClick={() =>
@@ -223,12 +218,12 @@ export const ProfileSection = ({ user, onUpdateProfile, onUpdateEmail }: IProfil
                   ...(nameChanged && { name: trimmedName }),
                   ...(avatarIconChanged && { avatarIcon }),
                 }),
-              profile.saveFailed,
+              t.platform.settings.profile.saveFailed,
             )
           }
           disabled={save.loading || !profileChanged || (nameChanged && !trimmedName)}
         >
-          {save.loading ? profile.saving : profile.save}
+          {save.loading ? t.platform.settings.profile.saving : t.platform.settings.profile.save}
         </SettingsPrimaryButton>
       </section>
     </div>

@@ -1,3 +1,1 @@
-import { handleDeleteAccount } from '@api/server';
-
-export const POST = handleDeleteAccount;
+export { handleDeleteAccount as POST } from '@api/server';

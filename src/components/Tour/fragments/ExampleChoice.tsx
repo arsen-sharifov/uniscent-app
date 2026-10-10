@@ -13,7 +13,6 @@ interface IExampleChoiceProps {
 
 export const ExampleChoice = ({ onKeep, onRemove }: IExampleChoiceProps) => {
   const t = useTranslations();
-  const example = t.platform.onboarding.example;
   const [removing, setRemoving] = useState(false);
 
   const remove = () => {
@@ -24,10 +23,10 @@ export const ExampleChoice = ({ onKeep, onRemove }: IExampleChoiceProps) => {
   return (
     <div className="ml-auto flex shrink-0 items-center gap-2">
       <TourButton variant="secondary" onClick={remove} disabled={removing}>
-        {example.remove}
+        {t.platform.onboarding.example.remove}
       </TourButton>
       <TourButton variant="primary" onClick={onKeep} disabled={removing}>
-        {example.keep}
+        {t.platform.onboarding.example.keep}
       </TourButton>
     </div>
   );

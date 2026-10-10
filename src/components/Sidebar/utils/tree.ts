@@ -6,6 +6,25 @@ const flattenTreeAll = (items: TNavItem[]): TNavItem[] =>
 export const findInTree = (items: TNavItem[], id: string): TNavItem | null =>
   flattenTreeAll(items).find((item) => item.id === id) ?? null;
 
+export const collectIds = (items: TNavItem[]): string[] => flattenTreeAll(items).map((item) => item.id);
+
+export const getSubtreeDepth = (item: TNavItem): number =>
+  item.type === 'folder' ? item.items.reduce((deepest, child) => Math.max(deepest, getSubtreeDepth(child)), 0) + 1 : 0;
+
+export const getMaxSubtreeDepth = (items: TNavItem[], ids: Iterable<string>): number =>
+  [...ids].reduce((deepest, id) => {
+    const item = findInTree(items, id);
+
+    return item ? Math.max(deepest, getSubtreeDepth(item)) : deepest;
+  }, 0);
+
+export const findOutermostItems = (items: TNavItem[], ids: ReadonlySet<string>): TNavItem[] =>
+  items.flatMap((item) => {
+    if (ids.has(item.id)) return [item];
+
+    return item.type === 'folder' ? findOutermostItems(item.items, ids) : [];
+  });
+
 export const findFirstThread = (items: TNavItem[]): string | null =>
   flattenTreeAll(items).find((item) => item.type === 'thread')?.id ?? null;
 
@@ -14,8 +33,7 @@ export const findParentId = (
   id: string,
   parentId: string | null = null,
 ): string | null | undefined => {
-  const matched = items.find((item) => item.id === id);
-  if (matched) return parentId;
+  if (items.some((item) => item.id === id)) return parentId;
 
   return items
     .filter((item) => item.type === 'folder')
@@ -44,10 +62,10 @@ export const updateNavItemName = (items: TNavItem[], id: string, name: string): 
     return item;
   });
 
-export const setThreadAnswered = (items: TNavItem[], threadId: string, answered: boolean): TNavItem[] =>
+export const setThreadResolved = (items: TNavItem[], threadId: string, resolved: boolean): TNavItem[] =>
   items.map((item) => {
-    if (item.type === 'folder') return { ...item, items: setThreadAnswered(item.items, threadId, answered) };
-    if (item.id === threadId) return { ...item, answered };
+    if (item.type === 'folder') return { ...item, items: setThreadResolved(item.items, threadId, resolved) };
+    if (item.id === threadId) return { ...item, resolved };
 
     return item;
   });
@@ -90,13 +108,13 @@ export const filterTree = (items: TNavItem[], query: string): TNavItem[] => {
   if (!query) return items;
   const needle = query.toLowerCase();
 
-  const walk = (list: TNavItem[]): TNavItem[] =>
+  const filterItems = (list: TNavItem[]): TNavItem[] =>
     list.flatMap<TNavItem>((item) => {
       const selfMatches = item.name.toLowerCase().includes(needle);
 
       if (item.type === 'thread') return selfMatches ? [item] : [];
 
-      const matchedChildren = walk(item.items);
+      const matchedChildren = filterItems(item.items);
       if (!selfMatches && matchedChildren.length === 0) return [];
 
       return [
@@ -107,7 +125,7 @@ export const filterTree = (items: TNavItem[], query: string): TNavItem[] => {
       ];
     });
 
-  return walk(items);
+  return filterItems(items);
 };
 
 export const buildNavTree = (folders: IFolder[], threads: IThread[]): TNavItem[] => {
@@ -131,27 +149,27 @@ export const buildNavTree = (folders: IFolder[], threads: IThread[]): TNavItem[]
         type: 'thread',
         id: thread.id,
         name: thread.name,
-        answered: thread.hasAnswer,
+        resolved: thread.resolved,
       } as TNavItem,
       position: thread.position,
     })),
   ];
 
-  const childrenByParent = entries.reduce((acc, { parentId, item, position }) => {
-    const list = acc.get(parentId) ?? [];
+  const childrenByParent = entries.reduce((accumulator, { parentId, item, position }) => {
+    const list = accumulator.get(parentId) ?? [];
     list.push({ item, position });
-    acc.set(parentId, list);
+    accumulator.set(parentId, list);
 
-    return acc;
+    return accumulator;
   }, new Map<string | null, { item: TNavItem; position: number }[]>());
 
   childrenByParent.forEach((children, parentId) => {
-    children.sort((a, b) => a.position - b.position);
+    children.sort((first, second) => first.position - second.position);
     if (parentId) {
       const parent = folderMap.get(parentId);
-      if (parent) parent.items = children.map((c) => c.item);
+      if (parent) parent.items = children.map((child) => child.item);
     }
   });
 
-  return (childrenByParent.get(null) ?? []).map((c) => c.item);
+  return (childrenByParent.get(null) ?? []).map((child) => child.item);
 };

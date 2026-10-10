@@ -27,13 +27,13 @@ export default defineConfig({
     ],
     coverage: {
       include: ['src/**'],
-      exclude: ['src/**/index.ts', 'src/lib/interfaces/**', 'src/lib/supabase/database.types.ts'],
+      exclude: ['src/**/index.ts', 'src/lib/interfaces/**'],
       reporter: ['text-summary', 'html', 'lcov', 'json-summary'],
       thresholds: {
-        statements: 55,
-        branches: 42,
-        functions: 49,
-        lines: 55,
+        statements: 84,
+        branches: 77,
+        functions: 81,
+        lines: 85,
       },
     },
   },

@@ -10,8 +10,6 @@ import { useOnboardingStore } from '@/lib/onboarding';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
 
-const copy = TRANSLATIONS.platform.onboarding.continueHint;
-
 let hint: TTourHint;
 
 beforeEach(() => {
@@ -33,15 +31,15 @@ describe('TourHint', () => {
       });
 
       test('THEN it invites the user to keep learning from the help menu', () => {
-        expect(screen.getByText(copy.afterTour.title)).toBeInTheDocument();
-        expect(screen.getByText(copy.afterTour.body)).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.continueHint.afterTour.title)).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.continueHint.afterTour.body)).toBeInTheDocument();
       });
     });
 
     describe('WHEN the guides are opened from it', () => {
       beforeEach(() => {
         render(<TourHint hint={hint} />);
-        fireEvent.click(screen.getByText(copy.open));
+        fireEvent.click(screen.getByText(TRANSLATIONS.platform.onboarding.continueHint.open));
       });
 
       test('THEN the picker opens and the pointer goes away', () => {
@@ -62,15 +60,15 @@ describe('TourHint', () => {
       });
 
       test('THEN it says where the tour waits', () => {
-        expect(screen.getByText(copy.afterDecline.title)).toBeInTheDocument();
-        expect(screen.getByText(copy.afterDecline.body)).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.continueHint.afterDecline.title)).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.continueHint.afterDecline.body)).toBeInTheDocument();
       });
     });
 
     describe('WHEN it is dismissed', () => {
       beforeEach(() => {
         render(<TourHint hint={hint} />);
-        fireEvent.click(screen.getByText(copy.dismiss));
+        fireEvent.click(screen.getByText(TRANSLATIONS.platform.onboarding.continueHint.dismiss));
       });
 
       test('THEN the pointer goes away without opening anything', () => {

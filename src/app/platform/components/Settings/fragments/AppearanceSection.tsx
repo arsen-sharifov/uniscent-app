@@ -1,24 +1,17 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { Check, Loader2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState, useTransition, type CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 
-import type { IPreferences, TCanvasPattern, TLocale, TPreferenceUpdater, TTheme } from '@interfaces';
+import type { IPreferences, TCanvasPattern, TPreferenceUpdater, TTheme } from '@interfaces';
 
-import { useTranslations, LOCALES, setLocale } from '@/i18n';
-import { event } from '@/lib/events';
+import { useTranslations } from '@/i18n';
 
 import { CANVAS_PATTERNS, THEMES } from '../consts';
-import { SettingsSwitch } from '../SettingsSwitch';
-
-const resolveLocaleStatus = (pending: boolean, errored: boolean, saving: string, failed: string): string => {
-  if (pending) return saving;
-  if (errored) return failed;
-
-  return '';
-};
+import { LanguagePicker } from './LanguagePicker';
+import { SectionHeader } from './SectionHeader';
+import { SelectedPip } from './SelectedPip';
+import { SettingsSwitch } from './SettingsSwitch';
 
 interface IAppearanceSectionProps {
   preferences: IPreferences;
@@ -27,34 +20,6 @@ interface IAppearanceSectionProps {
 
 export const AppearanceSection = ({ preferences, onUpdate }: IAppearanceSectionProps) => {
   const t = useTranslations();
-  const { appearance, languageSaving, languageSaveFailed } = t.platform.settings;
-  const router = useRouter();
-  const [pending, startTransition] = useTransition();
-  const [errored, setErrored] = useState(false);
-
-  const handleLocaleChange = (next: TLocale) => {
-    if (next === preferences.language || pending) {
-      return;
-    }
-
-    const previous = preferences.language;
-    setErrored(false);
-    onUpdate('language', next);
-
-    startTransition(async () => {
-      try {
-        await setLocale(next);
-        if (typeof document !== 'undefined') {
-          document.documentElement.setAttribute('lang', next);
-        }
-        router.refresh();
-      } catch (error) {
-        event.error(error, { toast: false, context: 'settings.setLocale' });
-        onUpdate('language', previous);
-        setErrored(true);
-      }
-    });
-  };
 
   const followsSystem = preferences.theme === 'auto';
 
@@ -87,98 +52,14 @@ export const AppearanceSection = ({ preferences, onUpdate }: IAppearanceSectionP
 
   return (
     <div className="space-y-4">
-      <section>
-        <header className="mb-3 flex items-center justify-between">
-          <h3 className="font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {appearance.language}
-          </h3>
-          <span
-            className={clsx(
-              'flex h-5 w-5 items-center justify-center text-[color:var(--accent-text)] transition-opacity duration-150 motion-reduce:transition-none',
-              pending ? 'opacity-100 delay-150' : 'opacity-0',
-            )}
-            aria-hidden
-          >
-            <Loader2 className="h-3 w-3 animate-spin motion-reduce:animate-none" strokeWidth={2} />
-          </span>
-        </header>
-
-        <div role="status" aria-live="polite" className="sr-only">
-          {resolveLocaleStatus(pending, errored, languageSaving, languageSaveFailed)}
-        </div>
-
-        <div aria-busy={pending} className="grid grid-cols-2 gap-2.5 sm:grid-cols-3">
-          {LOCALES.map((value) => {
-            const isActive = value === preferences.language;
-
-            return (
-              <button
-                key={value}
-                type="button"
-                disabled={pending}
-                onClick={() => handleLocaleChange(value)}
-                aria-pressed={isActive}
-                className={clsx(
-                  'group relative flex items-center gap-2.5 rounded-xl border px-3 py-1.5 text-left transition-[border-color,background-color,transform] duration-200 ease-out',
-                  'focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:ring-offset-2 focus-visible:ring-offset-[color:var(--surface)] focus-visible:outline-none',
-                  'motion-reduce:transition-none motion-reduce:hover:translate-y-0',
-                  pending ? 'cursor-wait' : 'cursor-pointer hover:-translate-y-px active:translate-y-0',
-                  isActive
-                    ? 'border-[color:var(--border-active)] bg-[color:var(--accent-soft)]'
-                    : 'border-[color:var(--border)] bg-[color:var(--surface-elevated)]',
-                  !isActive &&
-                    !pending &&
-                    'hover:border-[color:var(--border-strong)] hover:bg-[color:var(--surface-overlay)]',
-                )}
-              >
-                <span
-                  aria-hidden
-                  className={clsx(
-                    'flex h-7 w-7 shrink-0 items-center justify-center rounded-lg font-mono-ui text-[10.5px] font-semibold tracking-[0.06em] transition-colors duration-200 ease-out motion-reduce:transition-none',
-                    isActive
-                      ? 'bg-[color:var(--accent-soft)] text-[color:var(--accent-text)]'
-                      : 'bg-[color:var(--surface-overlay)] text-[color:var(--text-muted)]',
-                  )}
-                >
-                  {value.toUpperCase()}
-                </span>
-
-                <span
-                  className={clsx(
-                    'min-w-0 flex-1 truncate text-[13px] font-medium tracking-tight transition-colors duration-200 ease-out motion-reduce:transition-none',
-                    isActive ? 'text-[color:var(--accent-text)]' : 'text-[color:var(--text)]',
-                  )}
-                >
-                  {appearance.languages[value]}
-                </span>
-
-                <span
-                  aria-hidden={!isActive}
-                  className={clsx(
-                    'flex h-4 w-4 shrink-0 items-center justify-center text-[color:var(--accent-text)] transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none',
-                    isActive ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
-                  )}
-                >
-                  <Check className="h-3.5 w-3.5" strokeWidth={2.5} />
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
+      <LanguagePicker onChange={(next) => onUpdate('language', next)} />
 
       <section className="border-t border-[color:var(--border)] pt-2.5">
-        <header className="mb-1 flex items-baseline justify-between">
-          <h3 className="font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {appearance.theme}
-          </h3>
-          <span className="font-mono-ui text-[10px] tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {appearance.themeIntro}
-          </span>
-        </header>
-        <p className="mb-3 max-w-lg text-[12.5px] leading-relaxed text-[color:var(--text-muted)]">
-          {appearance.themeBlurb}
-        </p>
+        <SectionHeader
+          title={t.platform.settings.appearance.theme}
+          caption={t.platform.settings.appearance.themeIntro}
+          description={t.platform.settings.appearance.themeBlurb}
+        />
         <div
           className={clsx(
             'mb-3 flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-[border-color,background-color] duration-200 ease-out motion-reduce:transition-none',
@@ -199,16 +80,24 @@ export const AppearanceSection = ({ preferences, onUpdate }: IAppearanceSectionP
 
           <span className="min-w-0 flex-1">
             <span className="block font-grotesk text-[14px] leading-tight font-semibold tracking-tight text-[color:var(--text-strong)]">
-              {appearance.themeAuto}
+              {t.platform.settings.appearance.themeAuto}
             </span>
             <span className="block font-mono-ui text-[10px] font-bold tracking-[0.04em] text-[color:var(--text-label)] uppercase">
-              {appearance.autoDesc}
+              {t.platform.settings.appearance.autoDesc}
             </span>
           </span>
 
-          <SettingsSwitch checked={followsSystem} label={appearance.themeAuto} onChange={handleFollowSystemChange} />
+          <SettingsSwitch
+            checked={followsSystem}
+            label={t.platform.settings.appearance.themeAuto}
+            onChange={handleFollowSystemChange}
+          />
         </div>
-        <div role="radiogroup" aria-label={appearance.theme} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div
+          role="radiogroup"
+          aria-label={t.platform.settings.appearance.theme}
+          className="grid grid-cols-2 gap-3 sm:grid-cols-4"
+        >
           {THEMES.map(({ value, labelKey, descriptionKey, systemPair, icon: Icon }) => {
             const isActive = value === preferences.theme;
             const isPaired = followsSystem && systemPair === true;
@@ -253,20 +142,12 @@ export const AppearanceSection = ({ preferences, onUpdate }: IAppearanceSectionP
                 >
                   <span className="flex items-baseline justify-between gap-2">
                     <span className="truncate font-grotesk text-[14px] leading-none font-semibold tracking-tight text-[color:var(--text-strong)]">
-                      {appearance[labelKey]}
+                      {t.platform.settings.appearance[labelKey]}
                     </span>
-                    <span
-                      aria-hidden={!isActive}
-                      className={clsx(
-                        'flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[color:var(--accent)] text-[color:var(--on-accent)] shadow-[var(--shadow-pip)] transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none',
-                        isActive ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
-                      )}
-                    >
-                      <Check className="h-2.5 w-2.5" strokeWidth={3} />
-                    </span>
+                    <SelectedPip active={isActive} />
                   </span>
                   <span className="font-mono-ui text-[10px] font-bold tracking-[0.04em] text-[color:var(--text-label)] uppercase">
-                    {appearance[descriptionKey]}
+                    {t.platform.settings.appearance[descriptionKey]}
                   </span>
                 </span>
               </button>
@@ -276,19 +157,17 @@ export const AppearanceSection = ({ preferences, onUpdate }: IAppearanceSectionP
       </section>
 
       <section className="border-t border-[color:var(--border)] pt-2.5">
-        <header className="mb-1 flex items-baseline justify-between">
-          <h3 className="font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {appearance.canvas}
-          </h3>
-          <span className="font-mono-ui text-[10px] tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-            {appearance.canvasIntro}
-          </span>
-        </header>
-        <p className="mb-3 max-w-lg text-[12.5px] leading-relaxed text-[color:var(--text-muted)]">
-          {appearance.canvasBlurb}
-        </p>
+        <SectionHeader
+          title={t.platform.settings.appearance.canvas}
+          caption={t.platform.settings.appearance.canvasIntro}
+          description={t.platform.settings.appearance.canvasBlurb}
+        />
 
-        <div role="radiogroup" aria-label={appearance.canvas} className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div
+          role="radiogroup"
+          aria-label={t.platform.settings.appearance.canvas}
+          className="grid grid-cols-2 gap-3 sm:grid-cols-4"
+        >
           {CANVAS_PATTERNS.map(({ value, labelKey, descriptionKey, icon: Icon }) => {
             const isActive = value === preferences.canvasPattern;
 
@@ -329,20 +208,12 @@ export const AppearanceSection = ({ preferences, onUpdate }: IAppearanceSectionP
                 >
                   <div className="flex items-baseline justify-between gap-2">
                     <span className="font-grotesk text-[14px] leading-none font-semibold tracking-tight text-[color:var(--text-strong)]">
-                      {appearance[labelKey]}
+                      {t.platform.settings.appearance[labelKey]}
                     </span>
-                    <span
-                      aria-hidden={!isActive}
-                      className={clsx(
-                        'flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[color:var(--accent)] text-[color:var(--on-accent)] shadow-[var(--shadow-pip)] transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none',
-                        isActive ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
-                      )}
-                    >
-                      <Check className="h-2.5 w-2.5" strokeWidth={3} />
-                    </span>
+                    <SelectedPip active={isActive} />
                   </div>
                   <span className="font-mono-ui text-[10px] font-bold tracking-[0.04em] text-[color:var(--text-label)] uppercase">
-                    {appearance[descriptionKey]}
+                    {t.platform.settings.appearance[descriptionKey]}
                   </span>
                 </div>
               </button>

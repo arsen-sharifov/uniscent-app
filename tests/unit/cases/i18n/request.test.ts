@@ -147,6 +147,20 @@ describe('requestConfig', () => {
     });
   });
 
+  describe('GIVEN a stored preference outside the supported languages, browsing in french', () => {
+    beforeEach(() => {
+      primeRequest({ pathname: '/platform', accepted: 'fr-FR,fr;q=0.9' });
+      const { client } = primeSupabase([{ data: { language: '../en' } }], { user: { id: 'user-1' } });
+      vi.mocked(createServerClient).mockResolvedValue(client as never);
+    });
+
+    describe('WHEN the request locale is resolved', () => {
+      test('THEN the stored value is ignored and the browser language is served', async () => {
+        await expect(resolveConfig()).resolves.toMatchObject({ locale: 'fr', messages: fr });
+      });
+    });
+  });
+
   describe('GIVEN a failing supabase client and a browser asking for ukrainian', () => {
     beforeEach(() => {
       primeRequest({ pathname: '/platform', accepted: 'uk-UA,uk;q=0.9' });

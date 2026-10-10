@@ -2,8 +2,6 @@ import { COPY } from '../../consts';
 import { expect, guestTest, test } from '../../fixtures';
 import { deleteAccount, getErrorToast, getSidebar, seedAccount, signIn, signOut, uniqueLabel } from '../../utils';
 
-const { signIn: signInCopy } = COPY.auth;
-
 guestTest.describe('sign in', () => {
   guestTest.describe('GIVEN a confirmed account and no session', () => {
     guestTest.beforeEach(async ({ page }) => {
@@ -12,9 +10,9 @@ guestTest.describe('sign in', () => {
 
     guestTest.describe('WHEN the right credentials are submitted', () => {
       guestTest.beforeEach(async ({ page, account }) => {
-        await page.getByLabel(signInCopy.email).fill(account.email);
-        await page.getByLabel(signInCopy.password).fill(account.password);
-        await page.getByRole('button', { name: signInCopy.submit, exact: true }).click();
+        await page.getByLabel(COPY.auth.signIn.email).fill(account.email);
+        await page.getByLabel(COPY.auth.signIn.password).fill(account.password);
+        await page.getByRole('button', { name: COPY.auth.signIn.submit, exact: true }).click();
       });
 
       guestTest('THEN the platform opens', async ({ page }) => {
@@ -25,9 +23,9 @@ guestTest.describe('sign in', () => {
 
     guestTest.describe('WHEN the password is wrong', () => {
       guestTest.beforeEach(async ({ page, account }) => {
-        await page.getByLabel(signInCopy.email).fill(account.email);
-        await page.getByLabel(signInCopy.password).fill('definitely-not-the-password');
-        await page.getByRole('button', { name: signInCopy.submit, exact: true }).click();
+        await page.getByLabel(COPY.auth.signIn.email).fill(account.email);
+        await page.getByLabel(COPY.auth.signIn.password).fill('definitely-not-the-password');
+        await page.getByRole('button', { name: COPY.auth.signIn.submit, exact: true }).click();
       });
 
       guestTest('THEN the sign-in form stays open behind an error toast', async ({ page }) => {
@@ -47,7 +45,7 @@ guestTest.describe('route protection', () => {
 
       guestTest('THEN the sign-in form takes over', async ({ page }) => {
         await expect(page).toHaveURL(/\/login$/);
-        await expect(page.getByRole('heading', { name: signInCopy.heading })).toBeVisible();
+        await expect(page.getByRole('heading', { name: COPY.auth.signIn.heading })).toBeVisible();
       });
     });
   });

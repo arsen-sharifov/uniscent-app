@@ -1,65 +1,31 @@
 'use client';
 
 import {
-  type DragStartEvent,
-  type DragMoveEvent,
-  type DragEndEvent,
-  type CollisionDetection,
-  pointerWithin,
   closestCenter,
-  PointerSensor,
+  type CollisionDetection,
+  type DragEndEvent,
+  type DragMoveEvent,
+  type DragStartEvent,
   KeyboardSensor,
+  PointerSensor,
+  pointerWithin,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type { IProjection, TDropZone, TNavItem, TNavItemType } from '@interfaces';
+import type { IProjection, IUseDndTreeOptions, TDropZone } from '@interfaces';
 
+import { AUTO_EXPAND_DELAY_MS, KEYBOARD_SENSOR_OPTIONS, POINTER_SENSOR_OPTIONS, ROOT_TAIL_PROJECTION } from '../consts';
 import {
-  AUTO_EXPAND_DELAY_MS,
-  DROP_ZONE_HYSTERESIS_PX,
-  FOLDER_INSIDE_THRESHOLD,
-  KEYBOARD_SENSOR_OPTIONS,
-  LEAF_SPLIT_THRESHOLD,
-  POINTER_SENSOR_OPTIONS,
-} from '../consts';
-import { flattenTree, getProjection, removeChildrenOf } from '../utils';
-
-interface IUseDndTreeOptions {
-  items: TNavItem[];
-  onMoveItem?: (id: string, type: TNavItemType, parentId: string | null, position: number) => void;
-  onBulkMove?: (ids: Set<string>, parentId: string | null, position: number) => void;
-  editingId?: string | null;
-  selectedIds?: Set<string>;
-}
-
-const findAnchorAtParent = <T extends { id: string; parentId: string | null }>(
-  items: T[],
-  id: string,
-  targetParentId: string | null,
-): string | null => {
-  const node = items.find((item) => item.id === id);
-  if (!node) return null;
-  if (node.parentId === targetParentId) return node.id;
-
-  return node.parentId ? findAnchorAtParent(items, node.parentId, targetParentId) : null;
-};
-
-const resolveFolderZone = (ratio: number, prev: TDropZone, sameTarget: boolean, buffer: number): TDropZone => {
-  if (!sameTarget) return ratio < FOLDER_INSIDE_THRESHOLD ? 'before' : 'inside';
-  if (prev === 'before') return ratio > FOLDER_INSIDE_THRESHOLD + buffer ? 'inside' : 'before';
-  if (prev === 'inside') return ratio < FOLDER_INSIDE_THRESHOLD - buffer ? 'before' : 'inside';
-
-  return ratio < FOLDER_INSIDE_THRESHOLD ? 'before' : 'inside';
-};
-
-const resolveLeafZone = (ratio: number, prev: TDropZone, sameTarget: boolean, buffer: number): TDropZone => {
-  if (!sameTarget) return ratio < LEAF_SPLIT_THRESHOLD ? 'before' : 'after';
-  if (prev === 'before') return ratio > LEAF_SPLIT_THRESHOLD + buffer ? 'after' : 'before';
-
-  return ratio < LEAF_SPLIT_THRESHOLD - buffer ? 'before' : 'after';
-};
+  flattenTree,
+  getDropPosition,
+  getMaxSubtreeDepth,
+  getProjection,
+  removeChildrenOf,
+  resolveDropZone,
+  resolveKeyboardDropZone,
+} from '../utils';
 
 export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedIds }: IUseDndTreeOptions) => {
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
@@ -70,18 +36,18 @@ export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedI
 
   const expandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const expandTargetRef = useRef<string | null>(null);
-  const prevCollapsedRef = useRef<Set<string> | null>(null);
+  const previousCollapsedRef = useRef<Set<string> | null>(null);
   const isBulkDragRef = useRef(false);
   const zoneRef = useRef<TDropZone>('after');
-  const prevMoveOverIdRef = useRef<string | null>(null);
+  const previousMoveOverIdRef = useRef<string | null>(null);
   const stickyOverIdRef = useRef<string | number | null>(null);
 
   const collisionDetection = useCallback<CollisionDetection>((args) => {
-    const pw = pointerWithin(args);
-    if (pw.length > 0) {
-      stickyOverIdRef.current = pw[0]!.id;
+    const pointerCollisions = pointerWithin(args);
+    if (pointerCollisions.length > 0) {
+      stickyOverIdRef.current = pointerCollisions[0]!.id;
 
-      return pw;
+      return pointerCollisions;
     }
     if (stickyOverIdRef.current !== null && args.droppableRects.get(stickyOverIdRef.current)) {
       return [{ id: stickyOverIdRef.current }];
@@ -97,48 +63,50 @@ export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedI
 
   const flattenedItems = useMemo(() => flattenTree(items, collapsedIds), [items, collapsedIds]);
 
-  const sortableItems = useMemo(() => {
-    if (!activeId) return flattenedItems;
-    const excludeIds =
-      selectedIds && selectedIds.size > 1 && selectedIds.has(activeId)
-        ? new Set([activeId, ...selectedIds])
-        : new Set([activeId]);
+  const draggedIds = useMemo(() => {
+    if (!activeId) return null;
 
-    return removeChildrenOf(flattenedItems, excludeIds);
-  }, [flattenedItems, activeId, selectedIds]);
+    return selectedIds && selectedIds.size > 1 && selectedIds.has(activeId)
+      ? new Set([activeId, ...selectedIds])
+      : new Set([activeId]);
+  }, [activeId, selectedIds]);
+
+  const sortableItems = useMemo(
+    () => (draggedIds ? removeChildrenOf(flattenedItems, draggedIds) : flattenedItems),
+    [flattenedItems, draggedIds],
+  );
+
+  const draggedSubtreeDepth = useMemo(
+    () => (draggedIds ? getMaxSubtreeDepth(items, draggedIds) : 0),
+    [items, draggedIds],
+  );
 
   const sortedIds = useMemo(() => sortableItems.map((item) => item.id), [sortableItems]);
 
   const projected: IProjection | null = useMemo(() => {
     if (!activeId || !overId) return null;
-    const base = getProjection(sortableItems, activeId, overId, dropZone);
-    if (!base) return null;
-    const result: IProjection = isPastLast ? { depth: 0, parentId: null, zone: 'after' } : base;
+    const result: IProjection | null = isPastLast
+      ? ROOT_TAIL_PROJECTION
+      : getProjection(sortableItems, activeId, overId, dropZone, draggedSubtreeDepth);
+    if (!result) return null;
+    if (draggedIds && draggedIds.size > 1) return result;
 
     const activeItem = sortableItems.find((item) => item.id === activeId);
-    if (!activeItem || activeItem.parentId !== result.parentId) return result;
+    if (activeItem?.parentId !== result.parentId) return result;
 
-    const siblings = sortableItems.filter((item) => item.parentId === result.parentId);
-    const activeIdx = siblings.findIndex((item) => item.id === activeId);
-    if (activeIdx === -1) return result;
+    const activeIndex = sortableItems
+      .filter((item) => item.parentId === result.parentId)
+      .findIndex((item) => item.id === activeId);
+    if (activeIndex === -1) return result;
 
-    const targetIdx = (() => {
-      if (result.zone === 'inside') return 0;
-      const anchorId = findAnchorAtParent(sortableItems, overId, result.parentId);
-      const siblingsSansActive = siblings.filter((item) => item.id !== activeId);
-      const anchorIdx = anchorId ? siblingsSansActive.findIndex((item) => item.id === anchorId) : -1;
-
-      return anchorIdx === -1 ? siblingsSansActive.length : anchorIdx + (result.zone === 'after' ? 1 : 0);
-    })();
-
-    if (targetIdx === activeIdx) return null;
+    if (getDropPosition(sortableItems, activeId, overId, result) === activeIndex) return null;
 
     return result;
-  }, [sortableItems, activeId, overId, dropZone, isPastLast]);
+  }, [sortableItems, activeId, overId, dropZone, isPastLast, draggedIds, draggedSubtreeDepth]);
 
   const toggleCollapse = useCallback((id: string) => {
-    setCollapsedIds((prev) => {
-      const next = new Set(prev);
+    setCollapsedIds((previous) => {
+      const next = new Set(previous);
       if (next.has(id)) next.delete(id);
       else next.add(id);
 
@@ -147,9 +115,9 @@ export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedI
   }, []);
 
   const expandForDrop = useCallback((id: string) => {
-    setCollapsedIds((prev) => {
-      if (!prev.has(id)) return prev;
-      const next = new Set(prev);
+    setCollapsedIds((previous) => {
+      if (!previous.has(id)) return previous;
+      const next = new Set(previous);
       next.delete(id);
 
       return next;
@@ -163,15 +131,22 @@ export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedI
     }
   }, []);
 
+  const restoreCollapsed = useCallback(() => {
+    if (!previousCollapsedRef.current) return;
+
+    setCollapsedIds(previousCollapsedRef.current);
+    previousCollapsedRef.current = null;
+  }, []);
+
   const resetDragState = useCallback(() => {
     setActiveId(null);
     setOverId(null);
     setDropZone('after');
     setIsPastLast(false);
     zoneRef.current = 'after';
-    prevMoveOverIdRef.current = null;
+    previousMoveOverIdRef.current = null;
     expandTargetRef.current = null;
-    prevCollapsedRef.current = null;
+    previousCollapsedRef.current = null;
     isBulkDragRef.current = false;
   }, []);
 
@@ -189,160 +164,142 @@ export const useDndTree = ({ items, onMoveItem, onBulkMove, editingId, selectedI
       setOverId(id);
 
       if (item?.type === 'folder' && !collapsedIds.has(id)) {
-        prevCollapsedRef.current = new Set(collapsedIds);
-        setCollapsedIds((prev) => new Set(prev).add(id));
+        previousCollapsedRef.current = new Set(collapsedIds);
+        setCollapsedIds((previous) => new Set(previous).add(id));
       }
     },
     [flattenedItems, collapsedIds, editingId, selectedIds],
   );
 
+  const commitZone = useCallback((zone: TDropZone) => {
+    if (zoneRef.current === zone) return;
+    zoneRef.current = zone;
+    setDropZone(zone);
+  }, []);
+
+  const cancelAutoExpand = useCallback(() => {
+    clearExpandTimer();
+    expandTargetRef.current = null;
+  }, [clearExpandTimer]);
+
+  const armAutoExpand = useCallback(
+    (id: string) => {
+      if (expandTargetRef.current === id) return;
+      clearExpandTimer();
+      expandTargetRef.current = id;
+      expandTimerRef.current = setTimeout(() => {
+        expandForDrop(id);
+        expandTargetRef.current = null;
+      }, AUTO_EXPAND_DELAY_MS);
+    },
+    [clearExpandTimer, expandForDrop],
+  );
+
+  const trackPastLast = useCallback(
+    (pointerY: number | null) => {
+      const lastItem = sortableItems.at(-1);
+      const lastBottom = lastItem
+        ? document.querySelector(`[data-item-id="${lastItem.id}"]`)?.getBoundingClientRect().bottom
+        : undefined;
+      const nextPastLast = pointerY !== null && lastBottom !== undefined && pointerY > lastBottom;
+      setIsPastLast((previous) => (previous === nextPastLast ? previous : nextPastLast));
+    },
+    [sortableItems],
+  );
+
   const handleDragMove = useCallback(
     ({ activatorEvent, delta, over }: DragMoveEvent) => {
-      const curOverId = (over?.id as string) ?? null;
-      setOverId((prev) => (prev === curOverId ? prev : curOverId));
+      const currentOverId = (over?.id as string) ?? null;
+      setOverId((previous) => (previous === currentOverId ? previous : currentOverId));
 
-      const hasPointer = 'clientY' in activatorEvent;
-      const pointerY = hasPointer ? (activatorEvent as PointerEvent).clientY + delta.y : null;
+      const pointerY = 'clientY' in activatorEvent ? (activatorEvent as PointerEvent).clientY + delta.y : null;
+      trackPastLast(pointerY);
 
-      const lastItem = sortableItems[sortableItems.length - 1];
-      const lastEl = lastItem ? document.querySelector(`[data-item-id="${lastItem.id}"]`) : null;
-      const lastBottom = lastEl?.getBoundingClientRect().bottom;
-      const nextPastLast = pointerY !== null && lastBottom !== undefined && pointerY > lastBottom;
-      setIsPastLast((prev) => (prev === nextPastLast ? prev : nextPastLast));
-
-      if (!curOverId || curOverId === activeId) {
-        if (zoneRef.current !== 'after') {
-          zoneRef.current = 'after';
-          setDropZone('after');
-        }
-        clearExpandTimer();
-        expandTargetRef.current = null;
+      if (!currentOverId || currentOverId === activeId) {
+        commitZone('after');
+        cancelAutoExpand();
 
         return;
       }
 
-      if (pointerY === null) return;
+      if (pointerY === null) {
+        if (activeId) commitZone(resolveKeyboardDropZone(sortableItems, activeId, currentOverId));
 
-      const el = document.querySelector(`[data-item-id="${curOverId}"]`);
-      if (!el) return;
+        return;
+      }
 
-      const rect = el.getBoundingClientRect();
+      const element = document.querySelector(`[data-item-id="${currentOverId}"]`);
+      if (!element) return;
+
+      const rect = element.getBoundingClientRect();
       const ratio = Math.max(0, Math.min(1, (pointerY - rect.top) / rect.height));
 
-      const overItem = sortableItems.find((item) => item.id === curOverId);
-      const isFolder = overItem?.type === 'folder';
-      const sameTarget = curOverId === prevMoveOverIdRef.current;
-      prevMoveOverIdRef.current = curOverId;
+      const isFolder = sortableItems.find((item) => item.id === currentOverId)?.type === 'folder';
+      const sameTarget = currentOverId === previousMoveOverIdRef.current;
+      previousMoveOverIdRef.current = currentOverId;
 
-      const buffer = sameTarget ? DROP_ZONE_HYSTERESIS_PX / rect.height : 0;
-      const prev = zoneRef.current;
+      const zone = resolveDropZone(isFolder, ratio, zoneRef.current, sameTarget, rect.height);
+      commitZone(zone);
 
-      const zone = isFolder
-        ? resolveFolderZone(ratio, prev, sameTarget, buffer)
-        : resolveLeafZone(ratio, prev, sameTarget, buffer);
-
-      if (zone !== zoneRef.current) {
-        zoneRef.current = zone;
-        setDropZone(zone);
-      }
-
-      if (zone === 'inside' && overItem?.type === 'folder' && collapsedIds.has(curOverId)) {
-        if (expandTargetRef.current !== curOverId) {
-          clearExpandTimer();
-          expandTargetRef.current = curOverId;
-          expandTimerRef.current = setTimeout(() => {
-            expandForDrop(curOverId);
-            expandTargetRef.current = null;
-          }, AUTO_EXPAND_DELAY_MS);
-        }
-      } else if (expandTargetRef.current) {
-        clearExpandTimer();
-        expandTargetRef.current = null;
-      }
+      if (zone === 'inside' && isFolder && collapsedIds.has(currentOverId)) armAutoExpand(currentOverId);
+      else cancelAutoExpand();
     },
-    [activeId, sortableItems, collapsedIds, clearExpandTimer, expandForDrop],
+    [activeId, sortableItems, collapsedIds, trackPastLast, commitZone, cancelAutoExpand, armAutoExpand],
   );
 
   const handleDragEnd = useCallback(
     ({ active, over }: DragEndEvent) => {
       clearExpandTimer();
 
-      if (!over || !projected) {
-        if (prevCollapsedRef.current) {
-          setCollapsedIds(prevCollapsedRef.current);
-          prevCollapsedRef.current = null;
-        }
-        resetDragState();
-
-        return;
-      }
-
       const draggedId = active.id as string;
-      const endOverId = over.id as string;
-
-      if (draggedId === endOverId && !isPastLast) {
-        if (prevCollapsedRef.current) {
-          setCollapsedIds(prevCollapsedRef.current);
-          prevCollapsedRef.current = null;
-        }
+      if (!over || !projected || (draggedId === over.id && !isPastLast)) {
+        restoreCollapsed();
         resetDragState();
 
         return;
       }
 
-      const activeIndex = sortableItems.findIndex((item) => item.id === draggedId);
-      if (activeIndex === -1) {
+      if (!sortableItems.some((item) => item.id === draggedId)) {
         resetDragState();
 
         return;
       }
 
-      const activeItem = sortableItems[activeIndex] as (typeof sortableItems)[number];
+      const isBulkDrop = isBulkDragRef.current && selectedIds && selectedIds.size > 1;
+      const siblingPool = isBulkDrop
+        ? sortableItems.filter((item) => item.id === draggedId || !selectedIds.has(item.id))
+        : sortableItems;
+      const position = getDropPosition(siblingPool, draggedId, over.id as string, projected);
 
-      const getPosition = () => {
-        if (projected.zone === 'inside') return 0;
-        const siblings = sortableItems.filter((item) => item.id !== draggedId && item.parentId === projected.parentId);
-        const anchorId = findAnchorAtParent(sortableItems, endOverId, projected.parentId);
-        const anchor = anchorId ? siblings.findIndex((item) => item.id === anchorId) : -1;
-        if (anchor === -1) return siblings.length;
-
-        return anchor + (projected.zone === 'after' ? 1 : 0);
-      };
-      const position = getPosition();
-
-      if (isBulkDragRef.current && selectedIds && selectedIds.size > 1) {
+      if (isBulkDrop) {
         onBulkMove?.(selectedIds, projected.parentId, position);
       } else {
-        onMoveItem?.(draggedId, activeItem.type, projected.parentId, position);
+        onMoveItem?.(draggedId, projected.parentId, position);
       }
 
-      if (prevCollapsedRef.current) {
-        setCollapsedIds(prevCollapsedRef.current);
-        prevCollapsedRef.current = null;
-      }
-
+      restoreCollapsed();
       resetDragState();
     },
-    [sortableItems, projected, isPastLast, clearExpandTimer, resetDragState, onMoveItem, onBulkMove, selectedIds],
+    [
+      sortableItems,
+      projected,
+      isPastLast,
+      clearExpandTimer,
+      restoreCollapsed,
+      resetDragState,
+      onMoveItem,
+      onBulkMove,
+      selectedIds,
+    ],
   );
 
   const handleDragCancel = useCallback(() => {
     clearExpandTimer();
-    if (prevCollapsedRef.current) {
-      setCollapsedIds(prevCollapsedRef.current);
-      prevCollapsedRef.current = null;
-    }
+    restoreCollapsed();
     resetDragState();
-  }, [clearExpandTimer, resetDragState]);
+  }, [clearExpandTimer, restoreCollapsed, resetDragState]);
 
-  useEffect(
-    () => () => {
-      if (expandTimerRef.current) {
-        clearTimeout(expandTimerRef.current);
-      }
-    },
-    [],
-  );
+  useEffect(() => clearExpandTimer, [clearExpandTimer]);
 
   return {
     flattenedItems: sortableItems,

@@ -13,8 +13,6 @@ import {
   waitForCanvas,
 } from '../../utils';
 
-const { canvas } = COPY.platform;
-
 test.describe('cross-canvas references', () => {
   test.describe('GIVEN another thread in the workspace holding the source node', () => {
     test.beforeEach(async ({ page, workspace, account }) => {
@@ -30,10 +28,10 @@ test.describe('cross-canvas references', () => {
 
     test.describe('WHEN the cross-reference tool links that node through the search panel', () => {
       test.beforeEach(async ({ page }) => {
-        await selectTool(page, canvas.tools.items.crossReference.label);
+        await selectTool(page, COPY.platform.canvas.tools.items.crossReference.label);
         await getPane(page).click({ position: { x: 480, y: 600 } });
 
-        const panel = page.getByRole('dialog', { name: canvas.referenceSearch.placeholder });
+        const panel = page.getByRole('dialog', { name: COPY.platform.canvas.referenceSearch.placeholder });
         await expect(panel).toBeVisible();
         await panel.getByRole('combobox').fill('Key insight');
         await panel.getByRole('option', { name: 'Key insight' }).click();
@@ -72,7 +70,7 @@ test.describe('cross-canvas references', () => {
     test.describe('WHEN the referenced canvas is opened from the reference context menu', () => {
       test.beforeEach(async ({ page }) => {
         const menu = await openNodeMenu(page, getReferenceNode(page));
-        await menu.getByRole('menuitem', { name: canvas.context.openReferenced }).click();
+        await menu.getByRole('menuitem', { name: COPY.platform.canvas.context.openReferenced }).click();
       });
 
       test('THEN the source canvas takes over with the source node in view', async ({ page, workspace }) => {
@@ -87,7 +85,7 @@ test.describe('cross-canvas references', () => {
     test.describe('WHEN the reference is deleted from its context menu', () => {
       test.beforeEach(async ({ page }) => {
         const menu = await openNodeMenu(page, getReferenceNode(page));
-        await menu.getByRole('menuitem', { name: canvas.context.deleteReference }).click();
+        await menu.getByRole('menuitem', { name: COPY.platform.canvas.context.deleteReference }).click();
         await expectSaved(page);
       });
 

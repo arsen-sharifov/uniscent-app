@@ -4,6 +4,17 @@ import { vi } from 'vitest';
 export const domRect = (overrides: Partial<DOMRect>): DOMRect =>
   ({ top: 0, right: 0, bottom: 0, left: 0, width: 0, height: 0, x: 0, y: 0, ...overrides }) as DOMRect;
 
+export const elementAt = (attributes: Record<string, string>, rect: Partial<DOMRect>, tag = 'div'): HTMLElement => {
+  const element = document.createElement(tag);
+  const { top = 0, left = 0, width = 0, height = 0 } = rect;
+  Object.entries(attributes).forEach(([name, value]) => element.setAttribute(name, value));
+  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(
+    domRect({ right: left + width, bottom: top + height, ...rect }),
+  );
+
+  return element;
+};
+
 export const pointerEvent = (clientX = 0, clientY = 0, shiftKey = false): ReactMouseEvent =>
   ({ clientX, clientY, shiftKey }) as never;
 
@@ -37,8 +48,8 @@ export const stubPerformanceNow = () => {
   vi.spyOn(performance, 'now').mockImplementation(() => now);
 
   return {
-    advance: (ms: number) => {
-      now += ms;
+    advance: (durationMs: number) => {
+      now += durationMs;
     },
   };
 };
@@ -80,6 +91,7 @@ export const stubResizeObserver = () => {
     'ResizeObserver',
     class {
       observe = observe;
+      unobserve = vi.fn();
       disconnect = disconnect;
 
       constructor(callback: ResizeObserverCallback) {

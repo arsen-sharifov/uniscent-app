@@ -2,21 +2,17 @@
 
 import { type KeyboardEvent, type RefObject, useCallback } from 'react';
 
-const MENU_ITEM_SELECTOR = '[role="menuitem"]';
-const MENU_OPEN_KEYS: ReadonlySet<string> = new Set(['ArrowDown', 'ArrowUp']);
+import type { IUseMenuKeyboardNavigationOptions } from '@interfaces';
 
-interface IUseMenuKeyboardNavigationOptions {
-  onOpen?: () => void;
-  onClose?: () => void;
-}
+const MENU_OPEN_KEYS: ReadonlySet<string> = new Set(['ArrowDown', 'ArrowUp']);
 
 export const useMenuKeyboardNavigation = (
   menuRef: RefObject<HTMLElement | null>,
-  { onOpen, onClose }: IUseMenuKeyboardNavigationOptions = {},
+  { itemRole = 'menuitem', onOpen, onClose }: IUseMenuKeyboardNavigationOptions = {},
 ) => {
   const getItems = useCallback(
-    () => Array.from(menuRef.current?.querySelectorAll<HTMLElement>(MENU_ITEM_SELECTOR) ?? []),
-    [menuRef],
+    () => Array.from(menuRef.current?.querySelectorAll<HTMLElement>(`[role="${itemRole}"]`) ?? []),
+    [menuRef, itemRole],
   );
 
   const focusItem = useCallback(

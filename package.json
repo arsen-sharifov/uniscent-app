@@ -1,6 +1,6 @@
 {
   "name": "uniscept-app",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "private": true,
   "description": "Uniscept — a tool that structures complex thinking and discussions into a clear logical system.",
   "homepage": "https://github.com/arsen-sharifov/uniscept-app#readme",
@@ -43,7 +43,6 @@
     "db:reset": "supabase db reset",
     "db:migrate": "supabase migration up",
     "db:push": "supabase db push",
-    "db:types": "supabase gen types typescript --local > src/lib/supabase/database.types.ts",
     "clean": "node -e \"['.next','node_modules','storybook-static','.cache'].forEach(p=>require('fs').rmSync(p,{recursive:true,force:true}))\""
   },
   "lint-staged": {
@@ -64,7 +63,7 @@
     "@xyflow/react": "^12.11.2",
     "clsx": "^2.1.1",
     "lucide-react": "^1.31.0",
-    "next": "16.3.5",
+    "next": "16.3.6",
     "next-intl": "^4.13.6",
     "react": "19.2.8",
     "react-dom": "19.2.8",
@@ -85,10 +84,10 @@
     "@types/node": "^26.2.0",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
-    "@vitest/coverage-v8": "^4.1.10",
+    "@vitest/coverage-v8": "^4.1.11",
     "@vitest/eslint-plugin": "^1.6.27",
     "eslint": "^9.39.4",
-    "eslint-config-next": "16.3.5",
+    "eslint-config-next": "16.3.6",
     "eslint-plugin-storybook": "^10.5.7",
     "http-server": "^14.1.1",
     "husky": "^9.1.7",
@@ -101,7 +100,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "packageManager": "pnpm@10.29.3",
   "engines": {

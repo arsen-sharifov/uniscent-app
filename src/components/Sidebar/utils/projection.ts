@@ -1,6 +1,6 @@
 import type { IFlattenedItem, IProjection, TDropZone, TNavItem } from '@interfaces';
 
-import { MAX_DEPTH } from '../consts';
+import { DROP_ZONE_HYSTERESIS_PX, FOLDER_INSIDE_THRESHOLD, LEAF_SPLIT_THRESHOLD, MAX_DEPTH } from '../consts';
 
 const countDescendants = (items: TNavItem[]): number =>
   items.reduce((sum, item) => sum + 1 + (item.type === 'folder' ? countDescendants(item.items) : 0), 0);
@@ -15,7 +15,7 @@ export const flattenTree = (
     const isFolder = item.type === 'folder';
     const collapsed = isFolder && collapsedIds.has(item.id);
     const children = isFolder && !collapsed ? flattenTree(item.items, collapsedIds, item.id, depth + 1) : [];
-    const childCount = isFolder ? (collapsed ? countDescendants(item.items) : children.length) : 0;
+    const childCount = collapsed ? countDescendants(item.items) : children.length;
 
     const flatItem: IFlattenedItem = {
       id: item.id,
@@ -26,7 +26,7 @@ export const flattenTree = (
       index,
       collapsed,
       childCount,
-      answered: item.type === 'thread' ? item.answered : undefined,
+      resolved: item.type === 'thread' ? item.resolved : undefined,
     };
 
     return [flatItem, ...children];
@@ -44,6 +44,7 @@ export const getProjection = (
   activeId: string,
   overId: string,
   zone: TDropZone,
+  subtreeDepth: number,
 ): IProjection | null => {
   if (activeId === overId) return null;
 
@@ -53,7 +54,7 @@ export const getProjection = (
 
   const activeItem = flatItems[activeIndex] as IFlattenedItem;
   const overItem = flatItems[overIndex] as IFlattenedItem;
-  const maxDepth = activeItem.type === 'folder' ? MAX_DEPTH - 1 : MAX_DEPTH;
+  const maxDepth = MAX_DEPTH - subtreeDepth;
 
   if (zone === 'inside' && overItem.type === 'folder' && overItem.id !== activeId) {
     const depth = overItem.depth + 1;
@@ -64,27 +65,84 @@ export const getProjection = (
     }
   }
 
-  const parentId: string | null = overItem.parentId;
-  let depth: number = overItem.depth;
+  if (overItem.depth > maxDepth) return null;
 
-  if (depth > maxDepth) {
-    depth = maxDepth;
-  }
+  const parentId = overItem.parentId;
+  if (activeItem.type === 'folder' && parentId && isDescendantOrSelf(flatItems, parentId, activeId)) return null;
 
-  if (activeItem.type === 'folder' && parentId) {
-    if (isDescendantOrSelf(flatItems, parentId, activeId)) return null;
-  }
+  return { depth: overItem.depth, parentId, zone: zone === 'inside' ? 'before' : zone };
+};
 
-  return { depth, parentId, zone };
+const findAnchorAtParent = (items: IFlattenedItem[], id: string, targetParentId: string | null): string | null => {
+  const node = items.find((item) => item.id === id);
+  if (!node) return null;
+  if (node.parentId === targetParentId) return node.id;
+
+  return node.parentId ? findAnchorAtParent(items, node.parentId, targetParentId) : null;
+};
+
+export const getDropPosition = (
+  items: IFlattenedItem[],
+  activeId: string,
+  overId: string,
+  projection: IProjection,
+): number => {
+  if (projection.zone === 'inside') return 0;
+  const siblings = items.filter((item) => item.id !== activeId && item.parentId === projection.parentId);
+  const anchorId = findAnchorAtParent(items, overId, projection.parentId);
+  const anchorIndex = siblings.findIndex((item) => item.id === anchorId);
+  if (anchorIndex === -1) return siblings.length;
+
+  return anchorIndex + (projection.zone === 'after' ? 1 : 0);
+};
+
+const resolveFolderZone = (ratio: number, previous: TDropZone, sameTarget: boolean, buffer: number): TDropZone => {
+  if (!sameTarget) return ratio < FOLDER_INSIDE_THRESHOLD ? 'before' : 'inside';
+  if (previous === 'before') return ratio > FOLDER_INSIDE_THRESHOLD + buffer ? 'inside' : 'before';
+  if (previous === 'inside') return ratio < FOLDER_INSIDE_THRESHOLD - buffer ? 'before' : 'inside';
+
+  return ratio < FOLDER_INSIDE_THRESHOLD ? 'before' : 'inside';
+};
+
+const resolveLeafZone = (ratio: number, previous: TDropZone, sameTarget: boolean, buffer: number): TDropZone => {
+  if (!sameTarget) return ratio < LEAF_SPLIT_THRESHOLD ? 'before' : 'after';
+  if (previous === 'before') return ratio > LEAF_SPLIT_THRESHOLD + buffer ? 'after' : 'before';
+
+  return ratio < LEAF_SPLIT_THRESHOLD - buffer ? 'before' : 'after';
+};
+
+export const resolveDropZone = (
+  isFolder: boolean,
+  ratio: number,
+  previous: TDropZone,
+  sameTarget: boolean,
+  rowHeight: number,
+): TDropZone => {
+  const buffer = sameTarget ? DROP_ZONE_HYSTERESIS_PX / rowHeight : 0;
+
+  return isFolder
+    ? resolveFolderZone(ratio, previous, sameTarget, buffer)
+    : resolveLeafZone(ratio, previous, sameTarget, buffer);
+};
+
+export const resolveKeyboardDropZone = (
+  items: readonly { id: string }[],
+  activeId: string,
+  overId: string,
+): Exclude<TDropZone, 'inside'> => {
+  const overIndex = items.findIndex((item) => item.id === overId);
+  const activeIndex = items.findIndex((item) => item.id === activeId);
+
+  return overIndex > activeIndex ? 'after' : 'before';
 };
 
 export const removeChildrenOf = (flatItems: IFlattenedItem[], ids: Set<string>): IFlattenedItem[] => {
-  const excluded = flatItems.reduce((acc, item) => {
-    if (item.parentId && (ids.has(item.parentId) || acc.has(item.parentId))) {
-      acc.add(item.id);
+  const excluded = flatItems.reduce((accumulator, item) => {
+    if (item.parentId && (ids.has(item.parentId) || accumulator.has(item.parentId))) {
+      accumulator.add(item.id);
     }
 
-    return acc;
+    return accumulator;
   }, new Set<string>());
 
   return flatItems.filter((item) => !excluded.has(item.id));

@@ -13,8 +13,6 @@ import {
   uniqueLabel,
 } from '../../utils';
 
-const { invitations } = COPY.platform.sidebar;
-
 const SHARED_WORKSPACE = 'Invitation source';
 
 test.describe('workspace invitations', () => {
@@ -38,11 +36,11 @@ test.describe('workspace invitations', () => {
     test.describe('WHEN it is accepted from the workspace switcher', () => {
       test.beforeEach(async ({ page }) => {
         const panel = await openWorkspacePanel(page);
-        await panel.getByRole('button', { name: invitations.accept, exact: true }).click();
+        await panel.getByRole('button', { name: COPY.platform.sidebar.invitations.accept, exact: true }).click();
       });
 
       test('THEN the shared workspace joins the switcher list', async ({ page }) => {
-        await expect(getStatusToast(page, invitations.accepted)).toBeVisible();
+        await expect(getStatusToast(page, COPY.platform.sidebar.invitations.accepted)).toBeVisible();
 
         const panel = await openWorkspacePanel(page);
 
@@ -53,15 +51,15 @@ test.describe('workspace invitations', () => {
     test.describe('WHEN it is declined', () => {
       test.beforeEach(async ({ page }) => {
         const panel = await openWorkspacePanel(page);
-        await panel.getByRole('button', { name: invitations.decline, exact: true }).click();
+        await panel.getByRole('button', { name: COPY.platform.sidebar.invitations.decline, exact: true }).click();
       });
 
       test('THEN the invitation disappears and the workspace stays out of the list', async ({ page }) => {
-        await expect(getStatusToast(page, invitations.declined)).toBeVisible();
+        await expect(getStatusToast(page, COPY.platform.sidebar.invitations.declined)).toBeVisible();
 
         const panel = getWorkspacePanel(page);
 
-        await expect(panel.getByText(invitations.title)).toHaveCount(0);
+        await expect(panel.getByText(COPY.platform.sidebar.invitations.title)).toHaveCount(0);
         await expect(getWorkspaceRow(panel, SHARED_WORKSPACE)).toHaveCount(0);
       });
     });

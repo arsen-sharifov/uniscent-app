@@ -16,6 +16,17 @@ const items = ['first', 'second', 'third'].map((label) => {
 
 menu.append(...items);
 
+const listbox = document.createElement('div');
+const options = ['first', 'second'].map((label) => {
+  const option = document.createElement('button');
+  option.setAttribute('role', 'option');
+  option.textContent = label;
+
+  return option;
+});
+
+listbox.append(...options);
+
 let navigation: ReturnType<typeof useMenuKeyboardNavigation>;
 let preventDefault: ReturnType<typeof vi.fn>;
 let onOpen: Mock<() => void>;
@@ -39,6 +50,7 @@ beforeEach(() => {
 afterEach(() => {
   trigger.remove();
   menu.remove();
+  listbox.remove();
 });
 
 describe('useMenuKeyboardNavigation', () => {
@@ -167,6 +179,26 @@ describe('useMenuKeyboardNavigation', () => {
 
       test('THEN both keys are left alone', () => {
         expect(preventDefault).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('GIVEN a listbox whose items are options', () => {
+    beforeEach(() => {
+      document.body.append(listbox);
+      navigation = renderHook(() => useMenuKeyboardNavigation({ current: listbox }, { itemRole: 'option' })).result
+        .current;
+    });
+
+    describe('WHEN ArrowDown is pressed on the first option', () => {
+      beforeEach(() => {
+        navigation.focusItem(0);
+        pressInMenu('ArrowDown');
+      });
+
+      test('THEN focus moves to the second option', () => {
+        expect(document.activeElement).toBe(options[1]);
+        expect(preventDefault).toHaveBeenCalledTimes(1);
       });
     });
   });

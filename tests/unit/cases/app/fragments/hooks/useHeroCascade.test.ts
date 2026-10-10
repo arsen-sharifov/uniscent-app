@@ -1,8 +1,9 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
+import { REDUCED_MOTION_QUERY } from '@constants';
 import { stubMediaQueries } from '@mocks/browser';
-import { HERO_PHASE_DURATION_MS, REDUCED_MOTION_QUERY } from '@/app/fragments/consts';
+import { HERO_PHASE_DURATION_MS } from '@/app/fragments/consts';
 import { useHeroCascade } from '@/app/fragments/hooks';
 
 let cascade: { current: ReturnType<typeof useHeroCascade> };
@@ -25,6 +26,18 @@ describe('useHeroCascade', () => {
       cascade = renderHook(() => useHeroCascade()).result;
     });
 
+    describe('WHEN the healthy phase is on screen', () => {
+      test('THEN the paths from the question to the answer read answer and the loose support stays valid', () => {
+        expect(cascade.current.phase).toBe('healthy');
+        expect(cascade.current.edgeTones.get('q-p1')).toBe('answer');
+        expect(cascade.current.edgeTones.get('q-p2')).toBe('answer');
+        expect(cascade.current.edgeTones.get('p1-c1')).toBe('answer');
+        expect(cascade.current.edgeTones.get('p2-c1')).toBe('answer');
+        expect(cascade.current.edgeTones.get('c1-c2')).toBe('answer');
+        expect(cascade.current.edgeTones.get('p3-c1')).toBe('valid');
+      });
+    });
+
     describe('WHEN the refutation phase starts', () => {
       beforeEach(() => {
         act(() => vi.advanceTimersByTime(HERO_PHASE_DURATION_MS.healthy));
@@ -35,6 +48,10 @@ describe('useHeroCascade', () => {
         expect(cascade.current.statuses.get('p2')).toBe('invalid');
         expect(cascade.current.statuses.get('c1')).toBe('tainted-valid');
         expect(cascade.current.statuses.get('c2')).toBe('tainted-valid');
+        expect(cascade.current.edgeTones.get('q-p2')).toBe('invalid');
+        expect(cascade.current.edgeTones.get('p2-c1')).toBe('tainted');
+        expect(cascade.current.edgeTones.get('p1-c1')).toBe('valid');
+        expect(cascade.current.edgeTones.get('c1-c2')).toBe('invalid');
       });
     });
 
@@ -50,6 +67,11 @@ describe('useHeroCascade', () => {
         expect(cascade.current.statuses.get('c2')).toBe('valid');
         expect(cascade.current.edges).not.toContainEqual(expect.objectContaining({ source: 'p2', target: 'c1' }));
         expect(cascade.current.edges).toContainEqual(expect.objectContaining({ source: 'p5', target: 'c1' }));
+        expect(cascade.current.edgeTones.get('q-p1')).toBe('answer');
+        expect(cascade.current.edgeTones.get('p1-c1')).toBe('answer');
+        expect(cascade.current.edgeTones.get('c1-c2')).toBe('answer');
+        expect(cascade.current.edgeTones.get('p5-c1')).toBe('valid');
+        expect(cascade.current.edgeTones.get('q-p2')).toBe('invalid');
       });
     });
 

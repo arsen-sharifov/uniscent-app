@@ -6,7 +6,7 @@ import { Showcase } from '../../../components';
 import { EARNED_DEMO } from '../consts';
 
 export const GalleryShowcase = () => {
-  const { badges } = useTranslations().platform.settings.profile;
+  const t = useTranslations();
   const earnedSet = new Set(EARNED_DEMO);
 
   return (
@@ -15,14 +15,14 @@ export const GalleryShowcase = () => {
       caption={`${BADGES.length} badges`}
       columns={4}
       items={BADGES.map((definition) => ({
-        label: badges[definition.labelKey],
+        label: t.platform.settings.profile.badges[definition.labelKey],
         hint: earnedSet.has(definition.id) ? 'earned' : 'locked',
         children: (
           <div className="flex w-full justify-center">
             <Badge
               icon={definition.icon}
-              label={badges[definition.labelKey]}
-              unlock={badges[definition.unlockKey]}
+              label={t.platform.settings.profile.badges[definition.labelKey]}
+              unlock={t.platform.settings.profile.badges[definition.unlockKey]}
               earned={earnedSet.has(definition.id)}
             />
           </div>

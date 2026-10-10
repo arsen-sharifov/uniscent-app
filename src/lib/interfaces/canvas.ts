@@ -1,4 +1,20 @@
-import type { Edge, FitViewOptions, Node } from '@xyflow/react';
+import type {
+  Edge,
+  EdgeMouseHandler,
+  FitViewOptions,
+  IsValidConnection,
+  Node,
+  NodeMouseHandler,
+  OnConnect,
+  OnMoveEnd,
+  Position,
+  Viewport,
+} from '@xyflow/react';
+import type { LucideIcon } from 'lucide-react';
+import type { FocusEvent, KeyboardEvent, MouseEvent, RefObject } from 'react';
+
+import type { ISaveState } from './canvasSync';
+import type { TDefaultZoom } from './preferences';
 
 export enum ECanvasNodeType {
   Canvas = 'canvas-node',
@@ -84,21 +100,14 @@ export interface ICanvasSnapshot {
   edges: Edge[];
 }
 
-export type TSaveStatus = 'idle' | 'saving' | 'retrying' | 'saved' | 'error' | 'offline';
-
-export type TVisibleSaveStatus = Extract<TSaveStatus, 'retrying' | 'error' | 'offline'>;
+export interface ICanvasHistoryState {
+  nodes: Node[];
+  edges: Edge[];
+}
 
 export type TValidationAction = 'valid' | 'answer';
 
-export interface ISaveState {
-  status: TSaveStatus;
-  lastSavedAt: number | null;
-  retryAttempt: number;
-  pendingCount: number;
-  failedCount: number;
-}
-
-export type TEdgeTone = 'default' | 'valid' | 'invalid' | 'tainted';
+export type TEdgeTone = 'default' | 'valid' | 'answer' | 'invalid' | 'tainted';
 
 export interface ICanvasEdgeData extends Record<string, unknown> {
   tone?: TEdgeTone;
@@ -118,11 +127,6 @@ export interface ICanvasEdgeGeometry {
 }
 
 export type TEffectiveStatus = TNodeStatus | 'tainted' | 'tainted-valid';
-
-export interface IEdgePaletteEntry {
-  stroke: string;
-  marker: string;
-}
 
 export interface IAlignmentGuide {
   direction: 'vertical' | 'horizontal';
@@ -168,91 +172,6 @@ export interface ICreateNodeCommentInput {
   nodeId: string;
   text: string;
 }
-
-export interface IIdScoped {
-  id: string;
-}
-
-export interface IThreadScoped extends IIdScoped {
-  threadId: string;
-}
-
-export interface IPositioned extends IThreadScoped {
-  x: number;
-  y: number;
-}
-
-export interface ICreateCanvasNodeOperation extends IPositioned {
-  type: 'createCanvasNode';
-  label: string;
-}
-
-export interface ICreateReferenceNodeOperation extends IPositioned {
-  type: 'createReferenceNode';
-  data: IReferenceNodeData;
-}
-
-export interface IDeleteNodeOperation extends IIdScoped {
-  type: 'deleteNode';
-}
-
-export interface IUpdateNodePositionOperation extends IIdScoped {
-  type: 'updateNodePosition';
-  x: number;
-  y: number;
-}
-
-export interface IUpdateNodeLabelOperation extends IIdScoped {
-  type: 'updateNodeLabel';
-  label: string;
-}
-
-export interface IUpdateNodeStatusOperation extends IIdScoped {
-  type: 'updateNodeStatus';
-  status: TNodeStatus;
-}
-
-export interface IUpdateNodeAnswerOperation extends IIdScoped {
-  type: 'updateNodeAnswer';
-  isAnswer: boolean;
-}
-
-export interface ICreateEdgeOperation extends IThreadScoped {
-  type: 'createEdge';
-  source: string;
-  target: string;
-  sourceHandle: THandleId;
-  targetHandle: THandleId;
-}
-
-export interface IDeleteEdgeOperation extends IIdScoped {
-  type: 'deleteEdge';
-}
-
-export interface ICreateNodeCommentOperation extends IIdScoped {
-  type: 'createComment';
-  nodeId: string;
-  text: string;
-}
-
-export interface IDeleteNodeCommentOperation extends IIdScoped {
-  type: 'deleteComment';
-}
-
-export type TNodeOperation =
-  | ICreateCanvasNodeOperation
-  | ICreateReferenceNodeOperation
-  | IDeleteNodeOperation
-  | IUpdateNodePositionOperation
-  | IUpdateNodeLabelOperation
-  | IUpdateNodeStatusOperation
-  | IUpdateNodeAnswerOperation;
-
-export type TEdgeOperation = ICreateEdgeOperation | IDeleteEdgeOperation;
-
-export type TCommentOperation = ICreateNodeCommentOperation | IDeleteNodeCommentOperation;
-
-export type TCanvasOperation = TNodeOperation | TEdgeOperation | TCommentOperation;
 
 export interface ICanvasNodeRow {
   id: string;
@@ -320,4 +239,67 @@ export interface ICanvasSkeletonNode {
   y: number;
   width: number;
   lines: number;
+}
+
+export interface IHandlePosition {
+  id: THandleId;
+  position: Position;
+}
+
+export interface INodeBandStyle {
+  icon: LucideIcon;
+  color: string;
+}
+
+export interface INodeStateBand {
+  active: boolean;
+  tone: TNodeBandTone;
+  label: string;
+}
+
+export interface IUseCanvasSyncResult {
+  saveState: ISaveState;
+  loadFailed: boolean;
+  retryLoad: () => void;
+}
+
+export interface IUseCanvasToolsResult {
+  onPaneClick: (event: MouseEvent) => void;
+  onNodeClick: NodeMouseHandler;
+  onNodeDoubleClick: NodeMouseHandler;
+  onEdgeClick: EdgeMouseHandler;
+  onConnect: OnConnect;
+  isValidConnection: IsValidConnection;
+}
+
+export interface IUseCanvasViewportOptions {
+  threadId: string;
+  defaultZoom: TDefaultZoom;
+}
+
+export interface IUseCanvasViewportResult {
+  defaultViewport: Viewport;
+  arriving: boolean;
+  onMoveEnd: OnMoveEnd;
+}
+
+export interface IUseCanvasContextMenuResult {
+  contextMenu: TCanvasContextMenu | null;
+  closeContextMenu: () => void;
+  onPaneContextMenu: (event: MouseEvent | globalThis.MouseEvent) => void;
+  onNodeContextMenu: NodeMouseHandler;
+  onEdgeContextMenu: EdgeMouseHandler;
+}
+
+export interface IUseLabelEditingOptions {
+  id: string;
+  label: string;
+  measured: boolean;
+  signalLabelled?: boolean;
+}
+
+export interface IUseLabelEditingResult {
+  inputRef: RefObject<HTMLTextAreaElement | null>;
+  handleLabelBlur: (event: FocusEvent<HTMLTextAreaElement>) => void;
+  handleLabelKeyDown: (event: KeyboardEvent<HTMLTextAreaElement>) => void;
 }

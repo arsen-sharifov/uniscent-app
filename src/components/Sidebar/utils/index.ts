@@ -1,4 +1,4 @@
 export * from './dragStyle';
-export * from './labels';
+export * from './icons';
 export * from './projection';
 export * from './tree';

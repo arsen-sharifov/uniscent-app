@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 
+import { E2E_MAILPIT_URL } from '../consts';
 import type { IE2ESupabaseEnv } from '../interfaces';
 
 const ENV_FILES = ['.env.local', '.env'];
@@ -64,4 +65,10 @@ export const getAppUrl = (): string => {
   loadEnvFiles();
 
   return requireEnv('NEXT_PUBLIC_APP_URL');
+};
+
+export const getMailpitUrl = (): string => {
+  loadEnvFiles();
+
+  return process.env.MAILPIT_URL ?? E2E_MAILPIT_URL;
 };

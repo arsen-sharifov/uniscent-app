@@ -12,15 +12,18 @@ import {
   updateCanvasNodePositions,
 } from '@api/client';
 import { THREAD_ID, canvasEdge, canvasNode } from '@mocks/canvas';
-import { EDIT_ACCESS, READONLY_ACCESS } from '@mocks/roles';
+import { EDIT_ACCESS, FULL_ACCESS, READONLY_ACCESS } from '@mocks/roles';
 import { useCanvasSync } from '@/components/Canvas/hooks';
-import { FLUSH_DEBOUNCE_MS, resetQueue } from '@/lib/canvas';
-import { useToastStore } from '@/lib/events';
+import { ECanvasTool } from '@/components/tools';
+import { FLUSH_DEBOUNCE_MS, MAX_RETRIES, RETRY_BASE_MS, getSaveState, resetQueue } from '@/lib/canvas';
+import { event } from '@/lib/events';
 import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
 
 vi.mock('@api/client', () => import('@mocks/canvasApi'));
+vi.mock('@/lib/events', () => import('@mocks/events'));
 
 const LOAD_TIMEOUT_MS = 15000;
+const WORKSPACE_ID = 'ws-1';
 
 const canvasContent = (): ICanvasSnapshot => ({
   nodes: [canvasNode('own', { createdBy: 'user-1' }), canvasNode('foreign', { createdBy: 'user-2' })],
@@ -39,10 +42,11 @@ afterEach(async () => {
   await act(async () => {
     await vi.advanceTimersByTimeAsync(0);
   });
+  Reflect.deleteProperty(window.navigator, 'onLine');
+  window.dispatchEvent(new Event('online'));
   resetQueue();
   useCanvasStore.getState().clearCanvas();
   usePermissionsStore.getState().clearAccess();
-  useToastStore.getState().clear();
   vi.useRealTimers();
   vi.restoreAllMocks();
 });
@@ -53,7 +57,7 @@ describe('useCanvasSync', () => {
       usePermissionsStore.getState().setAccess('ws-1', 'user-1', EDIT_ACCESS);
       vi.mocked(getCanvasContent).mockResolvedValue(canvasContent());
 
-      const view = renderHook(() => useCanvasSync(THREAD_ID));
+      const view = renderHook(() => useCanvasSync(WORKSPACE_ID, THREAD_ID));
 
       sync = view.result;
       unmountSync = view.unmount;
@@ -64,14 +68,14 @@ describe('useCanvasSync', () => {
 
     describe('WHEN the canvas loads', () => {
       test('THEN the store hydrates with the persisted content', () => {
-        expect(getCanvasContent).toHaveBeenCalledExactlyOnceWith(THREAD_ID);
+        expect(getCanvasContent).toHaveBeenCalledExactlyOnceWith(WORKSPACE_ID, THREAD_ID);
         expect(useCanvasStore.getState()).toMatchObject({ threadId: THREAD_ID, hydrated: true });
         expect(useCanvasStore.getState().nodes.map((node) => node.id)).toEqual(['own', 'foreign']);
         expect(useCanvasStore.getState().edges).toHaveLength(1);
       });
 
       test('THEN the save state starts idle without a load error', () => {
-        expect(sync.current.loadError).toBeNull();
+        expect(sync.current.loadFailed).toBe(false);
         expect(sync.current.saveState).toMatchObject({ status: 'idle', pendingCount: 0 });
       });
     });
@@ -234,6 +238,58 @@ describe('useCanvasSync', () => {
       });
     });
 
+    describe('WHEN they undo an addition after losing their canvas edit access', () => {
+      beforeEach(async () => {
+        act(() => useCanvasStore.getState().addNode({ x: 0, y: 0 }, 'Draft'));
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(FLUSH_DEBOUNCE_MS);
+        });
+        act(() => usePermissionsStore.getState().setAccess('ws-1', 'user-1', READONLY_ACCESS));
+        act(() => useCanvasStore.getState().undo());
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(FLUSH_DEBOUNCE_MS);
+        });
+      });
+
+      test('THEN the addition stays and no delete reaches the api', () => {
+        expect(useCanvasStore.getState().nodes.map((node) => node.data.label)).toContain('Draft');
+        expect(deleteCanvasNode).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('WHEN they lose their canvas edit access with the add-node tool active', () => {
+      beforeEach(() => {
+        act(() => useCanvasStore.getState().setActiveTool(ECanvasTool.AddNode));
+        act(() => usePermissionsStore.getState().setAccess('ws-1', 'user-1', READONLY_ACCESS));
+      });
+
+      test('THEN the tool returns to select', () => {
+        expect(useCanvasStore.getState().activeTool).toBe(ECanvasTool.Select);
+      });
+    });
+
+    describe('WHEN they lose their canvas edit access with the pan tool active', () => {
+      beforeEach(() => {
+        act(() => useCanvasStore.getState().setActiveTool(ECanvasTool.Pan));
+        act(() => usePermissionsStore.getState().setAccess('ws-1', 'user-1', READONLY_ACCESS));
+      });
+
+      test('THEN the pan tool stays', () => {
+        expect(useCanvasStore.getState().activeTool).toBe(ECanvasTool.Pan);
+      });
+    });
+
+    describe('WHEN they gain the ownership with the add-node tool active', () => {
+      beforeEach(() => {
+        act(() => useCanvasStore.getState().setActiveTool(ECanvasTool.AddNode));
+        act(() => usePermissionsStore.getState().setAccess('ws-1', 'user-1', FULL_ACCESS));
+      });
+
+      test('THEN the add-node tool stays', () => {
+        expect(useCanvasStore.getState().activeTool).toBe(ECanvasTool.AddNode);
+      });
+    });
+
     describe('WHEN the hook unmounts with a pending operation', () => {
       beforeEach(async () => {
         act(() => useCanvasStore.getState().addNode({ x: 0, y: 0 }, 'Draft'));
@@ -281,12 +337,42 @@ describe('useCanvasSync', () => {
     });
   });
 
+  describe('GIVEN the workspace owner who renamed a node someone else created', () => {
+    beforeEach(async () => {
+      usePermissionsStore.getState().setAccess('ws-1', 'user-1', FULL_ACCESS);
+      vi.mocked(getCanvasContent).mockResolvedValue(canvasContent());
+      renderHook(() => useCanvasSync(WORKSPACE_ID, THREAD_ID));
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      act(() => useCanvasStore.getState().updateNodeLabel('foreign', 'Renamed'));
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(FLUSH_DEBOUNCE_MS);
+      });
+    });
+
+    describe('WHEN they undo the rename after handing the ownership over', () => {
+      beforeEach(async () => {
+        act(() => usePermissionsStore.getState().setAccess('ws-1', 'user-1', EDIT_ACCESS));
+        act(() => useCanvasStore.getState().undo());
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(FLUSH_DEBOUNCE_MS);
+        });
+      });
+
+      test('THEN the rename stays and only the rename itself reaches the api', () => {
+        expect(useCanvasStore.getState().nodes.find((node) => node.id === 'foreign')?.data.label).toBe('Renamed');
+        expect(updateCanvasNodeLabel).toHaveBeenCalledExactlyOnceWith('foreign', 'Renamed');
+      });
+    });
+  });
+
   describe('GIVEN a viewer on the same thread', () => {
     beforeEach(async () => {
       usePermissionsStore.getState().setAccess('ws-1', 'user-1', READONLY_ACCESS);
       vi.mocked(getCanvasContent).mockResolvedValue(canvasContent());
 
-      const view = renderHook(() => useCanvasSync(THREAD_ID));
+      const view = renderHook(() => useCanvasSync(WORKSPACE_ID, THREAD_ID));
 
       sync = view.result;
       await act(async () => {
@@ -322,11 +408,10 @@ describe('useCanvasSync', () => {
 
   describe('GIVEN a backend that never responds', () => {
     beforeEach(async () => {
-      vi.spyOn(console, 'error').mockImplementation(() => {});
       usePermissionsStore.getState().setAccess('ws-1', 'user-1', EDIT_ACCESS);
       vi.mocked(getCanvasContent).mockReturnValue(new Promise(() => {}));
 
-      sync = renderHook(() => useCanvasSync(THREAD_ID)).result;
+      sync = renderHook(() => useCanvasSync(WORKSPACE_ID, THREAD_ID)).result;
     });
 
     describe('WHEN the load timeout elapses', () => {
@@ -337,7 +422,11 @@ describe('useCanvasSync', () => {
       });
 
       test('THEN the load times out without hydrating the store', () => {
-        expect(sync.current.loadError).toMatchObject({ message: 'Request timed out' });
+        expect(sync.current.loadFailed).toBe(true);
+        expect(event.error).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ message: 'Request timed out' }), {
+          toast: false,
+          context: 'canvas.load',
+        });
         expect(useCanvasStore.getState()).toMatchObject({ threadId: null, hydrated: false });
       });
     });
@@ -351,7 +440,7 @@ describe('useCanvasSync', () => {
       usePermissionsStore.getState().setAccess('ws-1', 'user-1', EDIT_ACCESS);
       vi.mocked(getCanvasContent).mockResolvedValueOnce(canvasContent());
 
-      view = renderHook(({ threadId }: { threadId: string }) => useCanvasSync(threadId), {
+      view = renderHook(({ threadId }: { threadId: string }) => useCanvasSync(WORKSPACE_ID, threadId), {
         initialProps: { threadId: THREAD_ID },
       });
       await act(async () => {
@@ -396,13 +485,156 @@ describe('useCanvasSync', () => {
     });
   });
 
+  describe('GIVEN an editor with an unflushed operation on the old thread and a new thread still loading', () => {
+    let view: RenderHookResult<ReturnType<typeof useCanvasSync>, { threadId: string }>;
+
+    beforeEach(async () => {
+      usePermissionsStore.getState().setAccess('ws-1', 'user-1', EDIT_ACCESS);
+      vi.mocked(getCanvasContent).mockResolvedValueOnce(canvasContent());
+
+      view = renderHook(({ threadId }: { threadId: string }) => useCanvasSync(WORKSPACE_ID, threadId), {
+        initialProps: { threadId: THREAD_ID },
+      });
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      act(() => useCanvasStore.getState().addNode({ x: 0, y: 0 }, 'Stale'));
+      vi.mocked(getCanvasContent).mockReturnValueOnce(new Promise(() => {}));
+    });
+
+    describe('WHEN the route switches to the new thread while the old save is in flight', () => {
+      beforeEach(() => {
+        vi.mocked(createCanvasNode).mockReturnValueOnce(new Promise(() => {}));
+        view.rerender({ threadId: 'thread-2' });
+      });
+
+      test('THEN the old graph leaves the store at once', () => {
+        expect(useCanvasStore.getState()).toMatchObject({ threadId: null, hydrated: false });
+        expect(useCanvasStore.getState().nodes).toHaveLength(0);
+      });
+    });
+
+    describe('WHEN the route switches and a node is added before the new thread loads', () => {
+      beforeEach(async () => {
+        view.rerender({ threadId: 'thread-2' });
+        act(() => useCanvasStore.getState().addNode({ x: 0, y: 0 }, 'Lost'));
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(FLUSH_DEBOUNCE_MS);
+        });
+      });
+
+      test('THEN only the old operation reaches the api, under the old thread', () => {
+        expect(createCanvasNode).toHaveBeenCalledExactlyOnceWith(
+          expect.objectContaining({ threadId: THREAD_ID, label: 'Stale' }),
+        );
+      });
+    });
+  });
+
+  describe('GIVEN an editor who deleted a parked node while another save is in flight', () => {
+    let settleInflight: () => void;
+
+    beforeEach(async () => {
+      usePermissionsStore.getState().setAccess('ws-1', 'user-1', EDIT_ACCESS);
+      vi.mocked(getCanvasContent).mockResolvedValue(canvasContent());
+
+      unmountSync = renderHook(() => useCanvasSync(WORKSPACE_ID, THREAD_ID)).unmount;
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      vi.mocked(createCanvasNode).mockRejectedValue(new Error('down'));
+      act(() => useCanvasStore.getState().addNode({ x: 0, y: 0 }, 'Parked', 'parked'));
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(FLUSH_DEBOUNCE_MS + RETRY_BASE_MS * (2 ** MAX_RETRIES - 1));
+      });
+
+      const inflightCreate = Promise.withResolvers<void>();
+      settleInflight = inflightCreate.resolve;
+      vi.mocked(createCanvasNode).mockReset();
+      vi.mocked(createCanvasNode).mockReturnValueOnce(inflightCreate.promise);
+      act(() => useCanvasStore.getState().addNode({ x: 40, y: 40 }, 'In flight'));
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(FLUSH_DEBOUNCE_MS);
+      });
+      act(() => useCanvasStore.getState().deleteNode('parked'));
+    });
+
+    afterEach(() => {
+      settleInflight();
+    });
+
+    describe('WHEN the hook unmounts before the in-flight save settles', () => {
+      beforeEach(async () => {
+        unmountSync();
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(0);
+        });
+      });
+
+      test('THEN the queue is not reset under the in-flight save', () => {
+        expect(useCanvasStore.getState()).toMatchObject({ threadId: null, hydrated: false });
+        expect(getSaveState().status).toBe('saving');
+      });
+    });
+  });
+
+  describe('GIVEN an editor who changed the canvas after the connection dropped', () => {
+    beforeEach(async () => {
+      usePermissionsStore.getState().setAccess('ws-1', 'user-1', EDIT_ACCESS);
+      vi.mocked(getCanvasContent).mockResolvedValue(canvasContent());
+
+      unmountSync = renderHook(() => useCanvasSync(WORKSPACE_ID, THREAD_ID)).unmount;
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+
+      act(() => useCanvasStore.getState().addNode({ x: 0, y: 0 }, 'Offline draft'));
+      Object.defineProperty(window.navigator, 'onLine', { configurable: true, value: false });
+      window.dispatchEvent(new Event('offline'));
+    });
+
+    describe('WHEN the hook unmounts while still offline', () => {
+      beforeEach(async () => {
+        unmountSync();
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(0);
+        });
+      });
+
+      test('THEN the store clears but the change stays queued', () => {
+        expect(useCanvasStore.getState()).toMatchObject({ threadId: null, hydrated: false });
+        expect(getSaveState()).toMatchObject({ status: 'offline', pendingCount: 1 });
+        expect(createCanvasNode).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('WHEN the connection returns after the hook unmounted', () => {
+      beforeEach(async () => {
+        unmountSync();
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(0);
+        });
+        Object.defineProperty(window.navigator, 'onLine', { configurable: true, value: true });
+        window.dispatchEvent(new Event('online'));
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(FLUSH_DEBOUNCE_MS);
+        });
+      });
+
+      test('THEN the queued change still reaches the api', () => {
+        expect(createCanvasNode).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ label: 'Offline draft' }));
+      });
+    });
+  });
+
   describe('GIVEN a backend that fails to load the thread', () => {
     beforeEach(async () => {
-      vi.spyOn(console, 'error').mockImplementation(() => {});
       usePermissionsStore.getState().setAccess('ws-1', 'user-1', EDIT_ACCESS);
       vi.mocked(getCanvasContent).mockRejectedValue(new Error('load failed'));
 
-      sync = renderHook(() => useCanvasSync(THREAD_ID)).result;
+      sync = renderHook(() => useCanvasSync(WORKSPACE_ID, THREAD_ID)).result;
       await act(async () => {
         await vi.advanceTimersByTimeAsync(0);
       });
@@ -410,13 +642,34 @@ describe('useCanvasSync', () => {
 
     describe('WHEN the load settles', () => {
       test('THEN the load error surfaces without hydrating the store', () => {
-        expect(sync.current.loadError).toMatchObject({ message: 'load failed' });
+        expect(sync.current.loadFailed).toBe(true);
         expect(useCanvasStore.getState()).toMatchObject({ threadId: null, hydrated: false });
       });
 
-      test('THEN the failure is reported to the sink without a toast', () => {
-        expect(console.error).toHaveBeenCalledTimes(1);
-        expect(useToastStore.getState().toasts).toEqual([]);
+      test('THEN the failure is reported without a toast', () => {
+        expect(event.error).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ message: 'load failed' }), {
+          toast: false,
+          context: 'canvas.load',
+        });
+      });
+    });
+
+    describe('WHEN the user retries and the backend has recovered', () => {
+      beforeEach(async () => {
+        vi.mocked(getCanvasContent).mockResolvedValue(canvasContent());
+        act(() => sync.current.retryLoad());
+        await act(async () => {
+          await vi.advanceTimersByTimeAsync(0);
+        });
+      });
+
+      test('THEN the load runs again and the store hydrates', () => {
+        expect(getCanvasContent).toHaveBeenCalledTimes(2);
+        expect(useCanvasStore.getState()).toMatchObject({ threadId: THREAD_ID, hydrated: true });
+      });
+
+      test('THEN the load error clears', () => {
+        expect(sync.current.loadFailed).toBe(false);
       });
     });
   });

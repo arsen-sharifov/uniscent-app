@@ -1,4 +1,6 @@
+export * from './DetailRow';
 export * from './GeneralSection';
+export * from './InlineConfirm';
 export * from './MemberRow';
 export * from './MembersSection';
 export * from './OwnershipTransferDialog';
@@ -7,4 +9,5 @@ export * from './RoleIcon';
 export * from './RoleListItem';
 export * from './RoleSelect';
 export * from './RolesSection';
+export * from './WorkspaceSettingsSidebar';
 export * from './WorkspaceSettingsSkeleton';

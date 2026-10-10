@@ -4,14 +4,13 @@ import { CheckCircle2 } from 'lucide-react';
 import { useMemo } from 'react';
 
 import { useTranslations } from '@/i18n';
+import { isThreadResolved } from '@/lib/canvas';
 import { useCanvasStore } from '@/lib/stores';
-
-import { isThreadResolved } from '../utils';
 
 export const ResolutionBar = () => {
   const t = useTranslations();
-  const nodes = useCanvasStore((s) => s.nodes);
-  const edges = useCanvasStore((s) => s.edges);
+  const nodes = useCanvasStore((state) => state.nodes);
+  const edges = useCanvasStore((state) => state.edges);
 
   const resolved = useMemo(() => isThreadResolved(nodes, edges), [nodes, edges]);
 

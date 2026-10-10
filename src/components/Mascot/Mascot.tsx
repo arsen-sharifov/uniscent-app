@@ -1,6 +1,6 @@
 import { clsx } from 'clsx';
 
-import type { IMascotLimb, TMascotCharacter, TMascotPose } from '@interfaces';
+import type { TMascotCharacter, TMascotPose } from '@interfaces';
 
 import {
   MASCOT_EYES,
@@ -8,7 +8,6 @@ import {
   MASCOT_EYE_X,
   MASCOT_EYE_Y,
   MASCOT_FOOT,
-  MASCOT_HAND_RADIUS,
   MASCOT_LEGS,
   MASCOT_LEG_BOTTOM,
   MASCOT_LEG_TOP,
@@ -17,7 +16,7 @@ import {
   MASCOT_SHOULDER,
   MASCOT_VIEW_BOX,
 } from './consts';
-import { ErgoBody, NodiBody } from './fragments';
+import { ErgoBody, MascotArm, NodiBody } from './fragments';
 
 interface IMascotProps {
   label: string;
@@ -26,28 +25,11 @@ interface IMascotProps {
   className?: string;
 }
 
-const armOrigin = (x: number) =>
-  ({ transformBox: 'view-box', transformOrigin: `${x}px ${MASCOT_SHOULDER.y}px` }) as const;
-
 export const Mascot = ({ label, pose = 'idle', character = 'nodi', className }: IMascotProps) => {
   const shape = MASCOT_POSES[pose];
   const eye = MASCOT_EYES[character];
   const eyeY = MASCOT_EYE_Y + shape.eyeOffsetY;
   const eager = shape.sway === 'eager';
-
-  const renderArm = (arm: IMascotLimb, shoulderX: number, animation: string) => (
-    <g style={armOrigin(shoulderX)} className={clsx(animation, 'motion-reduce:animate-none')}>
-      <path
-        d={arm.path}
-        fill="none"
-        stroke="var(--text-muted)"
-        strokeWidth={MASCOT_LIMB_WIDTH}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <circle cx={arm.handX} cy={arm.handY} r={MASCOT_HAND_RADIUS} fill="var(--text-muted)" />
-    </g>
-  );
 
   return (
     <svg
@@ -76,12 +58,16 @@ export const Mascot = ({ label, pose = 'idle', character = 'nodi', className }: 
         </g>
       ))}
 
-      {renderArm(shape.leftArm, MASCOT_SHOULDER.left, eager ? 'animate-mascot-sway-eager' : 'animate-mascot-sway')}
-      {renderArm(
-        shape.rightArm,
-        MASCOT_SHOULDER.right,
-        eager ? 'animate-mascot-sway-alt-eager' : 'animate-mascot-sway-alt',
-      )}
+      <MascotArm
+        arm={shape.leftArm}
+        shoulderX={MASCOT_SHOULDER.left}
+        animation={eager ? 'animate-mascot-sway-eager' : 'animate-mascot-sway'}
+      />
+      <MascotArm
+        arm={shape.rightArm}
+        shoulderX={MASCOT_SHOULDER.right}
+        animation={eager ? 'animate-mascot-sway-alt-eager' : 'animate-mascot-sway-alt'}
+      />
 
       {character === 'ergo' ? <ErgoBody /> : <NodiBody />}
 

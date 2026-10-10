@@ -3,12 +3,11 @@
 import { useRouter, useSearchParams } from 'next/navigation';
 import { type SubmitEvent, useEffect, useState } from 'react';
 
-import { signIn } from '@api/client';
+import { getSession, signIn } from '@api/client';
 import { useTranslations } from '@/i18n';
 import { event } from '@/lib/events';
-import { createClient } from '@/lib/supabase/client';
 
-import { AuthButton, AuthHeading, AuthInput, AuthLabel, AuthLink } from '../fragments';
+import { AuthButton, AuthField, AuthHeading, AuthLink } from '../fragments';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -18,9 +17,9 @@ const LoginPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailSent = searchParams.get('emailSent') === 'true';
+  const invalidLink = searchParams.get('error') === 'invalid_code';
 
   const t = useTranslations();
-  const { signIn: signInT, placeholders } = t.auth;
 
   useEffect(() => {
     if (!emailSent) return;
@@ -28,7 +27,8 @@ const LoginPage = () => {
     const interval = setInterval(async () => {
       const {
         data: { session },
-      } = await createClient().auth.getSession();
+      } = await getSession();
+
       if (session) {
         clearInterval(interval);
         router.push('/platform');
@@ -38,14 +38,14 @@ const LoginPage = () => {
     return () => clearInterval(interval);
   }, [emailSent, router]);
 
-  const handleLogin = async (e: SubmitEvent) => {
-    e.preventDefault();
+  const handleLogin = async (submitEvent: SubmitEvent) => {
+    submitEvent.preventDefault();
     setLoading(true);
 
     const { error: authError } = await signIn(email, password);
 
     if (authError) {
-      event.error(authError, { context: 'auth.signIn' });
+      event.error(authError, { title: t.auth.errors.signInFailed, context: 'auth.signIn' });
       setLoading(false);
 
       return;
@@ -56,50 +56,51 @@ const LoginPage = () => {
 
   return (
     <div className="w-full max-w-sm">
-      <AuthHeading title={signInT.heading} subtitle={signInT.subtitle} />
+      <AuthHeading title={t.auth.signIn.heading} subtitle={t.auth.signIn.subtitle} />
+
+      {invalidLink && (
+        <div
+          role="alert"
+          className="mb-4 rounded-lg border border-[color:var(--hero-refuted)]/35 bg-[color:var(--hero-refuted)]/10 px-4 py-3 text-center font-grotesk text-sm text-[color:var(--hero-refuted)]"
+        >
+          {t.auth.signIn.invalidLink}
+        </div>
+      )}
 
       {emailSent && (
         <div className="mb-4 rounded-lg border border-[color:var(--hero-tainted)]/35 bg-[color:var(--hero-tainted)]/10 px-4 py-3 text-center font-grotesk text-sm text-[color:var(--hero-tainted)]">
-          {signInT.emailSent}
+          {t.auth.signIn.emailSent}
         </div>
       )}
 
       <form onSubmit={handleLogin} className="space-y-4">
-        <div>
-          <AuthLabel htmlFor="email" className="mb-1.5">
-            {signInT.email}
-          </AuthLabel>
-          <AuthInput
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            placeholder={placeholders.email}
-          />
-        </div>
+        <AuthField
+          id="email"
+          label={t.auth.signIn.email}
+          type="email"
+          value={email}
+          onChange={(inputEvent) => setEmail(inputEvent.target.value)}
+          required
+          placeholder={t.auth.placeholders.email}
+        />
 
-        <div>
-          <AuthLabel htmlFor="password" className="mb-1.5">
-            {signInT.password}
-          </AuthLabel>
-          <AuthInput
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            placeholder={placeholders.password}
-          />
-        </div>
+        <AuthField
+          id="password"
+          label={t.auth.signIn.password}
+          type="password"
+          value={password}
+          onChange={(inputEvent) => setPassword(inputEvent.target.value)}
+          required
+          placeholder={t.auth.placeholders.password}
+        />
 
         <AuthButton type="submit" disabled={loading} className="w-full">
-          {loading ? signInT.submitting : signInT.submit}
+          {loading ? t.auth.signIn.submitting : t.auth.signIn.submit}
         </AuthButton>
       </form>
 
       <p className="mt-6 text-center font-grotesk text-sm text-[color:var(--hero-ground-muted)]">
-        {signInT.noAccount} <AuthLink href="/signup">{signInT.signUpLink}</AuthLink>
+        {t.auth.signIn.noAccount} <AuthLink href="/signup">{t.auth.signIn.signUpLink}</AuthLink>
       </p>
     </div>
   );

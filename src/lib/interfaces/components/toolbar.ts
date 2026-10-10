@@ -18,6 +18,16 @@ export interface IToolItem {
   disabled?: boolean;
 }
 
+export interface IToolToneColors {
+  ink: string;
+  fill: string;
+}
+
+export interface IToolHoverState {
+  tool: IToolItem;
+  top: number;
+}
+
 export interface IToolGroup {
   id: string;
   label?: string;
@@ -26,7 +36,7 @@ export interface IToolGroup {
 
 export interface IToolbarModel {
   groups: IToolGroup[];
-  pendingGroupSizes: number[];
+  pendingGroups: IToolGroup[];
   activeTool: string;
   handleToolClick: (id: string) => void;
 }
@@ -41,7 +51,7 @@ export type TCanvasToolsTranslations = TTranslations['platform']['canvas']['tool
 
 export type TMenuOpener = 'pointer' | 'keyboard';
 
-export interface IToolbarMenuModel {
+interface IToolbarMenuModel {
   open: boolean;
   menuId: string;
   rootRef: RefObject<HTMLDivElement | null>;

@@ -2,10 +2,7 @@ import type { Node, XYPosition } from '@xyflow/react';
 
 import type { IHandlePair, IHandlePairWithDistance, IRect, THandleId } from '@interfaces';
 
-const HANDLE_IDS = ['top', 'right', 'bottom', 'left'] as const;
-
-const DEFAULT_NODE_WIDTH = 160;
-const DEFAULT_NODE_HEIGHT = 40;
+import { DEFAULT_NODE_HEIGHT, DEFAULT_NODE_WIDTH, HANDLE_IDS } from '../consts';
 
 export const isHandleId = (value: unknown): value is THandleId =>
   typeof value === 'string' && HANDLE_IDS.includes(value as THandleId);
@@ -30,7 +27,7 @@ const toRect = (node: Node): IRect => ({
   height: node.measured?.height ?? DEFAULT_NODE_HEIGHT,
 });
 
-const distance = (a: XYPosition, b: XYPosition) => Math.hypot(a.x - b.x, a.y - b.y);
+const distance = (from: XYPosition, to: XYPosition) => Math.hypot(from.x - to.x, from.y - to.y);
 
 export const findNearestSides = (source: IRect, target: IRect): IHandlePair => {
   const candidates = HANDLE_IDS.flatMap((sourceHandle) =>

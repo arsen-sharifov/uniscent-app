@@ -1,13 +1,12 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
-import type { TTheme } from '@constants';
+import type { TTheme } from '@interfaces';
 
 import { ColorsAtlas } from './fragments';
 
 const meta: Meta = {
   title: 'Foundations/Colors',
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:

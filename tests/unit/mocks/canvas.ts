@@ -1,4 +1,4 @@
-import type { Edge, Node } from '@xyflow/react';
+import type { Edge, Node, NodeProps } from '@xyflow/react';
 
 import {
   ECanvasNodeType,
@@ -103,6 +103,24 @@ export const createReferenceNodeOp = (id: string): TCanvasOperation => ({
   y: 0,
   data: referenceNode(id).data,
 });
+
+export const nodeProps = <TNode extends Node>(node: TNode, selected = false): NodeProps<TNode> =>
+  ({
+    id: node.id,
+    data: node.data,
+    selected,
+    type: node.type,
+    dragging: false,
+    zIndex: 0,
+    isConnectable: true,
+    positionAbsoluteX: 0,
+    positionAbsoluteY: 0,
+    selectable: true,
+    deletable: true,
+    draggable: true,
+    width: 240,
+    height: 96,
+  }) as unknown as NodeProps<TNode>;
 
 export const canvasEdge = (id: string, source: string, target: string): Edge => ({
   id,

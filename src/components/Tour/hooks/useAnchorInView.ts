@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 
 import type { TTourAnchor } from '@interfaces';
-
+import { REDUCED_MOTION_QUERY } from '@constants';
 import { findAnchorElement } from '@/lib/onboarding';
 import { useCanvasStore } from '@/lib/stores';
 
@@ -29,6 +29,9 @@ export const useAnchorInView = (anchor: TTourAnchor | null) => {
 
     if (box.top >= 0 && box.bottom <= window.innerHeight) return;
 
-    element.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    element.scrollIntoView({
+      block: 'nearest',
+      behavior: window.matchMedia(REDUCED_MOTION_QUERY).matches ? 'instant' : 'smooth',
+    });
   }, [anchor, requestFit]);
 };

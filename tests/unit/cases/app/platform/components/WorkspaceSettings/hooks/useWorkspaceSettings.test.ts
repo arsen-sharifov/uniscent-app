@@ -1,7 +1,7 @@
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
-import type { IWorkspace, IWorkspaceMember, IWorkspaceRole } from '@interfaces';
+import type { IWorkspace, IWorkspaceAccess, IWorkspaceMember, IWorkspaceRole } from '@interfaces';
 import {
   createWorkspaceInvitation,
   createWorkspaceRole,
@@ -130,6 +130,7 @@ describe('useWorkspaceSettings', () => {
         expect(settings.current.canManageRoles).toBe(true);
         expect(settings.current.canManageWorkspace).toBe(true);
         expect(settings.current.currentRoleName).toBe(TRANSLATIONS.platform.workspaceSettings.roleNames.owner);
+        expect(settings.current.currentRole).toEqual(roleList()[0]);
       });
 
       test('THEN the pending invitations are loaded', () => {
@@ -170,6 +171,7 @@ describe('useWorkspaceSettings', () => {
         expect(settings.current.canManageRoles).toBe(false);
         expect(settings.current.canManageWorkspace).toBe(false);
         expect(settings.current.currentRoleName).toBe('Custom role');
+        expect(settings.current.currentRole?.id).toBe('role-custom');
       });
     });
   });
@@ -662,6 +664,44 @@ describe('useWorkspaceSettings', () => {
         expect(event.success).toHaveBeenCalledExactlyOnceWith(
           TRANSLATIONS.platform.workspaceSettings.members.roleChanged,
         );
+      });
+    });
+  });
+
+  describe('GIVEN an access refresh still in flight when another workspace becomes active', () => {
+    let resolveAccess: (access: IWorkspaceAccess) => void;
+
+    beforeEach(async () => {
+      const pendingAccess = Promise.withResolvers<IWorkspaceAccess>();
+
+      resolveAccess = pendingAccess.resolve;
+      primeApi();
+      vi.mocked(getWorkspaceInvitations).mockResolvedValue([]);
+      vi.mocked(setMemberRole).mockResolvedValue(undefined);
+      vi.mocked(getMyWorkspacePermissions).mockReturnValue(pendingAccess.promise);
+      usePermissionsStore.getState().setAccess('ws-1', 'user-1', FULL_ACCESS);
+
+      settings = renderHook(() => useWorkspaceSettings('ws-1', onWorkspacesChanged)).result;
+      await act(async () => {
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      await act(async () => {
+        settings.current.assignRole('user-1', 'role-member');
+        await vi.advanceTimersByTimeAsync(0);
+      });
+      usePermissionsStore.getState().setAccess('ws-2', 'user-1', FULL_ACCESS);
+    });
+
+    describe('WHEN the stale refresh settles', () => {
+      beforeEach(async () => {
+        await act(async () => {
+          resolveAccess(EDIT_ACCESS);
+          await vi.advanceTimersByTimeAsync(0);
+        });
+      });
+
+      test('THEN the access of the newly active workspace stays in the store', () => {
+        expect(usePermissionsStore.getState()).toMatchObject({ workspaceId: 'ws-2', ...FULL_ACCESS });
       });
     });
   });

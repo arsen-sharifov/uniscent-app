@@ -1,3 +1,5 @@
+import type { LucideIcon } from 'lucide-react';
+
 export type TAvatarIcon =
   | 'cat'
   | 'dog'
@@ -22,28 +24,49 @@ export type TAvatarIcon =
 
 export type TAvatarIconLabelKey = `avatarIcon${Capitalize<TAvatarIcon>}`;
 
+export interface IAvatarIconOption {
+  id: TAvatarIcon;
+  icon: LucideIcon;
+  labelKey: TAvatarIconLabelKey;
+}
+
 export type TBadgeId =
   | 'founder'
   | 'initiate'
   | 'firstSteps'
+  | 'workspaceBuilder'
   | 'architect'
   | 'connector'
   | 'critic'
-  | 'linguist'
-  | 'curator'
-  | 'voice'
-  | 'explorer'
-  | 'storyteller'
-  | 'workspaceBuilder'
-  | 'nightOwl'
-  | 'marathoner'
-  | 'collaborator'
   | 'weaver'
-  | 'sage';
+  | 'verdict'
+  | 'voice'
+  | 'curator'
+  | 'collaborator'
+  | 'linguist'
+  | 'stylist'
+  | 'cartographer'
+  | 'nightOwl';
 
 export type TBadgeLabelKey = `badge${Capitalize<TBadgeId>}`;
 
 export type TBadgeUnlockKey = `${TBadgeId}Unlock`;
+
+export interface IBadgeDefinition {
+  id: TBadgeId;
+  icon: LucideIcon;
+  labelKey: TBadgeLabelKey;
+  unlockKey: TBadgeUnlockKey;
+}
+
+export interface IBadgeAward {
+  id: TBadgeId;
+  announce: boolean;
+}
+
+export interface IAwardBadgeOptions {
+  quiet?: boolean;
+}
 
 export interface IUserProfileUpdate {
   name?: string;

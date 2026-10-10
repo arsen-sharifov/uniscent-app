@@ -11,7 +11,6 @@ import { AuthPanel } from './fragments';
 
 const AuthLayout = ({ children }: { children: ReactNode }) => {
   const t = useTranslations();
-  const { aside } = t.auth;
 
   return (
     <LandingWorld className="relative flex min-h-screen flex-col items-center justify-center px-6 py-12">
@@ -25,10 +24,10 @@ const AuthLayout = ({ children }: { children: ReactNode }) => {
 
         <blockquote className="mt-7 text-center text-balance">
           <p className="font-grotesk text-lg leading-relaxed font-medium text-[color:var(--hero-ground-text)]">
-            {`“${aside.quote}”`}
+            {`“${t.auth.aside.quote}”`}
           </p>
           <p className="mt-2 font-mono-ui text-[11px] tracking-[0.08em] text-[color:var(--hero-ground-muted)]">
-            {aside.tagline}
+            {t.auth.aside.tagline}
           </p>
         </blockquote>
 

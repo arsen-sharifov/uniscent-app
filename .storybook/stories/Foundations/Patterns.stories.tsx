@@ -1,21 +1,18 @@
 import type { Meta, StoryObj } from '@storybook/nextjs-vite';
 
-import type { TTheme } from '@constants';
-import type { TPatternVariant } from '@story-interfaces';
+import type { TCanvasPattern, TTheme } from '@interfaces';
+import { CANVAS_PATTERN_VALUES } from '@constants';
 
-import '@xyflow/react/dist/style.css';
-import { PATTERN_VARIANTS } from './consts';
 import { PatternsAtlas } from './fragments';
 import { ARG_CATEGORIES } from '../../consts';
 
 interface IPatternsStoryArgs {
-  pattern: TPatternVariant;
+  pattern: TCanvasPattern;
 }
 
 const meta: Meta<IPatternsStoryArgs> = {
   title: 'Foundations/Patterns & Effects',
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:
@@ -29,7 +26,7 @@ const meta: Meta<IPatternsStoryArgs> = {
   argTypes: {
     pattern: {
       control: { type: 'inline-radio' },
-      options: [...PATTERN_VARIANTS],
+      options: [...CANVAS_PATTERN_VALUES],
       description: 'Canvas background pattern.',
       table: { category: ARG_CATEGORIES.APPEARANCE },
     },

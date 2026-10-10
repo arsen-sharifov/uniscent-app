@@ -1,6 +1,5 @@
 import type { IE2EMailboxSearch, IE2EMailMessage } from '../interfaces';
-
-const MAILPIT_URL = 'http://127.0.0.1:54324';
+import { getMailpitUrl } from './env';
 
 const POLL_ATTEMPTS = 20;
 
@@ -8,10 +7,12 @@ const POLL_INTERVAL_MS = 500;
 
 const VERIFY_LINK_PATTERN = /https?:\/\/\S+\/auth\/v1\/verify\S+/;
 
-const wait = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms));
+const JOIN_LINK_PATTERN = /https?:\/\/\S+\/join\?token_hash=\S+/;
+
+const wait = (durationMs: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, durationMs));
 
 const readJson = async <T>(path: string): Promise<T> => {
-  const response = await fetch(`${MAILPIT_URL}${path}`);
+  const response = await fetch(`${getMailpitUrl()}${path}`);
 
   if (!response.ok) throw new Error(`Mailpit request ${path} failed with ${response.status}`);
 
@@ -25,21 +26,25 @@ const findNewestMessageId = async (email: string): Promise<string | null> => {
   return mailbox.messages[0]?.ID ?? null;
 };
 
-export const readConfirmationLink = async (email: string, attempt = 0): Promise<string> => {
+const readEmailLink = async (email: string, pattern: RegExp, attempt = 0): Promise<string> => {
   const messageId = await findNewestMessageId(email);
 
   if (!messageId) {
-    if (attempt >= POLL_ATTEMPTS) throw new Error(`No confirmation email arrived for ${email}`);
+    if (attempt >= POLL_ATTEMPTS) throw new Error(`No email arrived for ${email}`);
 
     await wait(POLL_INTERVAL_MS);
 
-    return readConfirmationLink(email, attempt + 1);
+    return readEmailLink(email, pattern, attempt + 1);
   }
 
   const message = await readJson<IE2EMailMessage>(`/api/v1/message/${messageId}`);
-  const link = message.Text.match(VERIFY_LINK_PATTERN)?.[0];
+  const link = message.Text.match(pattern)?.[0];
 
-  if (!link) throw new Error(`The email to ${email} carries no confirmation link`);
+  if (!link) throw new Error(`The email to ${email} carries no link matching ${pattern}`);
 
   return link;
 };
+
+export const readConfirmationLink = (email: string): Promise<string> => readEmailLink(email, VERIFY_LINK_PATTERN);
+
+export const readInviteLink = (email: string): Promise<string> => readEmailLink(email, JOIN_LINK_PATTERN);

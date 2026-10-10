@@ -51,6 +51,18 @@
   --hero-card-shadow: 0 14px 36px -18px rgba(0, 0, 0, 0.6);
   --hero-panel-shadow: 0 32px 80px -32px rgba(0, 0, 0, 0.85);
   --hero-stream-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.8);
+  --hero-counter-valid: var(--hero-lime-strong);
+  --hero-counter-valid-rim: rgba(74, 222, 128, 0.4);
+  --hero-counter-valid-tint: rgba(74, 222, 128, 0.1);
+  --hero-counter-refuted: #fca5a5;
+  --hero-counter-refuted-rim: rgba(248, 113, 113, 0.4);
+  --hero-counter-refuted-tint: rgba(248, 113, 113, 0.1);
+  --hero-counter-affected: #fcd34d;
+  --hero-counter-affected-rim: rgba(251, 191, 36, 0.38);
+  --hero-counter-affected-tint: rgba(251, 191, 36, 0.09);
+  --hero-counter-rim: rgba(240, 253, 246, 0.14);
+  --hero-counter-tint: rgba(255, 255, 255, 0.04);
+  --hero-stream-prompt: rgba(240, 253, 246, 0.32);
   color-scheme: dark;
   background-color: var(--hero-ground);
 }
@@ -73,7 +85,7 @@
 }
 
 .stream-prompt {
-  color: rgba(240, 253, 246, 0.32);
+  color: var(--hero-stream-prompt);
 }
 
 .hero-grid {
@@ -295,30 +307,30 @@
 }
 
 .hero-counter {
-  border-color: rgba(240, 253, 246, 0.14);
+  border-color: var(--hero-counter-rim);
   color: var(--hero-ground-muted);
-  background-color: rgba(255, 255, 255, 0.04);
+  background-color: var(--hero-counter-tint);
   transition:
     color 300ms ease,
     border-color 300ms ease;
 }
 
 .hero-counter[data-tone='valid'] {
-  color: var(--hero-lime-strong);
-  border-color: rgba(74, 222, 128, 0.4);
-  background-color: rgba(74, 222, 128, 0.1);
+  color: var(--hero-counter-valid);
+  border-color: var(--hero-counter-valid-rim);
+  background-color: var(--hero-counter-valid-tint);
 }
 
 .hero-counter[data-tone='refuted'] {
-  color: #fca5a5;
-  border-color: rgba(248, 113, 113, 0.4);
-  background-color: rgba(248, 113, 113, 0.1);
+  color: var(--hero-counter-refuted);
+  border-color: var(--hero-counter-refuted-rim);
+  background-color: var(--hero-counter-refuted-tint);
 }
 
 .hero-counter[data-tone='affected'] {
-  color: #fcd34d;
-  border-color: rgba(251, 191, 36, 0.38);
-  background-color: rgba(251, 191, 36, 0.09);
+  color: var(--hero-counter-affected);
+  border-color: var(--hero-counter-affected-rim);
+  background-color: var(--hero-counter-affected-tint);
 }
 
 .hero-stage[data-phase='repaired'] .hero-claim[data-status='answer'] {
@@ -370,10 +382,6 @@
     transform: none;
   }
 
-  .hero-edge-draw {
-    animation: none;
-  }
-
   .hero-edge-flow {
     stroke-dasharray: none;
     animation: none;
@@ -384,29 +392,17 @@
     transition: none;
   }
 
-  .hero-stage[data-phase='repaired'] .hero-claim[data-status='answer'] {
-    animation: none;
-  }
-
+  .hero-edge-draw,
+  .hero-stage[data-phase='repaired'] .hero-claim[data-status='answer'],
   .cta-glow,
   .stream-scroll,
   .stream-stamp,
   .type-caret,
-  .code-pulse {
-    animation: none;
-  }
-
-  .stream-stamp {
-    opacity: 0;
-  }
-
-  .snap-start.on-screen .how-panel .mini-node {
-    animation: none;
-  }
-
+  .code-pulse,
+  .snap-start.on-screen .how-panel .mini-node,
   .snap-start.on-screen .sweep-strip,
   .snap-start.on-screen .step-numeral,
-  .snap-start.on-screen .canvas-vignette svg path {
+  .snap-start.on-screen .canvas-vignette svg path:not(.hero-edge-flow) {
     animation: none;
   }
 }
@@ -458,6 +454,18 @@
     --hero-stream-shadow:
       inset 0 1px 0 rgba(255, 255, 255, 0.75), 0 2px 5px rgba(13, 19, 16, 0.06),
       0 28px 64px -26px rgba(13, 19, 16, 0.22);
+    --hero-counter-valid: #166534;
+    --hero-counter-valid-rim: rgba(22, 163, 74, 0.45);
+    --hero-counter-valid-tint: rgba(22, 163, 74, 0.1);
+    --hero-counter-refuted: #991b1b;
+    --hero-counter-refuted-rim: rgba(220, 38, 38, 0.4);
+    --hero-counter-refuted-tint: rgba(220, 38, 38, 0.08);
+    --hero-counter-affected: #92400e;
+    --hero-counter-affected-rim: rgba(217, 119, 6, 0.4);
+    --hero-counter-affected-tint: rgba(217, 119, 6, 0.08);
+    --hero-counter-rim: rgba(13, 19, 16, 0.14);
+    --hero-counter-tint: rgba(13, 19, 16, 0.04);
+    --hero-stream-prompt: rgba(13, 19, 16, 0.35);
     color-scheme: light;
   }
 
@@ -474,33 +482,6 @@
 
   .canvas-vignette {
     --hero-ground-deep: #f2f7f3;
-  }
-
-  .hero-counter {
-    border-color: rgba(13, 19, 16, 0.14);
-    background-color: rgba(13, 19, 16, 0.04);
-  }
-
-  .hero-counter[data-tone='valid'] {
-    color: #15803d;
-    border-color: rgba(22, 163, 74, 0.45);
-    background-color: rgba(22, 163, 74, 0.1);
-  }
-
-  .hero-counter[data-tone='refuted'] {
-    color: #dc2626;
-    border-color: rgba(220, 38, 38, 0.4);
-    background-color: rgba(220, 38, 38, 0.08);
-  }
-
-  .hero-counter[data-tone='affected'] {
-    color: #b45309;
-    border-color: rgba(217, 119, 6, 0.4);
-    background-color: rgba(217, 119, 6, 0.08);
-  }
-
-  .stream-prompt {
-    color: rgba(13, 19, 16, 0.35);
   }
 
   .landing-glass {

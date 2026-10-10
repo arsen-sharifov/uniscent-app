@@ -10,18 +10,19 @@ import { useTranslations } from '@/i18n';
 import { roleLabel } from '@/lib/utils';
 
 import { PERMISSION_DEFINITIONS } from '../consts';
+import { InlineConfirm } from './InlineConfirm';
 import { RoleIcon } from './RoleIcon';
 
 interface IRoleListItemProps {
   role: IWorkspaceRole;
   canManage: boolean;
+  canDelete: boolean;
   onEdit: (role: IWorkspaceRole) => void;
   onDelete: (roleId: string) => void;
 }
 
-export const RoleListItem = ({ role, canManage, onEdit, onDelete }: IRoleListItemProps) => {
+export const RoleListItem = ({ role, canManage, canDelete, onEdit, onDelete }: IRoleListItemProps) => {
   const t = useTranslations();
-  const { roles: copy, permissions } = t.platform.workspaceSettings;
   const [confirmingDelete, setConfirmingDelete] = useState(false);
 
   const editable = canManage && !role.isSystem;
@@ -51,36 +52,26 @@ export const RoleListItem = ({ role, canManage, onEdit, onDelete }: IRoleListIte
             </h4>
             {role.isSystem && (
               <span className="shrink-0 rounded-md bg-[color:var(--surface-overlay)] px-1.5 py-0.5 font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
-                {copy.systemLocked}
+                {t.platform.workspaceSettings.roles.systemLocked}
               </span>
             )}
           </div>
           <p className="mt-0.5 truncate font-mono-ui text-[10px] tracking-[0.14em] text-[color:var(--text-label)] uppercase tabular-nums">
-            {role.memberCount} {copy.membersSuffix}
+            {t('platform.workspaceSettings.roles.memberCount', { count: role.memberCount })}
           </p>
         </div>
 
         {editable &&
           (confirmingDelete ? (
-            <div className="flex shrink-0 items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setConfirmingDelete(false)}
-                className="cursor-pointer rounded-lg border border-[color:var(--border-strong)] px-2.5 py-1 font-grotesk text-xs font-medium text-[color:var(--text-muted)] transition-[color,background-color,scale] duration-150 hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:scale-95 motion-reduce:transition-none"
-              >
-                {copy.cancel}
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setConfirmingDelete(false);
-                  onDelete(role.id);
-                }}
-                className="cursor-pointer rounded-lg bg-[color:var(--status-error)] px-2.5 py-1 font-grotesk text-xs font-medium text-[color:var(--on-status)] transition-[opacity,scale] duration-150 hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:scale-95 motion-reduce:transition-none"
-              >
-                {copy.deleteConfirm}
-              </button>
-            </div>
+            <InlineConfirm
+              cancelLabel={t.platform.workspaceSettings.roles.cancel}
+              confirmLabel={t.platform.workspaceSettings.roles.deleteConfirm}
+              onCancel={() => setConfirmingDelete(false)}
+              onConfirm={() => {
+                setConfirmingDelete(false);
+                onDelete(role.id);
+              }}
+            />
           ) : (
             <div className="flex shrink-0 items-center gap-1">
               <button
@@ -88,22 +79,30 @@ export const RoleListItem = ({ role, canManage, onEdit, onDelete }: IRoleListIte
                 onClick={() => onEdit(role)}
                 className="cursor-pointer rounded-lg px-2.5 py-1 font-grotesk text-xs font-medium text-[color:var(--text-muted)] transition-[color,background-color,scale] duration-150 hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:scale-95 motion-reduce:transition-none"
               >
-                {copy.edit}
+                {t.platform.workspaceSettings.roles.edit}
               </button>
-              <button
-                type="button"
-                onClick={() => setConfirmingDelete(true)}
-                className="cursor-pointer rounded-lg px-2.5 py-1 font-grotesk text-xs font-medium text-[color:var(--text-subtle)] transition-[color,background-color,scale] duration-150 hover:bg-[color:var(--status-error-bg)] hover:text-[color:var(--status-error)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:scale-95 motion-reduce:transition-none"
-              >
-                {copy.delete}
-              </button>
+              {canDelete && (
+                <button
+                  type="button"
+                  onClick={() => setConfirmingDelete(true)}
+                  className="cursor-pointer rounded-lg px-2.5 py-1 font-grotesk text-xs font-medium text-[color:var(--text-subtle)] transition-[color,background-color,scale] duration-150 hover:bg-[color:var(--status-error-bg)] hover:text-[color:var(--status-error)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:scale-95 motion-reduce:transition-none"
+                >
+                  {t.platform.workspaceSettings.roles.delete}
+                </button>
+              )}
             </div>
           ))}
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-1.5">
+      <ul aria-label={t.platform.workspaceSettings.roles.permissionsLabel} className="sr-only">
+        {PERMISSION_DEFINITIONS.filter(({ key }) => role[key]).map(({ key }) => (
+          <li key={key}>{t.platform.workspaceSettings.permissions[key].name}</li>
+        ))}
+      </ul>
+
+      <div aria-hidden className="mt-3 flex flex-wrap gap-1.5">
         {PERMISSION_DEFINITIONS.map((definition) => (
-          <Tooltip key={definition.key} text={permissions[definition.key].name}>
+          <Tooltip key={definition.key} text={t.platform.workspaceSettings.permissions[definition.key].name}>
             <span
               className={clsx(
                 'flex h-6 w-6 items-center justify-center rounded-md border',

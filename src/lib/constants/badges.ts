@@ -1,54 +1,52 @@
 import {
   BookMarked,
-  Brain,
   Building2,
   Compass,
-  Feather,
-  Flame,
+  Flag,
   Footprints,
   Gavel,
   GitFork,
   GraduationCap,
   Languages,
   Link2,
-  type LucideIcon,
+  MapIcon,
   MessagesSquare,
   Moon,
+  Palette,
   Sparkles,
-  Telescope,
   Users2,
 } from 'lucide-react';
 
-import type { TBadgeId, TBadgeLabelKey, TBadgeUnlockKey } from '@interfaces';
+import type { IBadgeDefinition, TBadgeId } from '@interfaces';
 
-export const BADGES: readonly {
-  id: TBadgeId;
-  icon: LucideIcon;
-  labelKey: TBadgeLabelKey;
-  unlockKey: TBadgeUnlockKey;
-}[] = [
+export const BADGES: readonly IBadgeDefinition[] = [
   { id: 'founder', icon: Sparkles, labelKey: 'badgeFounder', unlockKey: 'founderUnlock' },
   { id: 'initiate', icon: GraduationCap, labelKey: 'badgeInitiate', unlockKey: 'initiateUnlock' },
   { id: 'firstSteps', icon: Footprints, labelKey: 'badgeFirstSteps', unlockKey: 'firstStepsUnlock' },
-  { id: 'architect', icon: Compass, labelKey: 'badgeArchitect', unlockKey: 'architectUnlock' },
-  { id: 'connector', icon: Link2, labelKey: 'badgeConnector', unlockKey: 'connectorUnlock' },
-  { id: 'critic', icon: Gavel, labelKey: 'badgeCritic', unlockKey: 'criticUnlock' },
-  { id: 'linguist', icon: Languages, labelKey: 'badgeLinguist', unlockKey: 'linguistUnlock' },
-  { id: 'curator', icon: BookMarked, labelKey: 'badgeCurator', unlockKey: 'curatorUnlock' },
-  { id: 'voice', icon: MessagesSquare, labelKey: 'badgeVoice', unlockKey: 'voiceUnlock' },
-  { id: 'explorer', icon: Telescope, labelKey: 'badgeExplorer', unlockKey: 'explorerUnlock' },
-  { id: 'storyteller', icon: Feather, labelKey: 'badgeStoryteller', unlockKey: 'storytellerUnlock' },
   {
     id: 'workspaceBuilder',
     icon: Building2,
     labelKey: 'badgeWorkspaceBuilder',
     unlockKey: 'workspaceBuilderUnlock',
   },
-  { id: 'nightOwl', icon: Moon, labelKey: 'badgeNightOwl', unlockKey: 'nightOwlUnlock' },
-  { id: 'marathoner', icon: Flame, labelKey: 'badgeMarathoner', unlockKey: 'marathonerUnlock' },
-  { id: 'collaborator', icon: Users2, labelKey: 'badgeCollaborator', unlockKey: 'collaboratorUnlock' },
+  { id: 'architect', icon: Compass, labelKey: 'badgeArchitect', unlockKey: 'architectUnlock' },
+  { id: 'connector', icon: Link2, labelKey: 'badgeConnector', unlockKey: 'connectorUnlock' },
+  { id: 'critic', icon: Gavel, labelKey: 'badgeCritic', unlockKey: 'criticUnlock' },
   { id: 'weaver', icon: GitFork, labelKey: 'badgeWeaver', unlockKey: 'weaverUnlock' },
-  { id: 'sage', icon: Brain, labelKey: 'badgeSage', unlockKey: 'sageUnlock' },
+  { id: 'verdict', icon: Flag, labelKey: 'badgeVerdict', unlockKey: 'verdictUnlock' },
+  { id: 'voice', icon: MessagesSquare, labelKey: 'badgeVoice', unlockKey: 'voiceUnlock' },
+  { id: 'curator', icon: BookMarked, labelKey: 'badgeCurator', unlockKey: 'curatorUnlock' },
+  { id: 'collaborator', icon: Users2, labelKey: 'badgeCollaborator', unlockKey: 'collaboratorUnlock' },
+  { id: 'linguist', icon: Languages, labelKey: 'badgeLinguist', unlockKey: 'linguistUnlock' },
+  { id: 'stylist', icon: Palette, labelKey: 'badgeStylist', unlockKey: 'stylistUnlock' },
+  { id: 'cartographer', icon: MapIcon, labelKey: 'badgeCartographer', unlockKey: 'cartographerUnlock' },
+  { id: 'nightOwl', icon: Moon, labelKey: 'badgeNightOwl', unlockKey: 'nightOwlUnlock' },
 ];
 
 export const DEFAULT_BADGES: readonly TBadgeId[] = ['founder'];
+
+export const ARCHITECT_NODE_COUNT = 25;
+
+export const CONNECTOR_EDGE_COUNT = 15;
+
+export const NIGHT_OWL_END_HOUR = 5;

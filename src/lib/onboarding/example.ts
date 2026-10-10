@@ -76,7 +76,7 @@ const movesOf = (act: TExampleCanvasAct, copy: IExampleCopy, ids: Record<TExampl
     case 'status':
       return [
         pickTool(act.status === 'valid' ? ECanvasTool.ValidPath : ECanvasTool.InvalidPath),
-        ...act.keys.map((key) => () => store.setNodesStatus([ids[key]], act.status)),
+        ...act.keys.map((key) => () => store.setNodeStatus(ids[key], act.status)),
       ];
     case 'answer':
       return [pickTool(ECanvasTool.Answer), () => store.setNodeAnswer(ids[act.key])];

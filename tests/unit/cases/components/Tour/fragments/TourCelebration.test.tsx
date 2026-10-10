@@ -7,10 +7,6 @@ import { useOnboardingStore } from '@/lib/onboarding';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
 
-const copy = TRANSLATIONS.platform.onboarding;
-
-const badges = TRANSLATIONS.platform.settings.profile.badges;
-
 afterEach(() => useOnboardingStore.getState().forget());
 
 describe('TourCelebration', () => {
@@ -25,16 +21,26 @@ describe('TourCelebration', () => {
       });
 
       test('THEN it congratulates the user and shows the earned Initiate badge', () => {
-        expect(screen.getByRole('heading', { name: copy.celebrationTitle })).toBeInTheDocument();
-        expect(screen.getByText(copy.celebrationBody)).toBeInTheDocument();
-        expect(screen.getByRole('img', { name: badges.badgeInitiate })).toBeInTheDocument();
+        expect(
+          screen.getByRole('heading', { name: TRANSLATIONS.platform.onboarding.celebrationTitle }),
+        ).toBeInTheDocument();
+        expect(screen.getByText(TRANSLATIONS.platform.onboarding.celebrationBody)).toBeInTheDocument();
+        expect(
+          screen.getByRole('img', { name: TRANSLATIONS.platform.settings.profile.badges.badgeInitiate }),
+        ).toBeInTheDocument();
+      });
+
+      test('THEN the dialog is named by its title', () => {
+        expect(
+          screen.getByRole('dialog', { name: TRANSLATIONS.platform.onboarding.celebrationTitle }),
+        ).toBeInTheDocument();
       });
     });
 
     describe('WHEN the user heads back to work', () => {
       beforeEach(() => {
         render(<TourCelebration />);
-        fireEvent.click(screen.getByRole('button', { name: copy.celebrationClose }));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.onboarding.celebrationClose }));
       });
 
       test('THEN the celebration closes', () => {

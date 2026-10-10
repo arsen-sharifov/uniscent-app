@@ -1,6 +1,6 @@
 name: Chore
 description: Maintenance, setup, dependencies, infrastructure
-title: 'chore: '
+title: 'DEV: '
 labels: [chore]
 body:
   - type: textarea

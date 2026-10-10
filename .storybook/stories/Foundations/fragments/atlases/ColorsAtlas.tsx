@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 
-import type { TTheme } from '@constants';
+import type { TTheme } from '@interfaces';
 
 import { COLOR_GROUPS } from '../../consts';
 import { findActiveTheme } from '../../utils';
@@ -17,7 +17,7 @@ interface IColorsAtlasProps {
 export const ColorsAtlas = ({ activeTheme }: IColorsAtlasProps) => {
   const [query, setQuery] = useState('');
 
-  const sections = COLOR_GROUPS.map((g) => ({ id: g.id, label: g.title }));
+  const sections = COLOR_GROUPS.map((group) => ({ id: group.id, label: group.title }));
 
   return (
     <AtlasFrame
@@ -30,7 +30,8 @@ export const ColorsAtlas = ({ activeTheme }: IColorsAtlasProps) => {
           <FilterInput value={query} onChange={setQuery} placeholder="--accent, status, ref…" />
           <div className="flex flex-col items-end gap-0.5">
             <span className="font-mono-ui text-[9.5px] tracking-[0.22em] text-[color:var(--text-subtle)] uppercase">
-              {COLOR_GROUPS.reduce((acc, g) => acc + g.tokens.length, 0)} tokens · {findActiveTheme(activeTheme).name}
+              {COLOR_GROUPS.reduce((accumulator, group) => accumulator + group.tokens.length, 0)} tokens ·{' '}
+              {findActiveTheme(activeTheme).name}
             </span>
           </div>
         </div>

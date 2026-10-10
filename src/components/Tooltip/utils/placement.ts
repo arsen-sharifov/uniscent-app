@@ -1,6 +1,6 @@
 import type { ISize, ITooltipPosition, TTooltipPlacement } from '@interfaces';
 
-import { TRIGGER_GAP, VIEWPORT_MARGIN } from '../consts';
+import { PLACEMENT_FALLBACK_ORDER, TRIGGER_GAP, VIEWPORT_MARGIN } from '../consts';
 
 export const getOppositePlacement = (placement: TTooltipPlacement): TTooltipPlacement => {
   if (placement === 'top') return 'bottom';
@@ -20,8 +20,6 @@ export const fitsInViewport = (placement: TTooltipPlacement, trigger: DOMRect, t
 
   return trigger.right + TRIGGER_GAP + tooltip.width <= window.innerWidth - VIEWPORT_MARGIN;
 };
-
-const PLACEMENT_FALLBACK_ORDER: TTooltipPlacement[] = ['right', 'left', 'top', 'bottom'];
 
 export const choosePlacement = (preferred: TTooltipPlacement, trigger: DOMRect, tooltip: ISize): TTooltipPlacement => {
   const candidates = [preferred, getOppositePlacement(preferred), ...PLACEMENT_FALLBACK_ORDER];

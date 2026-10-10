@@ -22,7 +22,7 @@ export const FilterInput = ({ value, onChange, placeholder }: IFilterInputProps)
       <input
         id={id}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(inputEvent) => onChange(inputEvent.target.value)}
         placeholder={placeholder}
         className="w-[200px] bg-transparent text-[12px] text-[color:var(--text)] placeholder:text-[color:var(--text-subtle)] focus:outline-none"
       />

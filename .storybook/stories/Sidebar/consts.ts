@@ -74,10 +74,10 @@ export const flatThreads: TNavItem[] = [
   { type: 'thread', id: 't5', name: 'Quarterly Goals' },
 ];
 
-export const manyItems: TNavItem[] = Array.from({ length: 30 }, (_, i) => ({
+export const manyItems: TNavItem[] = Array.from({ length: 30 }, (_, index) => ({
   type: 'thread' as const,
-  id: `scroll-t${i}`,
-  name: `Thread ${i + 1}: ${['Analysis', 'Review', 'Planning', 'Research', 'Design'][i % 5]}`,
+  id: `scroll-t${index}`,
+  name: `Thread ${index + 1}: ${['Analysis', 'Review', 'Planning', 'Research', 'Design'][index % 5]}`,
 }));
 
 export const deepTree: TNavItem[] = [

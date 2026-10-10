@@ -8,6 +8,7 @@
       "submit": "Sign In",
       "submitting": "Signing in…",
       "emailSent": "Check your email to confirm your account.",
+      "invalidLink": "This link is invalid or has expired. Try signing in, or ask for a new link.",
       "noAccount": "Don't have an account?",
       "signUpLink": "Sign Up"
     },
@@ -49,13 +50,25 @@
       "inviteHeading": "Set up your account",
       "inviteSubtitle": "You're joining your team on Uniscept"
     },
+    "join": {
+      "heading": "You're invited",
+      "subtitle": "Accept the invitation to set up your account on Uniscept.",
+      "accept": "Accept invitation",
+      "accepting": "Accepting…",
+      "signedInAs": "You're signed in as {email}. Accepting this invitation signs you out of that account first.",
+      "switchAccount": "Sign out and accept",
+      "stay": "Stay signed in"
+    },
     "placeholders": {
       "name": "John Doe",
-      "email": "you@example.com",
+      "email": "name@example.com",
       "password": "••••••••"
     },
     "errors": {
-      "invalidInviteCode": "Invalid invite code"
+      "invalidInviteCode": "Invalid invite code",
+      "signInFailed": "Couldn't sign in",
+      "signUpFailed": "Couldn't create the account",
+      "joinFailed": "Couldn't set up the account"
     },
     "confirmed": {
       "heading": "Email Confirmed",
@@ -68,8 +81,9 @@
     }
   },
   "common": {
-    "loading": "Loading",
     "close": "Close",
+    "moreInfo": "More info",
+    "completed": "Completed",
     "userAvatar": "User",
     "notifications": "Notifications",
     "errors": {
@@ -77,6 +91,7 @@
       "permission": "You don't have permission to do that.",
       "notFound": "We couldn't find that anymore.",
       "rateLimit": "Too many attempts. Please wait a moment.",
+      "limitReached": "Limit reached. Remove some items and try again.",
       "validation": "Some details look invalid. Please review and try again.",
       "auth": "Your session expired. Please sign in again.",
       "unknown": "Something went wrong. Please try again.",
@@ -84,10 +99,10 @@
       "emailNotConfirmed": "Please confirm your email before signing in.",
       "emailTaken": "An account with this email already exists.",
       "invalidEmail": "That email address doesn't look valid.",
-      "weakPassword": "Password is too weak. Use at least 6 characters.",
-      "samePassword": "New password must be different from your current one."
+      "weakPassword": "Password is too weak. Use at least 8 characters.",
+      "samePassword": "New password must be different from your current one.",
+      "ownsSharedWorkspaces": "Transfer or delete the workspaces you share with others before deleting your account."
     },
-    "noPermission": "You don't have permission",
     "errorTitles": {
       "createFailed": "Couldn't create",
       "renameFailed": "Couldn't rename",
@@ -105,6 +120,9 @@
       "errorTitle": "Something broke",
       "errorHint": "An unexpected error occurred. You can try again.",
       "retry": "Try again"
+    },
+    "metadata": {
+      "description": "A platform for structured discussions and argument mapping"
     }
   },
   "platform": {
@@ -138,6 +156,11 @@
       "structure": "Structure",
       "newThread": "New thread",
       "newFolder": "New folder",
+      "defaultNames": {
+        "workspace": "New Workspace",
+        "folder": "New Folder",
+        "thread": "New Thread"
+      },
       "signOut": "Sign Out",
       "deleteWorkspaceTitle": "Delete workspace",
       "deleteFolderTitle": "Delete folder",
@@ -151,13 +174,15 @@
       "treeAriaLabel": "Navigation",
       "dragToReorder": "Drag to reorder",
       "resolved": "Resolved",
-      "itemsSelected": "items selected",
-      "workspacesSelected": "workspaces selected",
+      "itemsSelected": "{count, plural, one {item selected} other {items selected}}",
+      "workspacesSelected": "{count, plural, one {workspace selected} other {workspaces selected}}",
       "moveToFolder": "Move to folder",
+      "structureLocked": "Requires the “Manage threads & folders” permission",
       "rootLevel": "Root level",
       "bulkDeleteTitle": "Delete items",
       "bulkDeleteConfirm": "Are you sure you want to delete these items? This action cannot be undone.",
       "searchPlaceholder": "Search…",
+      "clearSearch": "Clear search",
       "noSearchResults": "No matches found",
       "emptyStructureTitle": "Nothing here yet",
       "emptyStructureHint": "Create a thread or folder to start organizing your work.",
@@ -253,8 +278,8 @@
         }
       },
       "loadError": {
-        "title": "Canvas backend unreachable",
-        "hint": "Couldn't reach Supabase to load this canvas. Check that the local Supabase instance is running, then retry.",
+        "title": "Couldn't load this canvas",
+        "hint": "Check your connection and try again.",
         "retry": "Retry"
       },
       "node": {
@@ -271,7 +296,8 @@
         "sendComment": "Send comment",
         "closeComments": "Close",
         "commentsHeader": "Comments",
-        "noComments": "No comments yet. Start the conversation."
+        "noComments": "No comments yet. Start the conversation.",
+        "labelAriaLabel": "Node text"
       },
       "question": {
         "badge": "Question",
@@ -319,7 +345,12 @@
         "needsValidParent": "Needs the question or a valid step before it",
         "comment": "Comment",
         "duplicate": "Duplicate",
-        "delete": "Delete"
+        "delete": "Delete",
+        "deleteNotAllowed": "Only its author or the workspace owner can delete it"
+      },
+      "deleteBlocked": {
+        "foreignNodes": "Nothing was deleted. Some selected nodes can only be deleted by their author or the workspace owner.",
+        "question": "Nothing was deleted. The question can't be deleted. Deselect it and try again."
       },
       "shortcuts": {
         "title": "Keyboard shortcuts",
@@ -803,7 +834,6 @@
       "close": "Close settings",
       "comingSoon": "Coming soon",
       "languageSaving": "Saving language…",
-      "languageSaveFailed": "Couldn't save language preference. Please try again.",
       "groups": {
         "account": "Account",
         "preferences": "Preferences",
@@ -832,8 +862,9 @@
         "emailInvalid": "Please enter a valid email address.",
         "namePlaceholder": "How others see you",
         "avatarTitle": "Avatar",
-        "avatarOptions": "options",
+        "avatarOptionCount": "{count, plural, one {# option} other {# options}}",
         "badgesTitle": "Badges",
+        "badgeEarned": "New badge: {name}",
         "initialsLabel": "Initials",
         "avatarIcons": {
           "avatarIconCat": "Cat",
@@ -864,34 +895,32 @@
           "initiateUnlock": "Finish the tour and every guide.",
           "badgeFirstSteps": "First Steps",
           "firstStepsUnlock": "Create your first canvas.",
+          "badgeWorkspaceBuilder": "Builder",
+          "workspaceBuilderUnlock": "Create your first workspace.",
           "badgeArchitect": "Architect",
           "architectUnlock": "Build a canvas with 25 or more nodes.",
           "badgeConnector": "Connector",
-          "connectorUnlock": "Make 50 connections between nodes.",
+          "connectorUnlock": "Draw 15 connections on one canvas.",
           "badgeCritic": "Critic",
-          "criticUnlock": "Mark 25 paths as valid or invalid.",
-          "badgeLinguist": "Linguist",
-          "linguistUnlock": "Switch the interface language.",
-          "badgeCurator": "Curator",
-          "curatorUnlock": "Use a cross-canvas reference.",
-          "badgeVoice": "Voice",
-          "voiceUnlock": "Post your first comment.",
-          "badgeExplorer": "Explorer",
-          "explorerUnlock": "Open 10 different canvases.",
-          "badgeStoryteller": "Storyteller",
-          "storytellerUnlock": "Create 5 threads of your own.",
-          "badgeWorkspaceBuilder": "Builder",
-          "workspaceBuilderUnlock": "Create your first workspace.",
-          "badgeNightOwl": "Night owl",
-          "nightOwlUnlock": "Work past midnight for a week.",
-          "badgeMarathoner": "Marathoner",
-          "marathonerUnlock": "Stay active 30 days in a row.",
-          "badgeCollaborator": "Collaborator",
-          "collaboratorUnlock": "Join a shared workspace.",
+          "criticUnlock": "Mark a path as invalid.",
           "badgeWeaver": "Weaver",
           "weaverUnlock": "Mix valid and invalid paths on one canvas.",
-          "badgeSage": "Sage",
-          "sageUnlock": "Leave 100 thoughtful comments."
+          "badgeVerdict": "Verdict",
+          "verdictUnlock": "Mark a node as the final answer.",
+          "badgeVoice": "Voice",
+          "voiceUnlock": "Post your first comment.",
+          "badgeCurator": "Curator",
+          "curatorUnlock": "Use a cross-canvas reference.",
+          "badgeCollaborator": "Collaborator",
+          "collaboratorUnlock": "Join a shared workspace.",
+          "badgeLinguist": "Linguist",
+          "linguistUnlock": "Switch the interface language.",
+          "badgeStylist": "Stylist",
+          "stylistUnlock": "Switch to another theme.",
+          "badgeCartographer": "Cartographer",
+          "cartographerUnlock": "Export a canvas as an image.",
+          "badgeNightOwl": "Night owl",
+          "nightOwlUnlock": "Add a node between midnight and 5 a.m."
         }
       },
       "security": {
@@ -917,6 +946,8 @@
         "deleteAccount": "Delete account",
         "deleteAccountCaption": "Erases all your workspaces, threads and canvases",
         "deleteConfirm": "Are you sure? This action cannot be undone. All your data will be permanently deleted.",
+        "deletePassword": "Confirm with your password",
+        "deleteBlocked": "You own workspaces that other people use. Transfer ownership or delete them before you delete your account.",
         "deleteButton": "Delete my account",
         "deleting": "Deleting…",
         "cancel": "Cancel",
@@ -945,7 +976,6 @@
         "themeBloom": "Bloom",
         "bloomDesc": "Warm porcelain, magenta action",
         "autoDesc": "Pairs Daybreak and Eclipse",
-        "adaptive": "Adaptive",
         "canvas": "Canvas",
         "canvasIntro": "Four textures",
         "canvasBlurb": "Pick the surface your ideas live on. From quiet paper to a charted grid.",
@@ -1020,6 +1050,20 @@
         "member": "Member",
         "viewer": "Viewer"
       },
+      "roleIcons": {
+        "shield": "Shield",
+        "star": "Star",
+        "flag": "Flag",
+        "sparkles": "Sparkles",
+        "target": "Target",
+        "zap": "Lightning",
+        "rocket": "Rocket",
+        "award": "Award",
+        "compass": "Compass",
+        "crown": "Crown",
+        "penTool": "Pen",
+        "eye": "Eye"
+      },
       "general": {
         "nameLabel": "Workspace name",
         "namePlaceholder": "Name this workspace",
@@ -1049,7 +1093,7 @@
         "cancel": "Cancel",
         "inviteTitle": "Invite people",
         "inviteHint": "They join the next time they open Uniscept.",
-        "emailPlaceholder": "name@company.com",
+        "emailPlaceholder": "name@example.com",
         "sendInvite": "Send invite",
         "sending": "Sending…",
         "invited": "Invitation ready",
@@ -1061,7 +1105,7 @@
       },
       "roles": {
         "hint": "Everyone has one role. Roles decide what a person can do.",
-        "membersSuffix": "members",
+        "memberCount": "{count, plural, one {# member} other {# members}}",
         "newRole": "New role",
         "nameLabel": "Role name",
         "namePlaceholder": "e.g. Reviewer",

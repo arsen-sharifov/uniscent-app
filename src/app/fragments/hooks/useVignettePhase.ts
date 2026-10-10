@@ -11,7 +11,7 @@ export const useVignettePhase = (phaseCount: number, intervalMs: number): number
   useEffect(() => {
     if (reducedMotion) return;
 
-    const timer = setInterval(() => setPhase((prev) => (prev + 1) % phaseCount), intervalMs);
+    const timer = setInterval(() => setPhase((previous) => (previous + 1) % phaseCount), intervalMs);
 
     return () => clearInterval(timer);
   }, [phaseCount, intervalMs, reducedMotion]);

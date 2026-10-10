@@ -66,7 +66,6 @@ export const Themes: Story = {
           'The wordmark takes the inherited text color of its surface, so it reads as ink on every theme rather than carrying a color of its own. Each tile renders the logo under a different `data-theme`.',
       },
     },
-    layout: 'fullscreen',
   },
   render: () => (
     <div
@@ -102,7 +101,6 @@ export const MotionShowcase: Story = {
           'The wordmark is a static solid-ink grotesk (no gradient, no motion) so it renders identically regardless of the reduced-motion preference; both tiles should look the same.',
       },
     },
-    layout: 'fullscreen',
   },
   render: () => (
     <div className="mx-auto grid w-full max-w-[1100px] grid-cols-1 gap-3 px-8 py-10 lg:grid-cols-2">

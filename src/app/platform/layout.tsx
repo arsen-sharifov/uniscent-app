@@ -5,17 +5,17 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { CanvasSkeleton, Sidebar, Toolbar, Tour, useToolbar } from '@/components';
 
 import { EmptyCanvas } from './components/EmptyCanvas';
-import { Settings } from './components/Settings';
-import { usePreferences } from './components/Settings/hooks';
+import { Settings, usePreferences } from './components/Settings';
 import { SheetChrome } from './components/SheetChrome';
 import { UserMenu } from './components/UserMenu';
 import { WorkspaceSettings } from './components/WorkspaceSettings';
-import { useWorkspaceManager } from './hooks';
+import { useBadgeAwards, useWorkspaceManager } from './hooks';
 
 const WorkspaceLayout = ({ children }: { children: ReactNode }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [workspaceSettingsId, setWorkspaceSettingsId] = useState<string | null>(null);
   const { preferences, updatePreference } = usePreferences();
+  useBadgeAwards();
 
   useEffect(() => {
     document.documentElement.setAttribute('data-has-toolbar', '');
@@ -54,7 +54,7 @@ const WorkspaceLayout = ({ children }: { children: ReactNode }) => {
     loading,
   } = useWorkspaceManager();
 
-  const { groups, pendingGroupSizes, activeTool, handleToolClick } = useToolbar(loading);
+  const { groups, pendingGroups, activeTool, handleToolClick } = useToolbar(loading);
 
   const workspaceSettingsTarget = workspaces.find((workspace) => workspace.id === workspaceSettingsId);
 
@@ -117,7 +117,7 @@ const WorkspaceLayout = ({ children }: { children: ReactNode }) => {
         threadId={activeThreadId ?? undefined}
         threadName={activeThreadName ?? undefined}
         groups={groups}
-        pendingGroupSizes={pendingGroupSizes}
+        pendingGroups={pendingGroups}
         activeTool={activeTool}
         onToolClick={handleToolClick}
       />

@@ -1,18 +1,19 @@
 import type { IUserMetadata, IUserProfileUpdate, TBadgeId } from '@interfaces';
 
+import { event } from '@/lib/events';
 import { createClient } from '@/lib/supabase';
 import { resolveEarnedBadges } from '@/lib/utils';
 
 import { signOut } from './auth';
-import { getCurrentUser } from './utils';
+import { getCurrentUser, toResponseError } from './utils';
 
-export const getUser = async () => {
+export const getUser = () => {
   const supabase = createClient();
 
   return supabase.auth.getUser();
 };
 
-export const updateUserMetadata = async (data: IUserProfileUpdate) => {
+export const updateUserMetadata = (data: IUserProfileUpdate) => {
   const supabase = createClient();
 
   return supabase.auth.updateUser({ data });
@@ -30,26 +31,36 @@ export const addUserBadge = async (badge: TBadgeId): Promise<void> => {
   if (error) throw error;
 };
 
-export const updateEmail = async (email: string) => {
+export const updateEmail = (email: string) => {
   const supabase = createClient();
 
   return supabase.auth.updateUser({ email });
 };
 
-export const verifyPassword = async (email: string, password: string) => {
-  const supabase = createClient();
+export const updatePassword = async (currentPassword: string, newPassword: string): Promise<boolean> => {
+  const response = await fetch('/auth/change-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ currentPassword, newPassword }),
+  });
 
-  return supabase.auth.signInWithPassword({ email, password });
+  if (response.ok) return true;
+
+  const error = await toResponseError(response, 'Failed to update password');
+
+  if (error.code === 'invalid_credentials') return false;
+
+  throw error;
 };
 
-export const updatePassword = async (password: string) => {
-  const supabase = createClient();
+export const deleteAccount = async (password: string): Promise<void> => {
+  const response = await fetch('/auth/delete-account', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password }),
+  });
 
-  return supabase.auth.updateUser({ password });
-};
+  if (!response.ok) throw await toResponseError(response, 'Failed to delete account');
 
-export const deleteAccount = async () => {
-  const res = await fetch('/auth/delete-account', { method: 'POST' });
-  if (!res.ok) throw new Error('Failed to delete account');
-  await signOut();
+  await signOut().catch((error: unknown) => event.error(error, { toast: false, context: 'auth.signOut' }));
 };

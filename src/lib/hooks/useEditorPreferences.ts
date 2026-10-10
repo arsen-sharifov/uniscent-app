@@ -4,9 +4,7 @@ import { useSyncExternalStore } from 'react';
 
 import type { TDefaultZoom, TEditorPreferences } from '@interfaces';
 import { DEFAULT_PREFERENCES } from '@constants';
-import { isDefaultZoom } from '@/lib/utils';
-
-const SUBSCRIBED_ATTRS = ['data-snap-to-grid', 'data-default-zoom', 'data-smart-guides'];
+import { createRootAttributeSubscription, isDefaultZoom } from '@/lib/utils';
 
 const SERVER_SNAPSHOT: TEditorPreferences = {
   snapToGrid: DEFAULT_PREFERENCES.snapToGrid,
@@ -14,12 +12,12 @@ const SERVER_SNAPSHOT: TEditorPreferences = {
   smartGuides: DEFAULT_PREFERENCES.smartGuides,
 };
 
-const subscribers = new Set<() => void>();
-let observer: MutationObserver | null = null;
+const subscribe = createRootAttributeSubscription(['data-snap-to-grid', 'data-default-zoom', 'data-smart-guides']);
+
 let cached: TEditorPreferences = SERVER_SNAPSHOT;
 
-const readBoolean = (attr: string, fallback: boolean): boolean => {
-  const value = document.documentElement.getAttribute(attr);
+const readBoolean = (attribute: string, fallback: boolean): boolean => {
+  const value = document.documentElement.getAttribute(attribute);
 
   return value === null ? fallback : value === 'true';
 };
@@ -31,9 +29,7 @@ const readDefaultZoom = (fallback: TDefaultZoom): TDefaultZoom => {
 };
 
 const readSnapshot = (): TEditorPreferences => {
-  if (typeof document === 'undefined') {
-    return SERVER_SNAPSHOT;
-  }
+  if (typeof document === 'undefined') return SERVER_SNAPSHOT;
 
   const next: TEditorPreferences = {
     snapToGrid: readBoolean('data-snap-to-grid', DEFAULT_PREFERENCES.snapToGrid),
@@ -52,23 +48,6 @@ const readSnapshot = (): TEditorPreferences => {
   cached = next;
 
   return cached;
-};
-
-const subscribe = (notify: () => void) => {
-  subscribers.add(notify);
-
-  if (!observer && typeof document !== 'undefined') {
-    observer = new MutationObserver(() => subscribers.forEach((cb) => cb()));
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: SUBSCRIBED_ATTRS });
-  }
-
-  return () => {
-    subscribers.delete(notify);
-    if (subscribers.size === 0) {
-      observer?.disconnect();
-      observer = null;
-    }
-  };
 };
 
 export const useEditorPreferences = (): TEditorPreferences =>

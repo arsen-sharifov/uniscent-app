@@ -1,15 +1,11 @@
 import { useEffect, useRef } from 'react';
 
+import type { IToolbarProps } from '@/components';
 import { useCanvasStore } from '@/lib/stores';
 
 import { ToolbarWithState } from './ToolbarWithState';
 
-interface IToolbarWithExportMenuProps {
-  threadId: string;
-  threadName: string;
-}
-
-export const ToolbarWithExportMenu = ({ threadId, threadName }: IToolbarWithExportMenuProps) => {
+export const ToolbarWithExportMenu = ({ threadId, threadName }: IToolbarProps) => {
   const ready = useCanvasStore((state) => state.hydrated && state.threadId === threadId && state.nodes.length > 0);
   const rootRef = useRef<HTMLDivElement>(null);
 

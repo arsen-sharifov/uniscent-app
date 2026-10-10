@@ -1,4 +1,4 @@
-import type { TCanvasExportFormat } from '@interfaces';
+import type { IExportCodePointRange, TCanvasExportFormat } from '@interfaces';
 
 export const SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
 export const EXPORT_PADDING = 48;
@@ -26,6 +26,12 @@ export const EXPORT_EDGE_ID_ATTRIBUTE = 'data-edge-id';
 
 export const FILENAME_FORBIDDEN_PATTERN = /[<>:"/\\|?*]/g;
 export const FILENAME_TRAILING_CHARACTERS = '. ';
+export const FILENAME_BIDI_CONTROL_RANGES: readonly IExportCodePointRange[] = [
+  { start: 0x06_1c, end: 0x06_1c },
+  { start: 0x20_0e, end: 0x20_0f },
+  { start: 0x20_2a, end: 0x20_2e },
+  { start: 0x20_66, end: 0x20_69 },
+];
 export const FILENAME_RESERVED_PATTERN = /^(con|prn|aux|nul|com\d|lpt\d)(?:\.|$)/i;
 export const BOX_SHADOW_LENGTHS_PATTERN = / (-?[\d.]+)px (-?[\d.]+)px ([\d.]+)px (-?[\d.]+)px$/;
 export const LINEAR_GRADIENT_PREFIX = 'linear-gradient(';

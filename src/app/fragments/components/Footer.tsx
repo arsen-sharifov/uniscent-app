@@ -2,8 +2,6 @@
 
 import { useTranslations } from '@/i18n';
 
-const CURRENT_YEAR = new Date().getFullYear();
-
 export const Footer = () => {
   const t = useTranslations();
 
@@ -14,7 +12,7 @@ export const Footer = () => {
           {t.landing.header.logo}
         </span>
         <span className="font-mono-ui text-[11px] tracking-[0.06em] text-[color:var(--hero-ground-muted)]">
-          © {CURRENT_YEAR} {t.landing.header.logo}
+          © {new Date().getFullYear()} {t.landing.header.logo}
         </span>
       </div>
     </footer>

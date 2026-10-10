@@ -8,9 +8,7 @@ const isFetchFailure = (error: unknown): boolean =>
   isRecord(error) && typeof error.message === 'string' && FETCH_FAILURE_PATTERN.test(error.message);
 
 const messageOf = (error: unknown): string => {
-  if (isRecord(error) && typeof error.message === 'string') {
-    return error.message;
-  }
+  if (isRecord(error) && typeof error.message === 'string') return error.message;
 
   return String(error);
 };
@@ -27,9 +25,7 @@ const categoryOf = (error: unknown): TErrorCategory => {
     if (byStatus) return byStatus;
   }
 
-  if (isFetchFailure(error) || (typeof navigator !== 'undefined' && !navigator.onLine)) {
-    return 'network';
-  }
+  if (isFetchFailure(error) || (typeof navigator !== 'undefined' && !navigator.onLine)) return 'network';
 
   return 'unknown';
 };

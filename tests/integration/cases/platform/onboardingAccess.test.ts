@@ -1,6 +1,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { afterAll, beforeAll, beforeEach, describe, expect, test } from 'vitest';
 
+import { COMPLETED_GUIDES_CAP, COMPLETED_GUIDES_LENGTH_CAP } from '../../consts';
 import type { IIntegrationAccount, IIntegrationOnboardingRow, IIntegrationResponse } from '../../interfaces';
 import { deleteAccounts, getUserClient, readOnboarding, seedAccount } from '../../utils';
 
@@ -78,6 +79,60 @@ describe('user_onboarding', () => {
       test('THEN the stored row is replaced instead of conflicting', async () => {
         expect(response.error).toBeNull();
         await expect(readOnboarding(owner.id)).resolves.toMatchObject({ completed_guides: ['base', 'settings'] });
+      });
+    });
+
+    describe('WHEN the owner records guides up to both caps', () => {
+      let completedGuides: string[];
+      let response: IIntegrationResponse;
+
+      beforeEach(async () => {
+        completedGuides = Array.from({ length: COMPLETED_GUIDES_CAP }, (_, index) =>
+          String(index).padStart(COMPLETED_GUIDES_LENGTH_CAP / COMPLETED_GUIDES_CAP, 'g'),
+        );
+        response = await ownerClient
+          .from('user_onboarding')
+          .update({ completed_guides: completedGuides })
+          .eq('user_id', owner.id);
+      });
+
+      test('THEN the update lands', async () => {
+        expect(response.error).toBeNull();
+        await expect(readOnboarding(owner.id)).resolves.toMatchObject({ completed_guides: completedGuides });
+      });
+    });
+
+    describe('WHEN the owner records more guides than the cap', () => {
+      let response: IIntegrationResponse;
+
+      beforeEach(async () => {
+        response = await ownerClient
+          .from('user_onboarding')
+          .update({
+            completed_guides: Array.from({ length: COMPLETED_GUIDES_CAP + 1 }, (_, index) => `guide-${index}`),
+          })
+          .eq('user_id', owner.id);
+      });
+
+      test('THEN the check constraint rejects it and the stored guides stay', async () => {
+        expect(response.error?.code).toBe('23514');
+        await expect(readOnboarding(owner.id)).resolves.toMatchObject({ completed_guides: ['base'] });
+      });
+    });
+
+    describe('WHEN the owner records a guide past the length cap', () => {
+      let response: IIntegrationResponse;
+
+      beforeEach(async () => {
+        response = await ownerClient
+          .from('user_onboarding')
+          .update({ completed_guides: ['g'.repeat(COMPLETED_GUIDES_LENGTH_CAP + 1)] })
+          .eq('user_id', owner.id);
+      });
+
+      test('THEN the check constraint rejects it and the stored guides stay', async () => {
+        expect(response.error?.code).toBe('23514');
+        await expect(readOnboarding(owner.id)).resolves.toMatchObject({ completed_guides: ['base'] });
       });
     });
   });

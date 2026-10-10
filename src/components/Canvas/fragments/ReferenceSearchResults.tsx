@@ -79,6 +79,7 @@ export const ReferenceSearchResults = ({
           <button
             type="button"
             onMouseEnter={() => onCursorChange(index)}
+            onFocus={() => onCursorChange(index)}
             onClick={() => onSelect(node)}
             className={clsx(
               'group/item relative flex w-full flex-col items-stretch rounded-lg px-3 py-2 text-left transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none focus-visible:ring-inset motion-reduce:transition-none',

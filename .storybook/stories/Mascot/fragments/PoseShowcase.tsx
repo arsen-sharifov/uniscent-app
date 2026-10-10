@@ -11,12 +11,11 @@ interface IPoseShowcaseProps {
 }
 
 export const PoseShowcase = ({ character }: IPoseShowcaseProps) => {
-  const onboarding = useTranslations().platform.onboarding;
-  const name = character === 'ergo' ? onboarding.ergoName : onboarding.nodiName;
+  const t = useTranslations();
 
   return (
     <Showcase
-      title={`${name} poses`}
+      title={`${character === 'ergo' ? t.platform.onboarding.ergoName : t.platform.onboarding.nodiName} poses`}
       caption={`${MASCOT_POSE_IDS.length} poses`}
       columns={4}
       items={MASCOT_POSE_IDS.map((pose) => ({
@@ -27,7 +26,7 @@ export const PoseShowcase = ({ character }: IPoseShowcaseProps) => {
             <Mascot
               pose={pose}
               character={character}
-              label={character === 'ergo' ? onboarding.ergoAlt : onboarding.nodiAlt}
+              label={character === 'ergo' ? t.platform.onboarding.ergoAlt : t.platform.onboarding.nodiAlt}
               className="h-24 w-24"
             />
           </div>

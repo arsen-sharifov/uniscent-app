@@ -3,12 +3,13 @@
 import type { IAnchorRect, IResolvedAnchor, ITourGeometry, TTourAnchor } from '@interfaces';
 import {
   ANCHOR_SEPARATOR,
+  APP_OVERLAY_SELECTOR,
   TOUR_ANCHORS,
   TOUR_ANCHOR_SELECTORS,
-  TOUR_OVERLAY_SELECTOR,
   TOUR_PANEL_ATTRIBUTE,
   TOUR_SURFACE_SELECTOR,
 } from '@constants';
+import { isTypingTarget } from '@/lib/utils';
 
 const ANCHOR_SET: ReadonlySet<string> = new Set(TOUR_ANCHORS);
 
@@ -21,11 +22,6 @@ const isVisible = (element: Element): boolean =>
 const isRendered = (element: Element): boolean =>
   typeof element.checkVisibility !== 'function' || element.checkVisibility({ visibilityProperty: true });
 
-const isTextEntry = (element: Element): boolean =>
-  element instanceof HTMLInputElement ||
-  element instanceof HTMLTextAreaElement ||
-  (element instanceof HTMLElement && element.isContentEditable);
-
 const toRect = (element: Element): IAnchorRect | null => {
   const { top, left, width, height } = element.getBoundingClientRect();
   if (width === 0 && height === 0) return null;
@@ -36,16 +32,16 @@ const toRect = (element: Element): IAnchorRect | null => {
 const isAppOverlay = (overlay: Element): boolean => overlay.querySelector(`[${TOUR_PANEL_ATTRIBUTE}]`) === null;
 
 const readAppOverlays = (test: (element: Element) => boolean): Element[] =>
-  [...document.querySelectorAll(TOUR_OVERLAY_SELECTOR)].filter(test).filter(isAppOverlay);
+  [...document.querySelectorAll(APP_OVERLAY_SELECTOR)].filter(test).filter(isAppOverlay);
 
 const overlayAround = (hit: Element, target: Element): Element | null => {
-  const holding = hit.closest(TOUR_OVERLAY_SELECTOR);
+  const holding = hit.closest(APP_OVERLAY_SELECTOR);
   if (holding && !holding.contains(target)) return holding;
 
   return (
     [hit, hit.parentElement, hit.parentElement?.parentElement]
       .filter((node) => node instanceof Element)
-      .map((node) => node.querySelector(TOUR_OVERLAY_SELECTOR))
+      .map((node) => node.querySelector(APP_OVERLAY_SELECTOR))
       .find((overlay) => overlay !== null && !overlay.contains(target)) ?? null
   );
 };
@@ -73,6 +69,8 @@ export const dismissOverlays = (): void => {
 };
 
 export const parseAnchors = (key: string): TTourAnchor[] => key.split(ANCHOR_SEPARATOR).filter(isTourAnchor);
+
+export const joinAnchors = (anchors: readonly TTourAnchor[] = []): string => anchors.join(ANCHOR_SEPARATOR);
 
 export const findAnchorElement = (anchor: TTourAnchor): HTMLElement | null => {
   const element = document.querySelector<HTMLElement>(TOUR_ANCHOR_SELECTORS[anchor] ?? `[data-tour="${anchor}"]`);
@@ -115,17 +113,22 @@ export const readTourGeometry = (
     rect,
     ...expected.map(toRect),
     ...readAppOverlays(isVisible).map(toRect),
-    focused && isTextEntry(focused) ? toRect(focused) : null,
+    focused && isTypingTarget(focused) ? toRect(focused) : null,
   ].filter((candidate) => candidate !== null);
 
   return { rect, anchor, blocked: null, lit: rect ? [rect] : [], open };
 };
 
-export const sameRect = (a: IAnchorRect | null, b: IAnchorRect | null): boolean => {
-  if (a === null || b === null) return a === b;
+export const sameRect = (first: IAnchorRect | null, second: IAnchorRect | null): boolean => {
+  if (first === null || second === null) return first === second;
 
-  return a.top === b.top && a.left === b.left && a.width === b.width && a.height === b.height;
+  return (
+    first.top === second.top &&
+    first.left === second.left &&
+    first.width === second.width &&
+    first.height === second.height
+  );
 };
 
-export const sameRects = (a: readonly IAnchorRect[], b: readonly IAnchorRect[]): boolean =>
-  a.length === b.length && a.every((rect, index) => sameRect(rect, b[index] ?? null));
+export const sameRects = (first: readonly IAnchorRect[], second: readonly IAnchorRect[]): boolean =>
+  first.length === second.length && first.every((rect, index) => sameRect(rect, second[index] ?? null));

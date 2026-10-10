@@ -32,15 +32,16 @@ const NO_ACCESS = {
   canManageWorkspace: false,
 } as const;
 
-const INITIAL: IPermissionsState = {
+const INITIAL_STATE: IPermissionsState = {
   userId: null,
   workspaceId: null,
   resolved: false,
   ...NO_ACCESS,
 };
 
-export const usePermissionsStore = create<IPermissionsStore>()((set) => ({
-  ...INITIAL,
+export const usePermissionsStore = create<IPermissionsStore>((set) => ({
+  ...INITIAL_STATE,
+
   setAccess: (workspaceId, userId, access) => set({ workspaceId, userId, resolved: true, ...(access ?? NO_ACCESS) }),
-  clearAccess: (pendingWorkspaceId = null) => set({ ...INITIAL, workspaceId: pendingWorkspaceId }),
+  clearAccess: (pendingWorkspaceId = null) => set({ ...INITIAL_STATE, workspaceId: pendingWorkspaceId }),
 }));

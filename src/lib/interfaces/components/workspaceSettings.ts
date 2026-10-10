@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
 
-import type { IWorkspaceRole, IWorkspaceRolePermissions } from '@interfaces';
+import type { IWorkspaceRole, IWorkspaceRolePermissions, TTranslations } from '@interfaces';
 
 export type TWorkspaceSettingsSection = 'general' | 'members' | 'roles';
 
@@ -9,6 +9,8 @@ export type TRoleEditorState = { mode: 'create' } | { mode: 'edit'; role: IWorks
 export type TWorkspaceSettingsGroupLabel = 'workspace' | 'access';
 
 export type TRolePermissionKey = keyof IWorkspaceRolePermissions;
+
+export type TRoleIconKey = keyof TTranslations['platform']['workspaceSettings']['roleIcons'];
 
 export interface IWorkspaceSettingsSidebarItem {
   id: TWorkspaceSettingsSection;
@@ -26,6 +28,6 @@ export interface IPermissionDefinition {
 }
 
 export interface IRoleIconOption {
-  key: string;
+  key: TRoleIconKey;
   icon: LucideIcon;
 }

@@ -2,8 +2,6 @@ import { expect, type Locator, type Page } from '@playwright/test';
 
 import { COPY } from '../consts';
 
-const { sidebar } = COPY.platform;
-
 export const getSidebar = (page: Page): Locator =>
   page.locator('aside').filter({ has: page.locator('[aria-haspopup="dialog"]') });
 
@@ -18,11 +16,13 @@ export const getNavItem = (page: Page, name: string): Locator => getNavRow(page,
 
 export const getEditingRow = (page: Page): Locator => getNavRows(page).filter({ has: page.locator('input') });
 
+export const getUserMenuTrigger = (page: Page): Locator => page.locator('aside footer [aria-haspopup="dialog"]');
+
 export const getWorkspaceTrigger = (page: Page): Locator =>
   getSidebar(page).locator('[aria-haspopup="dialog"]').first();
 
 export const getWorkspacePanel = (page: Page): Locator =>
-  page.getByRole('dialog').filter({ hasText: sidebar.newWorkspace });
+  page.getByRole('dialog').filter({ hasText: COPY.platform.sidebar.newWorkspace });
 
 export const openWorkspacePanel = async (page: Page): Promise<Locator> => {
   await getWorkspaceTrigger(page).click();
@@ -38,11 +38,11 @@ export const getWorkspaceRow = (panel: Locator, name: string): Locator =>
   getWorkspaceRows(panel).filter({ hasText: name });
 
 export const createThread = async (page: Page): Promise<void> => {
-  await getStructureHeader(page).getByTitle(sidebar.newThread).click();
+  await getStructureHeader(page).getByTitle(COPY.platform.sidebar.newThread).click();
 };
 
 export const createFolder = async (page: Page): Promise<void> => {
-  await getStructureHeader(page).getByTitle(sidebar.newFolder).click();
+  await getStructureHeader(page).getByTitle(COPY.platform.sidebar.newFolder).click();
 };
 
 export const runRowAction = async (row: Locator, action: string): Promise<void> => {
@@ -60,6 +60,6 @@ export const commitRename = async (row: Locator, name: string): Promise<void> =>
 export const confirmDelete = async (page: Page): Promise<void> => {
   const dialog = page.getByRole('alertdialog');
   await expect(dialog).toBeVisible();
-  await dialog.getByRole('button', { name: sidebar.delete, exact: true }).click();
+  await dialog.getByRole('button', { name: COPY.platform.sidebar.delete, exact: true }).click();
   await expect(dialog).toBeHidden();
 };

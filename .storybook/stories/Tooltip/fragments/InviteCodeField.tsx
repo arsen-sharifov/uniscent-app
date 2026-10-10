@@ -7,12 +7,12 @@ interface IInviteCodeFieldProps {
 }
 
 export const InviteCodeField = ({ text, position }: IInviteCodeFieldProps) => {
-  const { inviteCode, inviteCodeTooltip } = useTranslations().auth.signUp.accountStep;
+  const t = useTranslations();
 
   return (
     <div className="flex items-center gap-1.5 text-[color:var(--text)]">
-      <span className="text-[13px] font-medium">{inviteCode}</span>
-      <Tooltip text={text ?? inviteCodeTooltip} position={position} />
+      <span className="text-[13px] font-medium">{t.auth.signUp.accountStep.inviteCode}</span>
+      <Tooltip text={text ?? t.auth.signUp.accountStep.inviteCodeTooltip} position={position} />
     </div>
   );
 };

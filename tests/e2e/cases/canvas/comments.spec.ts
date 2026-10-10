@@ -2,8 +2,6 @@ import { COPY } from '../../consts';
 import { expect, test } from '../../fixtures';
 import { addNodeComment, expectSaved, getNode, seedNodes, seedThread, waitForCanvas } from '../../utils';
 
-const { canvas } = COPY.platform;
-
 test.describe('node comments', () => {
   test.describe('GIVEN a canvas node without comments', () => {
     test.beforeEach(async ({ page, workspace, account }) => {
@@ -25,9 +23,9 @@ test.describe('node comments', () => {
         await page.reload();
         await waitForCanvas(page);
 
-        await expect(getNode(page, 'Risky bet').getByRole('button', { name: canvas.node.viewComments })).toContainText(
-          '1',
-        );
+        await expect(
+          getNode(page, 'Risky bet').getByRole('button', { name: COPY.platform.canvas.node.viewComments }),
+        ).toContainText('1');
       });
     });
 
@@ -37,7 +35,7 @@ test.describe('node comments', () => {
         await addNodeComment(node, 'Scratch that.');
         await expect(node).toContainText('Scratch that.');
         await node.getByText('Scratch that.').hover();
-        await node.getByRole('button', { name: canvas.comments.deleteAriaLabel }).click();
+        await node.getByRole('button', { name: COPY.platform.canvas.comments.deleteAriaLabel }).click();
         await expectSaved(page);
       });
 
@@ -47,7 +45,9 @@ test.describe('node comments', () => {
         await page.reload();
         await waitForCanvas(page);
 
-        await expect(getNode(page, 'Risky bet').getByRole('button', { name: canvas.node.viewComments })).toHaveCount(0);
+        await expect(
+          getNode(page, 'Risky bet').getByRole('button', { name: COPY.platform.canvas.node.viewComments }),
+        ).toHaveCount(0);
       });
     });
   });
@@ -65,8 +65,8 @@ test.describe('node comments', () => {
       test.beforeEach(async ({ page }) => {
         const node = getNode(page, 'Risky bet');
         await node.hover();
-        await node.getByRole('button', { name: canvas.node.addComment }).click();
-        await expect(node.getByPlaceholder(canvas.node.addCommentPlaceholder)).toBeVisible();
+        await node.getByRole('button', { name: COPY.platform.canvas.node.addComment }).click();
+        await expect(node.getByPlaceholder(COPY.platform.canvas.node.addCommentPlaceholder)).toBeVisible();
       });
 
       test('THEN the panel sits on top of the newer node', async ({ page }) => {

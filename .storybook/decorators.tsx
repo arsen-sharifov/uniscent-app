@@ -1,9 +1,10 @@
 import type { Decorator } from '@storybook/nextjs-vite';
-import { ReactFlowProvider } from '@xyflow/react';
+import { ReactFlowProvider, useReactFlow } from '@xyflow/react';
 import { useEffect } from 'react';
 
 import type { IMockCanvasState, IMockOnboardingState, IMockPermissionsState } from '@story-interfaces';
 
+import { CANVAS_FIT_VIEW_OPTIONS } from './consts';
 import {
   mockCanvasStore,
   mockOnboardingStore,
@@ -14,12 +15,6 @@ import {
 
 export const WithPad: Decorator = (Story) => (
   <div className="flex min-h-screen w-full items-center justify-center p-12">
-    <Story />
-  </div>
-);
-
-export const WithPadTop: Decorator = (Story) => (
-  <div className="flex min-h-screen w-full justify-center px-8 py-16">
     <Story />
   </div>
 );
@@ -35,6 +30,16 @@ export const WithReactFlow: Decorator = (Story) => (
     <Story />
   </ReactFlowProvider>
 );
+
+export const WithFittedCanvas: Decorator = (Story) => {
+  const { fitView } = useReactFlow();
+
+  useEffect(() => {
+    document.fonts.ready.then(() => fitView(CANVAS_FIT_VIEW_OPTIONS));
+  }, [fitView]);
+
+  return <Story />;
+};
 
 export const withCanvasStore = (state: IMockCanvasState = {}): Decorator =>
   function WithCanvasStore(Story) {

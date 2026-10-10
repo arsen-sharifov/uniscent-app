@@ -1,8 +1,8 @@
 import { ECanvasNodeType, type TCanvasContextMenu, type TCanvasNode, type TReferenceNode } from '@interfaces';
 
-export const SB_NODE_ID = 'sb-ctx-node';
-export const SB_REFERENCE_ID = 'sb-ctx-reference';
-export const SB_EDGE_ID = 'sb-ctx-edge';
+const SB_NODE_ID = 'sb-ctx-node';
+const SB_REFERENCE_ID = 'sb-ctx-reference';
+const SB_EDGE_ID = 'sb-ctx-edge';
 
 const MENU_X = 240;
 const MENU_Y = 160;
@@ -43,6 +43,7 @@ export const ctxCanvasNode: TCanvasNode = {
   data: {
     label: 'Should canvas evaluation be voting-based?',
     status: null,
+    isAnswer: false,
     comments: [],
   },
 };

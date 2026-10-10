@@ -7,6 +7,7 @@ import type { TCanvasNode } from '@interfaces';
 import { pointerEvent } from '@mocks/browser';
 import { THREAD_ID, canvasEdge, canvasNode, questionNode, referenceNode } from '@mocks/canvas';
 import { TRANSLATIONS } from '@mocks/i18n';
+import { router } from '@mocks/navigation';
 import { EDIT_ACCESS, READONLY_ACCESS } from '@mocks/roles';
 import { ZOOM_DURATION_MS, ZOOM_MAX, ZOOM_MIN, ZOOM_STEP_FACTOR } from '@/components/Canvas/consts';
 import { useCanvasTools } from '@/components/Canvas/hooks';
@@ -14,6 +15,7 @@ import { ECanvasTool } from '@/components/tools';
 import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
+vi.mock('next/navigation', () => import('@mocks/navigation'));
 
 const onSetViewport = vi.fn();
 
@@ -78,7 +80,8 @@ describe('useCanvasTools', () => {
         act(() => harness.current.tools.onNodeDoubleClick(pointerEvent(), referenceNode('ref')));
       });
 
-      test('THEN nothing enters label editing', () => {
+      test('THEN the referenced node opens in its thread and nothing enters label editing', () => {
+        expect(router.push).toHaveBeenCalledExactlyOnceWith('/platform/ws-2/th-2?focus=ref&node=origin');
         expect(useCanvasStore.getState().editingNodeId).toBeNull();
       });
     });
@@ -155,6 +158,33 @@ describe('useCanvasTools', () => {
 
       test('THEN label editing stays off', () => {
         expect(useCanvasStore.getState().editingNodeId).toBeNull();
+      });
+    });
+
+    describe('WHEN they double-click a reference node', () => {
+      beforeEach(() => {
+        act(() => harness.current.tools.onNodeDoubleClick(pointerEvent(), referenceNode('ref')));
+      });
+
+      test('THEN the referenced node still opens in its thread', () => {
+        expect(router.push).toHaveBeenCalledExactlyOnceWith('/platform/ws-2/th-2?focus=ref&node=origin');
+      });
+    });
+
+    describe('WHEN they double-click a reference node without a source node id', () => {
+      beforeEach(() => {
+        const reference = referenceNode('ref');
+
+        act(() =>
+          harness.current.tools.onNodeDoubleClick(pointerEvent(), {
+            ...reference,
+            data: { ...reference.data, sourceNodeId: '' },
+          }),
+        );
+      });
+
+      test('THEN nothing navigates', () => {
+        expect(router.push).not.toHaveBeenCalled();
       });
     });
   });
@@ -270,33 +300,28 @@ describe('useCanvasTools', () => {
     });
   });
 
-  describe('GIVEN an editor with the invalid-path tool over a multi-selection', () => {
+  describe('GIVEN an editor with the invalid-path tool over clean nodes', () => {
     beforeEach(() => {
       usePermissionsStore.getState().setAccess('ws-1', 'user-1', EDIT_ACCESS);
       useCanvasStore.getState().loadCanvas(THREAD_ID, {
-        nodes: [canvasNode('a'), canvasNode('b'), canvasNode('c')],
+        nodes: [canvasNode('a'), canvasNode('b')],
         edges: [],
       });
       useCanvasStore.getState().setActiveTool(ECanvasTool.InvalidPath);
-      useCanvasStore.getState().onNodesChange([
-        { type: 'select', id: 'a', selected: true },
-        { type: 'select', id: 'b', selected: true },
-      ]);
 
       harness = renderHook(() => ({ tools: useCanvasTools(), flow: useStoreApi() }), {
         wrapper: ReactFlowProvider,
       }).result;
     });
 
-    describe('WHEN they click one of the selected nodes', () => {
+    describe('WHEN they click one node', () => {
       beforeEach(() => {
         act(() => harness.current.tools.onNodeClick(pointerEvent(), canvasNode('a')));
       });
 
-      test('THEN every selected node turns invalid while the rest stays clean', () => {
+      test('THEN only that node turns invalid', () => {
         expect(useCanvasStore.getState().nodes.find((node) => node.id === 'a')?.data.status).toBe('invalid');
-        expect(useCanvasStore.getState().nodes.find((node) => node.id === 'b')?.data.status).toBe('invalid');
-        expect(useCanvasStore.getState().nodes.find((node) => node.id === 'c')?.data.status).toBeNull();
+        expect(useCanvasStore.getState().nodes.find((node) => node.id === 'b')?.data.status).toBeNull();
       });
     });
   });
@@ -387,8 +412,20 @@ describe('useCanvasTools', () => {
         act(() => harness.current.tools.onNodeClick(pointerEvent(), referenceNode('ref')));
       });
 
-      test('THEN no pending source is armed', () => {
-        expect(useCanvasStore.getState().pendingConnection).toBeNull();
+      test('THEN the reference node becomes the pending source', () => {
+        expect(useCanvasStore.getState().pendingConnection).toBe('ref');
+      });
+    });
+
+    describe('WHEN they click the first node and then the reference node', () => {
+      beforeEach(() => {
+        act(() => harness.current.tools.onNodeClick(pointerEvent(), nodeAt('a', 0, 0)));
+        act(() => harness.current.tools.onNodeClick(pointerEvent(), referenceNode('ref')));
+      });
+
+      test('THEN an edge into the reference node appears', () => {
+        expect(useCanvasStore.getState().edges).toHaveLength(1);
+        expect(useCanvasStore.getState().edges[0]).toMatchObject({ source: 'a', target: 'ref' });
       });
     });
   });
@@ -413,9 +450,10 @@ describe('useCanvasTools', () => {
         act(() => harness.current.tools.onNodeClick(pointerEvent(), canvasNode('idea')));
       });
 
-      test('THEN no edge is created', () => {
-        expect(useCanvasStore.getState().edges).toHaveLength(0);
-        expect(useCanvasStore.getState().pendingConnection).toBe('ref');
+      test('THEN an edge out of the reference node appears and the handshake resets', () => {
+        expect(useCanvasStore.getState().edges).toHaveLength(1);
+        expect(useCanvasStore.getState().edges[0]).toMatchObject({ source: 'ref', target: 'idea' });
+        expect(useCanvasStore.getState().pendingConnection).toBeNull();
       });
     });
   });

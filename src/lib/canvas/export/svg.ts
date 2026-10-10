@@ -12,11 +12,10 @@ import {
   EXPORT_MIN_WIDTH,
   EXPORT_NODE_ID_ATTRIBUTE,
   EXPORT_PADDING,
-  SVG_NAMESPACE,
 } from './consts';
 import { renderExportEdges } from './edges';
 import { embedExportFonts } from './fonts';
-import { getCanvasContext, resolveExportColor, setSvgAttributes, svgElement } from './primitives';
+import { getCanvasContext, resolveExportColor, setSvgAttributes, svgElement, toXmlText } from './primitives';
 import { cloneExportNodes, createExportStage } from './stage';
 
 export const getExportBounds = (rects: IRect[]): IRect => {
@@ -86,9 +85,9 @@ const mountExportSvg = (
   graph: SVGGElement,
   { stage, defs }: ICanvasExportContext,
 ): SVGSVGElement => {
-  const svg = svgElement('svg', { xmlns: SVG_NAMESPACE, version: '1.1' });
+  const svg = svgElement('svg', { version: '1.1' });
   const title = svgElement('title');
-  title.textContent = threadName;
+  title.textContent = toXmlText(threadName);
   svg.append(title, defs, graph);
   stage.append(svg);
 

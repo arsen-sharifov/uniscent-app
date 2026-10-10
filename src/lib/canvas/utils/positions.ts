@@ -2,8 +2,8 @@ import type { Node } from '@xyflow/react';
 
 import type { INodePositionUpdate } from '@interfaces';
 
-export const detectPositionChanges = (prev: Node[], next: Node[]): INodePositionUpdate[] => {
-  const previousById = new Map(prev.map((node) => [node.id, node]));
+export const detectPositionChanges = (previous: Node[], next: Node[]): INodePositionUpdate[] => {
+  const previousById = new Map(previous.map((node) => [node.id, node]));
 
   return next.flatMap((node) => {
     const before = previousById.get(node.id);

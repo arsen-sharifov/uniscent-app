@@ -44,3 +44,13 @@ export const findLinkedNodeIds = (edges: readonly Edge[]): ReadonlySet<string> =
 
   return linked;
 };
+
+export const withReverseEdgeIds = (edges: readonly Edge[], ids: readonly string[]): string[] => {
+  const picked = edges.filter((edge) => ids.includes(edge.id));
+  const reverseIds = edges
+    .filter((edge) => !ids.includes(edge.id))
+    .filter((edge) => picked.some((pick) => pick.source === edge.target && pick.target === edge.source))
+    .map((edge) => edge.id);
+
+  return [...ids, ...reverseIds];
+};

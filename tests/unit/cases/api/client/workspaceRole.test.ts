@@ -1,6 +1,7 @@
 import { describe, expect, test, vi } from 'vitest';
 
 import { createWorkspaceRole, deleteWorkspaceRole, getWorkspaceRoles, updateWorkspaceRole } from '@api/client';
+import { ROLE_PERMISSIONS } from '@mocks/roles';
 import { workspaceRoleRow } from '@mocks/rows';
 import { primeSupabase } from '@mocks/supabase';
 
@@ -94,16 +95,7 @@ describe('createWorkspaceRole', () => {
         const { client } = primeSupabase([]);
         vi.mocked(client.rpc).mockResolvedValue({ data: 'role-9', error: null });
 
-        await expect(
-          createWorkspaceRole('ws-1', 'Reviewer', 'star', {
-            canEditCanvas: true,
-            canComment: false,
-            canManageStructure: true,
-            canManageMembers: false,
-            canManageRoles: true,
-            canManageWorkspace: false,
-          }),
-        ).resolves.toEqual('role-9');
+        await expect(createWorkspaceRole('ws-1', 'Reviewer', 'star', ROLE_PERMISSIONS)).resolves.toEqual('role-9');
       });
     });
   });
@@ -114,16 +106,7 @@ describe('createWorkspaceRole', () => {
         const { client } = primeSupabase([]);
         vi.mocked(client.rpc).mockResolvedValue({ data: null, error: new Error('db down') });
 
-        await expect(
-          createWorkspaceRole('ws-1', 'Reviewer', 'star', {
-            canEditCanvas: true,
-            canComment: false,
-            canManageStructure: true,
-            canManageMembers: false,
-            canManageRoles: true,
-            canManageWorkspace: false,
-          }),
-        ).rejects.toThrow('db down');
+        await expect(createWorkspaceRole('ws-1', 'Reviewer', 'star', ROLE_PERMISSIONS)).rejects.toThrow('db down');
       });
     });
   });
@@ -166,16 +149,7 @@ describe('updateWorkspaceRole', () => {
         const { client } = primeSupabase([]);
         vi.mocked(client.rpc).mockResolvedValue({ data: null, error: new Error('db down') });
 
-        await expect(
-          updateWorkspaceRole('role-1', 'Reviewer', 'star', {
-            canEditCanvas: false,
-            canComment: true,
-            canManageStructure: false,
-            canManageMembers: true,
-            canManageRoles: false,
-            canManageWorkspace: true,
-          }),
-        ).rejects.toThrow('db down');
+        await expect(updateWorkspaceRole('role-1', 'Reviewer', 'star', ROLE_PERMISSIONS)).rejects.toThrow('db down');
       });
     });
   });

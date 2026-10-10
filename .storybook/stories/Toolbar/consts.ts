@@ -10,6 +10,8 @@ export const EXPORT_THREAD_NAME = 'Export thread';
 
 export const exportMenuNodes: TCanvasNode[] = [createCanvasNode('claim', 40, 40, 'A node worth exporting')];
 
+export const HISTORY_TOOL_IDS = new Set<string>([ECanvasTool.Undo, ECanvasTool.Redo]);
+
 export const DENSE_DISABLED_TOOL_IDS = new Set<string>([
   ECanvasTool.Pan,
   ECanvasTool.ZoomOut,

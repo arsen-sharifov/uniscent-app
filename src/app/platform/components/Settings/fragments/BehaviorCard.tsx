@@ -1,8 +1,9 @@
 'use client';
 
 import { clsx } from 'clsx';
-import { Check } from 'lucide-react';
 import type { ReactNode } from 'react';
+
+import { SelectedPip } from './SelectedPip';
 
 interface IBehaviorCardProps {
   diorama: ReactNode;
@@ -39,15 +40,7 @@ export const BehaviorCard = ({ diorama, label, description, checked, onChange }:
         <span className="truncate font-grotesk text-[16px] leading-none font-semibold tracking-tight text-[color:var(--text-strong)]">
           {label}
         </span>
-        <span
-          aria-hidden={!checked}
-          className={clsx(
-            'flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-[color:var(--accent)] text-[color:var(--on-accent)] shadow-[var(--shadow-pip)] transition-[opacity,transform] duration-200 ease-out motion-reduce:transition-none',
-            checked ? 'scale-100 opacity-100' : 'scale-50 opacity-0',
-          )}
-        >
-          <Check className="h-2.5 w-2.5" strokeWidth={3} />
-        </span>
+        <SelectedPip active={checked} />
       </div>
       <span className="font-mono-ui text-[10px] font-bold tracking-[0.14em] text-[color:var(--text-label)] uppercase">
         {description}

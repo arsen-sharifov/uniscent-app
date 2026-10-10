@@ -157,13 +157,28 @@ describe('canvasStore', () => {
       });
     });
 
-    describe('WHEN they remove the foreign node through node changes', () => {
+    describe('WHEN they delete the foreign node with the delete key', () => {
       beforeEach(() => {
-        useCanvasStore.getState().onNodesChange([{ type: 'remove', id: 'foreign' }]);
+        useCanvasStore.getState().deleteElements(['foreign'], []);
       });
 
-      test('THEN the node stays in state', () => {
+      test('THEN the node and its edge stay and nothing is emitted', () => {
         expect(useCanvasStore.getState().nodes).toHaveLength(2);
+        expect(useCanvasStore.getState().edges).toHaveLength(1);
+        expect(onOperation).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('WHEN React Flow reports node and edge removals as changes', () => {
+      beforeEach(() => {
+        useCanvasStore.getState().onEdgesChange([{ type: 'remove', id: 'e1' }]);
+        useCanvasStore.getState().onNodesChange([{ type: 'remove', id: 'own' }]);
+      });
+
+      test('THEN the changes are ignored because deletions go through deleteElements', () => {
+        expect(useCanvasStore.getState().nodes).toHaveLength(2);
+        expect(useCanvasStore.getState().edges).toHaveLength(1);
+        expect(onOperation).not.toHaveBeenCalled();
       });
     });
 
@@ -213,9 +228,9 @@ describe('canvasStore', () => {
       });
     });
 
-    describe('WHEN they remove the edge through edge changes', () => {
+    describe('WHEN they delete the selected edge with the delete key', () => {
       beforeEach(() => {
-        useCanvasStore.getState().onEdgesChange([{ type: 'remove', id: 'e1' }]);
+        useCanvasStore.getState().deleteElements([], ['e1']);
       });
 
       test('THEN the edge is removed and a delete operation is emitted', () => {
@@ -224,14 +239,38 @@ describe('canvasStore', () => {
       });
     });
 
-    describe('WHEN they remove their own node through node changes', () => {
+    describe('WHEN they delete their own node with the delete key', () => {
       beforeEach(() => {
-        useCanvasStore.getState().onNodesChange([{ type: 'remove', id: 'own' }]);
+        useCanvasStore.getState().deleteElements(['own'], []);
       });
 
-      test('THEN the node is removed and a delete operation is emitted', () => {
+      test('THEN the node and its edge are removed', () => {
         expect(useCanvasStore.getState().nodes.map((node) => node.id)).toEqual(['foreign']);
+        expect(useCanvasStore.getState().edges).toHaveLength(0);
+      });
+
+      test('THEN only the node delete is emitted because the database removes its edges', () => {
         expect(onOperation).toHaveBeenCalledExactlyOnceWith({ type: 'deleteNode', id: 'own' });
+      });
+    });
+
+    describe('WHEN a delete key deletion of their own node is undone once', () => {
+      beforeEach(() => {
+        useCanvasStore.getState().deleteElements(['own'], []);
+        onOperation.mockClear();
+        useCanvasStore.getState().undo();
+      });
+
+      test('THEN the node and its edge come back in one step', () => {
+        expect(useCanvasStore.getState().nodes.map((node) => node.id)).toEqual(['own', 'foreign']);
+        expect(useCanvasStore.getState().edges.map((edge) => edge.id)).toEqual(['e1']);
+      });
+
+      test('THEN the node and the edge are created again', () => {
+        expect(onOperation.mock.calls.map(([operation]) => operation)).toEqual([
+          expect.objectContaining({ type: 'createCanvasNode', id: 'own' }),
+          expect.objectContaining({ type: 'createEdge', id: 'e1', source: 'own', target: 'foreign' }),
+        ]);
       });
     });
 
@@ -404,13 +443,14 @@ describe('canvasStore', () => {
       });
     });
 
-    describe('WHEN they try to remove their own node through node changes', () => {
+    describe('WHEN they try to delete their own node with the delete key', () => {
       beforeEach(() => {
-        useCanvasStore.getState().onNodesChange([{ type: 'remove', id: 'n1' }]);
+        useCanvasStore.getState().deleteElements(['n1'], []);
       });
 
-      test('THEN the node stays in state', () => {
+      test('THEN the node stays in state and nothing is emitted', () => {
         expect(useCanvasStore.getState().nodes).toHaveLength(2);
+        expect(onOperation).not.toHaveBeenCalled();
       });
     });
 
@@ -428,13 +468,14 @@ describe('canvasStore', () => {
       });
     });
 
-    describe('WHEN they try to remove an edge through edge changes', () => {
+    describe('WHEN they try to delete the edge with the delete key', () => {
       beforeEach(() => {
-        useCanvasStore.getState().onEdgesChange([{ type: 'remove', id: 'e1' }]);
+        useCanvasStore.getState().deleteElements([], ['e1']);
       });
 
-      test('THEN the edge stays in state', () => {
+      test('THEN the edge stays in state and nothing is emitted', () => {
         expect(useCanvasStore.getState().edges).toHaveLength(1);
+        expect(onOperation).not.toHaveBeenCalled();
       });
     });
 
@@ -479,7 +520,7 @@ describe('canvasStore', () => {
 
     describe('WHEN they try to change a status or the answer', () => {
       beforeEach(() => {
-        useCanvasStore.getState().setNodesStatus(['n1'], 'valid');
+        useCanvasStore.getState().setNodeStatus('n1', 'valid');
         useCanvasStore.getState().setNodeAnswer('n1');
       });
 
@@ -619,7 +660,7 @@ describe('canvasStore', () => {
 
     describe('WHEN the child of a valid node is marked valid', () => {
       beforeEach(() => {
-        useCanvasStore.getState().setNodesStatus(['n2'], 'valid');
+        useCanvasStore.getState().setNodeStatus('n2', 'valid');
       });
 
       test('THEN its status updates', () => {
@@ -635,7 +676,7 @@ describe('canvasStore', () => {
 
     describe('WHEN an orphan node is marked valid', () => {
       beforeEach(() => {
-        useCanvasStore.getState().setNodesStatus(['n3'], 'valid');
+        useCanvasStore.getState().setNodeStatus('n3', 'valid');
       });
 
       test('THEN nothing changes and nothing is emitted', () => {
@@ -648,7 +689,7 @@ describe('canvasStore', () => {
 
     describe('WHEN an already valid node is marked valid again', () => {
       beforeEach(() => {
-        useCanvasStore.getState().setNodesStatus(['n1'], 'valid');
+        useCanvasStore.getState().setNodeStatus('n1', 'valid');
       });
 
       test('THEN the status toggles off', () => {
@@ -664,7 +705,7 @@ describe('canvasStore', () => {
 
     describe('WHEN an orphan node is marked invalid', () => {
       beforeEach(() => {
-        useCanvasStore.getState().setNodesStatus(['n3'], 'invalid');
+        useCanvasStore.getState().setNodeStatus('n3', 'invalid');
       });
 
       test('THEN the status applies without a validated parent', () => {
@@ -732,7 +773,7 @@ describe('canvasStore', () => {
     describe('WHEN the answer is toggled off after its parent lost validation', () => {
       beforeEach(() => {
         useCanvasStore.getState().setNodeAnswer('n2');
-        useCanvasStore.getState().setNodesStatus(['n1'], 'valid');
+        useCanvasStore.getState().setNodeStatus('n1', 'valid');
         onOperation.mockClear();
         useCanvasStore.getState().setNodeAnswer('n2');
       });
@@ -745,52 +786,16 @@ describe('canvasStore', () => {
       });
     });
 
-    describe('WHEN a mixed selection is marked valid', () => {
+    describe('WHEN the question node is marked valid', () => {
       beforeEach(() => {
-        useCanvasStore.getState().setNodesStatus(['n1', 'n2'], 'valid');
+        useCanvasStore.getState().setNodeStatus('q', 'valid');
       });
 
-      test('THEN both nodes align on valid instead of toggling', () => {
-        expect(useCanvasStore.getState().nodes.find((node) => node.id === 'n1')).toMatchObject({
-          data: { status: 'valid' },
-        });
-        expect(useCanvasStore.getState().nodes.find((node) => node.id === 'n2')).toMatchObject({
-          data: { status: 'valid' },
-        });
-        expect(onOperation).toHaveBeenCalledTimes(2);
-      });
-    });
-
-    describe('WHEN a uniformly valid selection is marked valid again', () => {
-      beforeEach(() => {
-        useCanvasStore.getState().setNodesStatus(['n1', 'n2'], 'valid');
-        onOperation.mockClear();
-        useCanvasStore.getState().setNodesStatus(['n1', 'n2'], 'valid');
-      });
-
-      test('THEN the whole selection toggles off', () => {
-        expect(useCanvasStore.getState().nodes.find((node) => node.id === 'n1')).toMatchObject({
-          data: { status: null },
-        });
-        expect(useCanvasStore.getState().nodes.find((node) => node.id === 'n2')).toMatchObject({
-          data: { status: null },
-        });
-        expect(onOperation).toHaveBeenCalledTimes(2);
-        expect(onOperation).toHaveBeenCalledWith({ type: 'updateNodeStatus', id: 'n1', status: null });
-        expect(onOperation).toHaveBeenCalledWith({ type: 'updateNodeStatus', id: 'n2', status: null });
-      });
-    });
-
-    describe('WHEN the selection includes the question node', () => {
-      beforeEach(() => {
-        useCanvasStore.getState().setNodesStatus(['q', 'n2'], 'valid');
-      });
-
-      test('THEN only the canvas node updates', () => {
+      test('THEN nothing changes and nothing is emitted', () => {
         expect(useCanvasStore.getState().nodes.find((node) => node.id === 'q')).toMatchObject({
           data: { status: null },
         });
-        expect(onOperation).toHaveBeenCalledExactlyOnceWith({ type: 'updateNodeStatus', id: 'n2', status: 'valid' });
+        expect(onOperation).not.toHaveBeenCalled();
       });
     });
 
@@ -1311,6 +1316,96 @@ describe('canvasStore', () => {
 
       test('THEN the position clears', () => {
         expect(useCanvasStore.getState().referenceSearchPosition).toBeNull();
+      });
+    });
+  });
+
+  describe('GIVEN an editor with a bidirectional pair and a one-way edge', () => {
+    beforeEach(() => {
+      usePermissionsStore.getState().setAccess('ws-1', 'user-1', EDIT_ACCESS);
+      useCanvasStore.getState().loadCanvas(THREAD_ID, {
+        nodes: [canvasNode('a'), canvasNode('b', { createdBy: 'user-1' }), canvasNode('c')],
+        edges: [canvasEdge('ab', 'a', 'b'), canvasEdge('ba', 'b', 'a'), canvasEdge('bc', 'b', 'c')],
+      });
+      unsubscribers.push(subscribeCanvasOperations(onOperation));
+    });
+
+    describe('WHEN they delete one direction of the pair', () => {
+      beforeEach(() => {
+        useCanvasStore.getState().deleteEdge('ab');
+      });
+
+      test('THEN both directions disappear and the one-way edge stays', () => {
+        expect(useCanvasStore.getState().edges.map((edge) => edge.id)).toEqual(['bc']);
+      });
+
+      test('THEN a delete operation is emitted for each direction', () => {
+        expect(onOperation.mock.calls.map(([operation]) => operation)).toEqual([
+          { type: 'deleteEdge', id: 'ab' },
+          { type: 'deleteEdge', id: 'ba' },
+        ]);
+      });
+    });
+
+    describe('WHEN they delete the rendered direction of the pair with the delete key', () => {
+      beforeEach(() => {
+        useCanvasStore.getState().deleteElements([], ['ab']);
+      });
+
+      test('THEN both directions disappear and the one-way edge stays', () => {
+        expect(useCanvasStore.getState().edges.map((edge) => edge.id)).toEqual(['bc']);
+      });
+
+      test('THEN a delete operation is emitted for each direction', () => {
+        expect(onOperation.mock.calls.map(([operation]) => operation)).toEqual([
+          { type: 'deleteEdge', id: 'ab' },
+          { type: 'deleteEdge', id: 'ba' },
+        ]);
+      });
+    });
+
+    describe('WHEN they delete the shared node together with one direction of the pair', () => {
+      beforeEach(() => {
+        useCanvasStore.getState().deleteElements(['b'], ['ab']);
+      });
+
+      test('THEN the node and every edge touching it disappear', () => {
+        expect(useCanvasStore.getState().nodes.map((node) => node.id)).toEqual(['a', 'c']);
+        expect(useCanvasStore.getState().edges).toEqual([]);
+      });
+
+      test('THEN only the node delete is emitted because the database removes its edges', () => {
+        expect(onOperation).toHaveBeenCalledExactlyOnceWith({ type: 'deleteNode', id: 'b' });
+      });
+    });
+
+    describe('WHEN they delete the one-way edge', () => {
+      beforeEach(() => {
+        useCanvasStore.getState().deleteEdge('bc');
+      });
+
+      test('THEN only that edge disappears', () => {
+        expect(useCanvasStore.getState().edges.map((edge) => edge.id)).toEqual(['ab', 'ba']);
+        expect(onOperation).toHaveBeenCalledExactlyOnceWith({ type: 'deleteEdge', id: 'bc' });
+      });
+    });
+
+    describe('WHEN the deletion of the pair is undone', () => {
+      beforeEach(() => {
+        useCanvasStore.getState().deleteEdge('ab');
+        onOperation.mockClear();
+        useCanvasStore.getState().undo();
+      });
+
+      test('THEN both directions come back in one step', () => {
+        expect(useCanvasStore.getState().edges.map((edge) => edge.id)).toEqual(['ab', 'ba', 'bc']);
+      });
+
+      test('THEN a create operation is replayed for each direction', () => {
+        expect(onOperation.mock.calls.map(([operation]) => operation)).toEqual([
+          expect.objectContaining({ type: 'createEdge', id: 'ab', source: 'a', target: 'b' }),
+          expect.objectContaining({ type: 'createEdge', id: 'ba', source: 'b', target: 'a' }),
+        ]);
       });
     });
   });

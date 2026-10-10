@@ -1,23 +1,20 @@
 import type { IOnboardingProgress, IOnboardingRow } from '@interfaces';
 
 import { createClient } from '@/lib/supabase';
-import { isGuideId } from '@/lib/utils';
 
-import { getCurrentUserId } from './utils';
-
-const SELECT_COLUMNS = 'offer_answered, completed_guides';
+import { ONBOARDING_SELECT } from './consts';
+import { getCurrentUserId, toOnboardingProgress } from './utils';
 
 export const getOnboarding = async (): Promise<IOnboardingProgress | null> => {
   const supabase = createClient();
-  const { data, error } = await supabase.from('user_onboarding').select(SELECT_COLUMNS).maybeSingle<IOnboardingRow>();
+  const { data, error } = await supabase
+    .from('user_onboarding')
+    .select(ONBOARDING_SELECT)
+    .maybeSingle<IOnboardingRow>();
 
   if (error) throw error;
-  if (!data) return null;
 
-  return {
-    offerAnswered: data.offer_answered,
-    completedGuides: data.completed_guides.filter(isGuideId),
-  };
+  return data ? toOnboardingProgress(data) : null;
 };
 
 export const upsertOnboarding = async (progress: IOnboardingProgress): Promise<void> => {

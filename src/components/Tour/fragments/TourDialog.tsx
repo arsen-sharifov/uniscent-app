@@ -6,11 +6,12 @@ interface ITourDialogProps {
   open: boolean;
   onClose: () => void;
   width: string;
+  labelledBy: string;
   children: ReactNode;
 }
 
-export const TourDialog = ({ open, onClose, width, children }: ITourDialogProps) => (
-  <Modal open={open} onClose={onClose} width={width} layerClassName="z-80">
+export const TourDialog = ({ open, onClose, width, labelledBy, children }: ITourDialogProps) => (
+  <Modal open={open} onClose={onClose} width={width} layerClassName="z-80" labelledBy={labelledBy}>
     <div data-tour-panel className="p-6">
       {children}
     </div>

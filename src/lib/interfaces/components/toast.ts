@@ -1,3 +1,5 @@
+import type { LucideIcon } from 'lucide-react';
+
 import type { TErrorCategory } from '@interfaces';
 
 export type TToastType = 'success' | 'info' | 'warning' | 'error';
@@ -19,6 +21,12 @@ interface IErrorToast extends IToastBase {
 export type TToastDraft = IMessageToast | IErrorToast;
 
 export type TToast = TToastDraft & { id: string };
+
+export interface IToastVisual {
+  icon: LucideIcon;
+  iconClassName: string;
+  spineClassName: string;
+}
 
 export interface IToastOptions {
   title?: string;

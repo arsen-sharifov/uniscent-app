@@ -2,17 +2,21 @@
 
 import { useTranslations } from '@/i18n';
 
-import { COLLAB_VIGNETTE_EDGES, COLLAB_VIGNETTE_INTERVAL_MS, COLLAB_VIGNETTE_PHASES } from '../../consts';
+import {
+  COLLABORATION_VIGNETTE_EDGES,
+  COLLABORATION_VIGNETTE_INTERVAL_MS,
+  COLLABORATION_VIGNETTE_PHASES,
+} from '../../consts';
 import { useVignettePhase } from '../../hooks';
 import { CanvasVignette } from '../CanvasVignette';
 import { MiniNode } from '../MiniNode';
 
 export const CollaborationVignette = () => {
   const t = useTranslations();
-  const commentCount = useVignettePhase(COLLAB_VIGNETTE_PHASES, COLLAB_VIGNETTE_INTERVAL_MS) + 1;
+  const commentCount = useVignettePhase(COLLABORATION_VIGNETTE_PHASES, COLLABORATION_VIGNETTE_INTERVAL_MS) + 1;
 
   return (
-    <CanvasVignette edges={COLLAB_VIGNETTE_EDGES} className="h-40">
+    <CanvasVignette edges={COLLABORATION_VIGNETTE_EDGES} className="h-40">
       <MiniNode
         nodeId="cv-a"
         tone="valid"

@@ -1,6 +1,6 @@
 name: Feature
 description: New functionality
-title: 'feat: '
+title: 'DEV: '
 labels: [feat]
 body:
   - type: textarea

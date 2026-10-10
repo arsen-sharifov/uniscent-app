@@ -13,7 +13,6 @@ const meta: Meta<typeof ReferenceSearchPanel> = {
   title: 'Components/Canvas/ReferenceSearchPanel',
   component: ReferenceSearchPanel,
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:

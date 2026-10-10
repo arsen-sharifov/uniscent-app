@@ -12,7 +12,6 @@ type TIconStoryArgs = Omit<ComponentProps<typeof IconGallery>, 'onCopy'>;
 const meta: Meta<TIconStoryArgs> = {
   title: 'Foundations/Icons',
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:
@@ -87,16 +86,16 @@ export const SizeBenchmark: Story = {
         data-visual-target
         className="flex items-end gap-6 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-elevated)] px-8 py-6"
       >
-        {BENCHMARK_SIZES.map((px) => (
-          <div key={px} className="flex flex-col items-center gap-2 text-[color:var(--text)]">
+        {BENCHMARK_SIZES.map((size) => (
+          <div key={size} className="flex flex-col items-center gap-2 text-[color:var(--text)]">
             <Sparkles
-              size={px}
+              size={size}
               color={args.color}
               strokeWidth={args.strokeWidth}
               absoluteStrokeWidth={args.absoluteStrokeWidth}
             />
             <span className="font-mono-ui text-[10px] tracking-[0.18em] text-[color:var(--text-subtle)] uppercase">
-              {px}px
+              {size}px
             </span>
           </div>
         ))}

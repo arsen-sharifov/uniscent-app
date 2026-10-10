@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { buildReferenceUrl } from '@/components/Canvas/utils';
+import { canvasNode, referenceNode } from '@mocks/canvas';
+import { buildReferenceTargetUrl, buildReferenceUrl } from '@/components/Canvas/utils';
 
 describe('buildReferenceUrl', () => {
   describe('GIVEN a workspace and a thread', () => {
@@ -40,6 +41,42 @@ describe('buildReferenceUrl', () => {
       test('THEN no url is produced', () => {
         expect(buildReferenceUrl('', 'th-1')).toBeNull();
         expect(buildReferenceUrl('ws-1', '')).toBeNull();
+      });
+    });
+  });
+});
+
+describe('buildReferenceTargetUrl', () => {
+  describe('GIVEN reference data pointing at a complete source', () => {
+    describe('WHEN the target url is built', () => {
+      test('THEN it focuses the source node inside its thread', () => {
+        expect(buildReferenceTargetUrl(referenceNode('r1').data)).toBe('/platform/ws-2/th-2?focus=ref&node=origin');
+      });
+    });
+  });
+
+  describe('GIVEN reference data without a source node', () => {
+    describe('WHEN the target url is built', () => {
+      test('THEN no url is produced', () => {
+        expect(buildReferenceTargetUrl({ ...referenceNode('r1').data, sourceNodeId: '' })).toBeNull();
+      });
+    });
+  });
+
+  describe('GIVEN reference data with an empty workspace or thread', () => {
+    describe('WHEN the target url is built', () => {
+      test('THEN no url is produced', () => {
+        expect(buildReferenceTargetUrl({ ...referenceNode('r1').data, sourceWorkspaceId: '' })).toBeNull();
+        expect(buildReferenceTargetUrl({ ...referenceNode('r1').data, sourceThreadId: '' })).toBeNull();
+      });
+    });
+  });
+
+  describe('GIVEN data that is not a reference', () => {
+    describe('WHEN the target url is built', () => {
+      test('THEN no url is produced', () => {
+        expect(buildReferenceTargetUrl(canvasNode('n1').data)).toBeNull();
+        expect(buildReferenceTargetUrl({ ...referenceNode('r1').data, sourceNodeId: 7 })).toBeNull();
       });
     });
   });

@@ -1,17 +1,20 @@
 import { describe, expect, test, vi } from 'vitest';
 
 import { ECanvasNodeType } from '@interfaces';
-import { countReferenceTargets, getCanvasContent, searchReferenceTargets } from '@api/client';
+import { countReferenceTargets, getCanvasContent, IDS_PER_REQUEST, searchReferenceTargets } from '@api/client';
 import { canvasEdgeRow, canvasNodeRow, canvasNodeWithThreadRow, nodeCommentRow } from '@mocks/rows';
 import { primeSupabase } from '@mocks/supabase';
 
 vi.mock('@/lib/supabase', () => import('@mocks/supabase'));
+
+const THREAD_ROW = { data: { id: 'th-1' } };
 
 describe('getCanvasContent', () => {
   describe('GIVEN a thread with a canvas node, a reference node and a comment', () => {
     describe('WHEN the canvas content is assembled', () => {
       test('THEN nodes carry their grouped comments and resolved reference meta', async () => {
         primeSupabase([
+          THREAD_ROW,
           {
             data: [
               canvasNodeRow(),
@@ -36,7 +39,7 @@ describe('getCanvasContent', () => {
           },
         ]);
 
-        await expect(getCanvasContent('th-1')).resolves.toEqual({
+        await expect(getCanvasContent('ws-1', 'th-1')).resolves.toEqual({
           nodes: [
             {
               id: 'n1',
@@ -74,10 +77,46 @@ describe('getCanvasContent', () => {
     });
   });
 
+  describe('GIVEN a canvas with more reference nodes than one request may carry ids for', () => {
+    describe('WHEN the canvas content is assembled', () => {
+      test('THEN the reference targets are read in bounded requests and every reference keeps its source meta', async () => {
+        const sourceIds = Array.from({ length: IDS_PER_REQUEST + 1 }, (_, index) => `origin-${index}`);
+        const targets = sourceIds.map((sourceId) =>
+          canvasNodeWithThreadRow({ id: sourceId, label: `Label ${sourceId}` }),
+        );
+        const { queries } = primeSupabase([
+          THREAD_ROW,
+          {
+            data: sourceIds.map((sourceId) =>
+              canvasNodeRow({ id: `ref-${sourceId}`, type: ECanvasNodeType.Reference, source_node_id: sourceId }),
+            ),
+          },
+          { data: [] },
+          { data: [] },
+          { data: [] },
+          { data: targets.slice(0, IDS_PER_REQUEST) },
+          { data: targets.slice(IDS_PER_REQUEST) },
+        ]);
+        const targetFilters = [vi.spyOn(queries[5]!, 'in'), vi.spyOn(queries[6]!, 'in')];
+
+        await expect(getCanvasContent('ws-1', 'th-1')).resolves.toMatchObject({
+          nodes: sourceIds.map((sourceId) => ({
+            data: { sourceNodeId: sourceId, sourceNodeLabel: `Label ${sourceId}` },
+          })),
+        });
+        expect(targetFilters.map((filter) => filter.mock.calls)).toEqual([
+          [['id', sourceIds.slice(0, IDS_PER_REQUEST)]],
+          [['id', [`origin-${IDS_PER_REQUEST}`]]],
+        ]);
+      });
+    });
+  });
+
   describe('GIVEN two canvas nodes each with their own comments', () => {
     describe('WHEN the canvas content is assembled', () => {
       test('THEN each node receives only its own grouped comments', async () => {
         primeSupabase([
+          THREAD_ROW,
           { data: [canvasNodeRow(), canvasNodeRow({ id: 'n2', label: 'Second' })] },
           { data: [] },
           {
@@ -89,7 +128,7 @@ describe('getCanvasContent', () => {
           },
         ]);
 
-        await expect(getCanvasContent('th-1')).resolves.toMatchObject({
+        await expect(getCanvasContent('ws-1', 'th-1')).resolves.toMatchObject({
           nodes: [
             expect.objectContaining({
               id: 'n1',
@@ -116,6 +155,7 @@ describe('getCanvasContent', () => {
     describe('WHEN the canvas content is assembled', () => {
       test('THEN the reference falls back to the row label and empty source fields', async () => {
         primeSupabase([
+          THREAD_ROW,
           {
             data: [
               canvasNodeRow({ id: 'ref1', type: ECanvasNodeType.Reference, source_node_id: 'gone', label: 'Ref' }),
@@ -126,7 +166,7 @@ describe('getCanvasContent', () => {
           { data: [] },
         ]);
 
-        await expect(getCanvasContent('th-1')).resolves.toMatchObject({
+        await expect(getCanvasContent('ws-1', 'th-1')).resolves.toMatchObject({
           nodes: [
             expect.objectContaining({
               id: 'ref1',
@@ -148,13 +188,28 @@ describe('getCanvasContent', () => {
   describe('GIVEN a thread without reference nodes', () => {
     describe('WHEN the canvas content is assembled', () => {
       test('THEN the reference target lookup is skipped', async () => {
-        const { client } = primeSupabase([{ data: [canvasNodeRow()] }, { data: [] }, { data: [] }]);
+        const { client } = primeSupabase([THREAD_ROW, { data: [canvasNodeRow()] }, { data: [] }, { data: [] }]);
 
-        await expect(getCanvasContent('th-1')).resolves.toMatchObject({
+        await expect(getCanvasContent('ws-1', 'th-1')).resolves.toMatchObject({
           nodes: [expect.objectContaining({ id: 'n1' })],
           edges: [],
         });
-        expect(client.from).toHaveBeenCalledTimes(3);
+        expect(client.from).toHaveBeenCalledTimes(4);
+      });
+    });
+  });
+
+  describe('GIVEN a thread that belongs to another workspace than the one in the address', () => {
+    describe('WHEN the canvas content is assembled', () => {
+      test('THEN it refuses to load the foreign canvas under this workspace', async () => {
+        const { client } = primeSupabase([
+          { data: null, error: { code: 'PGRST116', message: 'no rows' } },
+          { data: [canvasNodeRow()] },
+          { data: [] },
+        ]);
+
+        await expect(getCanvasContent('ws-1', 'th-foreign')).rejects.toMatchObject({ code: 'PGRST116' });
+        expect(client.from).not.toHaveBeenCalledWith('node_comments');
       });
     });
   });

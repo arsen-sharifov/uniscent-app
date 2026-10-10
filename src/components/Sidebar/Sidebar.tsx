@@ -1,7 +1,7 @@
 'use client';
 
-import { Files, FolderPlus, LayoutGrid, Plus, SearchX, Sparkles } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState, type MouseEvent, type ReactNode } from 'react';
+import { Files, FolderPlus, LayoutGrid, Plus, Sparkles } from 'lucide-react';
+import { useMemo, useState, type MouseEvent, type ReactNode } from 'react';
 
 import type { TDeleteTarget, TNavItem, TNavItemType, IWorkspaceItem, IMyInvitation } from '@interfaces';
 import { useEscapeKey } from '@hooks';
@@ -10,17 +10,20 @@ import { ConfirmDialog } from '@/components/Modal';
 import { useTranslations } from '@/i18n';
 import { usePermissionsStore } from '@/lib/stores';
 
+import { SINGLE_DELETE_TITLE_KEYS } from './consts';
 import {
   BulkActionsBar,
   EmptyState,
   MoveDialog,
   NavItems,
+  SearchEmptyState,
   SearchInput,
   SidebarSkeleton,
+  StructureActionButton,
   WorkspaceSwitcher,
 } from './fragments';
 import { useInlineEdit, useSelection } from './hooks';
-import { filterTree, getSiblings, getSingleDeleteTitleKey } from './utils';
+import { collectIds, filterTree, getSiblings } from './utils';
 
 export interface ISidebarProps {
   items?: TNavItem[];
@@ -45,7 +48,7 @@ export interface ISidebarProps {
   invitations?: IMyInvitation[];
   onAcceptInvitation?: (invitation: IMyInvitation) => void;
   onDeclineInvitation?: (invitation: IMyInvitation) => void;
-  onMoveItem?: (id: string, type: TNavItemType, parentId: string | null, position: number) => void;
+  onMoveItem?: (id: string, parentId: string | null, position: number) => void;
   onBulkDelete?: (ids: Set<string>) => void;
   onBulkMove?: (ids: Set<string>, parentId: string | null, position: number) => void;
   onBulkDeleteWorkspaces?: (ids: Set<string>) => void;
@@ -84,80 +87,23 @@ export const Sidebar = ({
   footer,
 }: ISidebarProps) => {
   const t = useTranslations();
-  const canManageStructure = usePermissionsStore((s) => s.canManageStructure);
+  const canManageStructure = usePermissionsStore((state) => state.canManageStructure);
 
-  const {
-    selectedIds,
-    setSelectedIds,
-    toggleSelection,
-    selectRange,
-    clearSelection,
-    clearAndSetAnchor,
-    selectionCount,
-  } = useSelection();
-
-  const {
-    selectedIds: workspaceSelectedIds,
-    setSelectedIds: setWorkspaceSelectedIds,
-    toggleSelection: toggleWorkspaceSelection,
-    selectRange: workspaceSelectRange,
-    clearSelection: clearWorkspaceSelection,
-    clearAndSetAnchor: clearAndSetAnchorWorkspace,
-  } = useSelection();
-
-  const allItemIds = useMemo(() => {
-    const collect = (list: TNavItem[]): string[] =>
-      list.flatMap((item) => (item.type === 'folder' ? [item.id, ...collect(item.items)] : [item.id]));
-
-    return new Set(collect(items));
-  }, [items]);
-
-  useEffect(() => {
-    setSelectedIds((prev) => {
-      const next = new Set([...prev].filter((id) => allItemIds.has(id)));
-
-      return next.size === prev.size ? prev : next;
-    });
-  }, [allItemIds, setSelectedIds]);
-
+  const selectableItemIds = useMemo(() => new Set(collectIds(items)), [items]);
   const allWorkspaceIds = useMemo(() => new Set(workspaces.map((workspace) => workspace.id)), [workspaces]);
 
-  useEffect(() => {
-    setWorkspaceSelectedIds((prev) => {
-      const next = new Set([...prev].filter((id) => allWorkspaceIds.has(id)));
-
-      return next.size === prev.size ? prev : next;
-    });
-  }, [allWorkspaceIds, setWorkspaceSelectedIds]);
-
-  const handleWorkspaceClick = useCallback(
-    (id: string, event: MouseEvent) => {
-      if (event.shiftKey) {
-        workspaceSelectRange(id, workspaces);
-
-        return;
-      }
-      if (event.ctrlKey || event.metaKey) {
-        toggleWorkspaceSelection(id);
-
-        return;
-      }
-      clearAndSetAnchorWorkspace(id);
-      onWorkspaceSelect?.(id);
-    },
-    [workspaces, workspaceSelectRange, toggleWorkspaceSelection, clearAndSetAnchorWorkspace, onWorkspaceSelect],
-  );
-
+  const { selectedIds, setSelectedIds, selectOnClick, clearSelection, selectionCount } =
+    useSelection(selectableItemIds);
   const {
-    editingId: workspaceEditingId,
-    editValue: workspaceEditValue,
-    setEditValue: setWorkspaceEditValue,
-    inputRef: workspaceInputRef,
-    startEditing: startWorkspaceEditing,
-    commitRename: commitWorkspaceRename,
-    cancelEditing: cancelWorkspaceEditing,
-    handleKeyDown: handleWorkspaceKeyDown,
-  } = useInlineEdit({
+    selectedIds: workspaceSelectedIds,
+    selectOnClick: selectWorkspaceOnClick,
+    clearSelection: clearWorkspaceSelection,
+  } = useSelection(allWorkspaceIds);
+
+  const handleWorkspaceClick = (id: string, event: MouseEvent) =>
+    selectWorkspaceOnClick(id, event, workspaces, onWorkspaceSelect);
+
+  const workspaceEdit = useInlineEdit({
     items: workspaces,
     autoEditId: editingWorkspaceId,
     onAutoEditHandled: onWorkspaceEditingComplete,
@@ -170,14 +116,8 @@ export const Sidebar = ({
 
   const filteredItems = useMemo(() => filterTree(items, query.trim()), [items, query]);
 
-  const handleWorkspaceBulkDelete = useCallback(() => {
-    setDeleteTarget({
-      mode: 'bulk',
-      scope: 'workspace',
-      ids: workspaceSelectedIds,
-      count: workspaceSelectedIds.size,
-    });
-  }, [workspaceSelectedIds]);
+  const handleWorkspaceBulkDelete = () =>
+    setDeleteTarget({ mode: 'bulk', scope: 'workspace', ids: workspaceSelectedIds });
 
   const confirmDelete = () => {
     if (!deleteTarget) return;
@@ -201,44 +141,34 @@ export const Sidebar = ({
     if (!deleteTarget) return '';
     if (deleteTarget.mode === 'bulk') return t.platform.sidebar.bulkDeleteTitle;
 
-    return t.platform.sidebar[getSingleDeleteTitleKey(deleteTarget.type)];
+    return t.platform.sidebar[SINGLE_DELETE_TITLE_KEYS[deleteTarget.type]];
   };
 
-  const getDeleteMessage = () => {
-    if (!deleteTarget) return '';
+  const renderDeleteMessage = () => {
+    if (!deleteTarget) return null;
     if (deleteTarget.mode === 'bulk') return t.platform.sidebar.bulkDeleteConfirm;
 
-    return `${t.platform.sidebar.deleteConfirmPrefix} "${deleteTarget.name}"${t.platform.sidebar.deleteConfirmSuffix}`;
+    return (
+      <>
+        {t.platform.sidebar.deleteConfirmPrefix} &quot;<bdi>{deleteTarget.name}</bdi>&quot;
+        {t.platform.sidebar.deleteConfirmSuffix}
+      </>
+    );
   };
 
-  const deleteTitle = getDeleteTitle();
-  const deleteMessage = getDeleteMessage();
+  const handleBulkDelete = () => setDeleteTarget({ mode: 'bulk', scope: 'navItem', ids: selectedIds });
 
-  const handleBulkDelete = useCallback(() => {
-    setDeleteTarget({
-      mode: 'bulk',
-      scope: 'navItem',
-      ids: selectedIds,
-      count: selectionCount,
-    });
-  }, [selectedIds, selectionCount]);
-
-  const handleRequestDelete = useCallback((id: string, name: string, type: TNavItemType) => {
+  const handleRequestDelete = (id: string, name: string, type: 'workspace' | TNavItemType) =>
     setDeleteTarget({ mode: 'single', id, name, type });
-  }, []);
 
-  const handleBulkMoveConfirm = useCallback(
-    (targetParentId: string | null) => {
-      const targetSiblings = getSiblings(items, targetParentId);
-      const position = targetSiblings.filter((sibling) => !selectedIds.has(sibling.id)).length;
-      onBulkMove?.(selectedIds, targetParentId, position);
-      clearSelection();
-      setShowMoveDialog(false);
-    },
-    [items, selectedIds, onBulkMove, clearSelection],
-  );
+  const handleBulkMoveConfirm = (targetParentId: string | null) => {
+    const position = getSiblings(items, targetParentId).filter((sibling) => !selectedIds.has(sibling.id)).length;
+    onBulkMove?.(selectedIds, targetParentId, position);
+    clearSelection();
+    setShowMoveDialog(false);
+  };
 
-  useEscapeKey(clearSelection, selectionCount > 0);
+  useEscapeKey(clearSelection, selectionCount > 0 && deleteTarget === null && !showMoveDialog);
 
   const isSearching = query.trim().length > 0;
   const showSearchEmpty = isSearching && filteredItems.length === 0;
@@ -258,24 +188,10 @@ export const Sidebar = ({
             workspaces={workspaces}
             activeWorkspaceId={activeWorkspaceId}
             selectedIds={workspaceSelectedIds}
-            editingId={workspaceEditingId}
-            editValue={workspaceEditValue}
-            setEditValue={setWorkspaceEditValue}
-            inputRef={workspaceInputRef}
-            commitRename={commitWorkspaceRename}
-            cancelEditing={cancelWorkspaceEditing}
-            handleKeyDown={handleWorkspaceKeyDown}
+            edit={workspaceEdit}
             onWorkspaceClick={handleWorkspaceClick}
             onCreateWorkspace={onCreateWorkspace}
-            onRequestRename={startWorkspaceEditing}
-            onRequestDelete={(id, name) =>
-              setDeleteTarget({
-                mode: 'single',
-                id,
-                name,
-                type: 'workspace',
-              })
-            }
+            onRequestDelete={(id, name) => handleRequestDelete(id, name, 'workspace')}
             onRequestSettings={(id) => onOpenWorkspaceSettings?.(id)}
             onMoveWorkspace={onMoveWorkspace}
             onBulkDelete={handleWorkspaceBulkDelete}
@@ -288,7 +204,7 @@ export const Sidebar = ({
 
         {!loading && activeWorkspaceId && items.length > 0 && (
           <div data-tour="sidebarSearch" className="px-2 pt-2">
-            <SearchInput value={query} onChange={setQuery} placeholder={t.platform.sidebar.searchPlaceholder} />
+            <SearchInput value={query} onChange={setQuery} />
           </div>
         )}
 
@@ -305,24 +221,18 @@ export const Sidebar = ({
               </div>
               {canManageStructure && (
                 <div className="flex items-center gap-0.5">
-                  <button
-                    type="button"
-                    data-tour="sidebarCreateFolder"
-                    onClick={onCreateFolder}
-                    className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-[color:var(--text-muted)] transition-colors duration-150 hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--accent-soft)] active:text-[color:var(--accent-text)] motion-reduce:transition-none"
+                  <StructureActionButton
+                    icon={FolderPlus}
                     title={t.platform.sidebar.newFolder}
-                  >
-                    <FolderPlus className="h-4 w-4" strokeWidth={1.9} />
-                  </button>
-                  <button
-                    type="button"
-                    data-tour="sidebarCreateThread"
-                    onClick={() => onCreateThread?.()}
-                    className="flex h-6 w-6 cursor-pointer items-center justify-center rounded-md text-[color:var(--text-muted)] transition-colors duration-150 hover:bg-[color:var(--surface-overlay)] hover:text-[color:var(--text-strong)] focus-visible:ring-2 focus-visible:ring-[color:var(--ring-focus)] focus-visible:outline-none active:bg-[color:var(--accent-soft)] active:text-[color:var(--accent-text)] motion-reduce:transition-none"
+                    tour="sidebarCreateFolder"
+                    onClick={() => onCreateFolder?.()}
+                  />
+                  <StructureActionButton
+                    icon={Plus}
                     title={t.platform.sidebar.newThread}
-                  >
-                    <Plus className="h-4 w-4" strokeWidth={1.9} />
-                  </button>
+                    tour="sidebarCreateThread"
+                    onClick={() => onCreateThread?.()}
+                  />
                 </div>
               )}
             </div>
@@ -332,9 +242,7 @@ export const Sidebar = ({
                 items={filteredItems}
                 activeItemId={activeItemId}
                 selectedIds={selectedIds}
-                onToggleSelection={toggleSelection}
-                onSelectRange={selectRange}
-                onClearAndSetAnchor={clearAndSetAnchor}
+                onSelectClick={selectOnClick}
                 setSelectedIds={setSelectedIds}
                 onItemClick={onItemClick}
                 onRequestDelete={handleRequestDelete}
@@ -347,19 +255,7 @@ export const Sidebar = ({
               />
             )}
 
-            {showSearchEmpty && (
-              <div className="flex flex-1 flex-col items-center justify-center px-4 py-8 text-center">
-                <div className="mb-2 flex h-9 w-9 items-center justify-center rounded-xl border border-[color:var(--border)] bg-[color:var(--surface-overlay)]">
-                  <SearchX className="h-4 w-4 text-[color:var(--text-subtle)]" />
-                </div>
-                <p className="font-grotesk text-xs font-medium text-[color:var(--text-muted)]">
-                  {t.platform.sidebar.noSearchResults}
-                </p>
-                <p className="mt-1 max-w-[180px] truncate font-mono-ui text-[10px] text-[color:var(--text-label)]">
-                  &ldquo;{query}&rdquo;
-                </p>
-              </div>
-            )}
+            {showSearchEmpty && <SearchEmptyState query={query} />}
 
             {showStructureEmpty && (
               <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-2">
@@ -397,15 +293,16 @@ export const Sidebar = ({
           </div>
         )}
 
-        {selectionCount > 0 && canManageStructure && (
+        {selectionCount > 0 && (
           <div className="border-t border-[color:var(--border)] px-2 pt-2 pb-2">
             <BulkActionsBar
               count={selectionCount}
               icon={Files}
-              label={t.platform.sidebar.itemsSelected}
+              label={t('platform.sidebar.itemsSelected', { count: selectionCount })}
               onDelete={handleBulkDelete}
               onMove={() => setShowMoveDialog(true)}
               onClear={clearSelection}
+              lockedHint={canManageStructure ? undefined : t.platform.sidebar.structureLocked}
             />
           </div>
         )}
@@ -415,8 +312,8 @@ export const Sidebar = ({
 
       <ConfirmDialog
         open={deleteTarget !== null}
-        title={deleteTitle}
-        message={deleteMessage}
+        title={getDeleteTitle()}
+        message={renderDeleteMessage()}
         confirmLabel={t.platform.sidebar.delete}
         cancelLabel={t.platform.sidebar.cancel}
         onConfirm={confirmDelete}

@@ -14,7 +14,7 @@ export const getAdminClient = (): SupabaseClient => {
   return adminClient;
 };
 
-const createAnonClient = (): SupabaseClient => {
+export const createAnonClient = (): SupabaseClient => {
   const { url, anonKey } = getSupabaseEnv();
 
   return createClient(url, anonKey, CLIENT_OPTIONS);

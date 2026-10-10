@@ -3,15 +3,19 @@ import { describe, expect, test } from 'vitest';
 import { folderInput, folderItem, threadInput, threadItem } from '@mocks/sidebar';
 import {
   buildNavTree,
+  collectIds,
   containsThread,
   filterTree,
   findFirstThread,
   findInTree,
+  findOutermostItems,
   findParentId,
+  getMaxSubtreeDepth,
   getSiblings,
+  getSubtreeDepth,
   insertIntoTree,
   removeFromTree,
-  setThreadAnswered,
+  setThreadResolved,
   updateNavItemName,
 } from '@/components/Sidebar/utils';
 
@@ -62,6 +66,36 @@ describe('findInTree', () => {
   });
 });
 
+describe('collectIds', () => {
+  describe('GIVEN a nested tree', () => {
+    describe('WHEN its ids are collected', () => {
+      test('THEN every folder and thread id is listed depth-first', () => {
+        const items = [folderItem('f1', [folderItem('f2', [threadItem('t1')]), threadItem('t2')]), threadItem('t3')];
+
+        expect(collectIds(items)).toEqual(['f1', 'f2', 't1', 't2', 't3']);
+      });
+    });
+  });
+});
+
+describe('findOutermostItems', () => {
+  describe('GIVEN a selection holding a folder, one of its children and a root thread', () => {
+    const items = [folderItem('f1', [threadItem('t1'), folderItem('f2')]), threadItem('t2'), threadItem('t3')];
+
+    describe('WHEN the outermost selected items are picked', () => {
+      test('THEN the child stays inside its selected folder and the rest follows the tree order', () => {
+        expect(findOutermostItems(items, new Set(['t3', 't1', 'f1']))).toEqual([items[0], items[2]]);
+      });
+    });
+
+    describe('WHEN only nested items are selected', () => {
+      test('THEN each of them is picked', () => {
+        expect(findOutermostItems(items, new Set(['f2', 't1']))).toEqual([threadItem('t1'), folderItem('f2')]);
+      });
+    });
+  });
+});
+
 describe('findFirstThread', () => {
   describe('GIVEN a tree starting with a folder', () => {
     describe('WHEN the first thread is searched', () => {
@@ -77,6 +111,32 @@ describe('findFirstThread', () => {
     describe('WHEN the first thread is searched', () => {
       test('THEN nothing is found', () => {
         expect(findFirstThread([folderItem('f1'), folderItem('f2')])).toBeNull();
+      });
+    });
+  });
+});
+
+describe('getSubtreeDepth', () => {
+  describe('GIVEN items of growing nesting', () => {
+    describe('WHEN their subtree depth is measured', () => {
+      test('THEN a thread takes no level and every folder reserves one for its content', () => {
+        expect(getSubtreeDepth(threadItem('t1'))).toBe(0);
+        expect(getSubtreeDepth(folderItem('f1'))).toBe(1);
+        expect(getSubtreeDepth(folderItem('f1', [threadItem('t1')]))).toBe(1);
+        expect(getSubtreeDepth(folderItem('f1', [threadItem('t1'), folderItem('f2', [threadItem('t2')])]))).toBe(2);
+      });
+    });
+  });
+});
+
+describe('getMaxSubtreeDepth', () => {
+  describe('GIVEN a tree with a shallow and a deep folder', () => {
+    const items = [folderItem('f1'), folderItem('f2', [folderItem('f3')]), threadItem('t1')];
+
+    describe('WHEN several ids are measured together', () => {
+      test('THEN the deepest subtree wins and unknown ids are ignored', () => {
+        expect(getMaxSubtreeDepth(items, ['t1', 'f1', 'f2', 'ghost'])).toBe(2);
+        expect(getMaxSubtreeDepth(items, ['t1', 'ghost'])).toBe(0);
       });
     });
   });
@@ -171,15 +231,36 @@ describe('updateNavItemName', () => {
   });
 });
 
-describe('setThreadAnswered', () => {
+describe('setThreadResolved', () => {
   describe('GIVEN a nested tree', () => {
-    describe('WHEN a nested thread is marked answered', () => {
+    describe('WHEN a nested thread is marked resolved', () => {
       test('THEN only that thread changes', () => {
         const items = [folderItem('f1', [threadItem('t1'), threadItem('t2')])];
 
-        expect(setThreadAnswered(items, 't1', true)).toEqual([
+        expect(setThreadResolved(items, 't1', true)).toEqual([
           folderItem('f1', [threadItem('t1', true), threadItem('t2')]),
         ]);
+      });
+    });
+  });
+
+  describe('GIVEN a resolved root thread beside a folder', () => {
+    describe('WHEN the thread loses its resolution', () => {
+      test('THEN the mark clears and the folder keeps its shape', () => {
+        const items = [threadItem('t1', true), folderItem('f1', [threadItem('t2', true)])];
+
+        expect(setThreadResolved(items, 't1', false)).toEqual([
+          threadItem('t1'),
+          folderItem('f1', [threadItem('t2', true)]),
+        ]);
+      });
+    });
+
+    describe('WHEN a folder id is passed instead of a thread id', () => {
+      test('THEN no item gains the mark', () => {
+        const items = [threadItem('t1'), folderItem('f1', [threadItem('t2')])];
+
+        expect(setThreadResolved(items, 'f1', true)).toEqual(items);
       });
     });
   });

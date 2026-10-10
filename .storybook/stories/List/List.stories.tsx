@@ -107,9 +107,9 @@ export const MultipleSiblings: Story = {
   },
   render: () => (
     <div className="space-y-1">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <List key={i} defaultOpen={i === 0} trigger={SimpleTrigger(`Section ${i + 1}`, { onToggle: fn() })}>
-          <ContentExample text={`Body of section ${i + 1}.`} />
+      {Array.from({ length: 5 }).map((_, index) => (
+        <List key={index} defaultOpen={index === 0} trigger={SimpleTrigger(`Section ${index + 1}`, { onToggle: fn() })}>
+          <ContentExample text={`Body of section ${index + 1}.`} />
         </List>
       ))}
     </div>
@@ -175,10 +175,10 @@ export const LongContent: Story = {
     trigger: SimpleTrigger('Notes', { onToggle: fn() }),
     children: (
       <div className="space-y-1 px-3 py-2 text-[12px] leading-relaxed text-[color:var(--text-muted)]">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <p key={i}>
+        {Array.from({ length: 8 }).map((_, index) => (
+          <p key={index}>
             <span className="font-mono-ui text-[9.5px] tracking-[0.18em] text-[color:var(--text-subtle)] uppercase">
-              ¶ {String(i + 1).padStart(2, '0')}
+              ¶ {String(index + 1).padStart(2, '0')}
             </span>{' '}
             — Paragraph used to exercise the open/close transition. Each entry is intentionally short to keep the page
             readable.

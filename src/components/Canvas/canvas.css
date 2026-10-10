@@ -146,7 +146,7 @@
 
 [data-canvas-tool='valid-path'],
 [data-canvas-tool='invalid-path'],
-[data-canvas-tool='comment'] {
+[data-canvas-tool='answer'] {
   cursor: cell;
 }
 
@@ -170,7 +170,7 @@
 [data-canvas-tool='delete'] .react-flow__edge,
 [data-canvas-tool='valid-path'] .react-flow__node,
 [data-canvas-tool='invalid-path'] .react-flow__node,
-[data-canvas-tool='comment'] .react-flow__node {
+[data-canvas-tool='answer'] .react-flow__node {
   cursor: pointer;
 }
 
@@ -189,7 +189,7 @@
 [data-canvas-tool='cross-reference'] .react-flow__edge,
 [data-canvas-tool='valid-path'] .react-flow__edge,
 [data-canvas-tool='invalid-path'] .react-flow__edge,
-[data-canvas-tool='comment'] .react-flow__edge {
+[data-canvas-tool='answer'] .react-flow__edge {
   cursor: not-allowed;
 }
 

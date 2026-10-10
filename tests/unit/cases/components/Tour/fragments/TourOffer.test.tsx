@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 
 import { TRANSLATIONS } from '@mocks/i18n';
@@ -6,8 +6,6 @@ import { TourOffer } from '@/components/Tour';
 import { useOnboardingStore } from '@/lib/onboarding';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
-
-const copy = TRANSLATIONS.platform.onboarding;
 
 afterEach(() => useOnboardingStore.getState().forget());
 
@@ -23,18 +21,22 @@ describe('TourOffer', () => {
       });
 
       test('THEN Nodi introduces the tour and says where to start it later', () => {
-        expect(screen.getByRole('heading', { name: copy.offerTitle })).toBeInTheDocument();
-        expect(screen.getByRole('img', { name: copy.nodiAlt })).toBeInTheDocument();
-        expect(screen.getByRole('dialog')).toHaveTextContent(copy.nodiIntro);
-        expect(screen.getByRole('dialog')).toHaveTextContent(copy.offerBody);
-        expect(screen.getByRole('dialog')).toHaveTextContent(copy.offerLater);
+        expect(screen.getByRole('heading', { name: TRANSLATIONS.platform.onboarding.offerTitle })).toBeInTheDocument();
+        expect(screen.getByRole('img', { name: TRANSLATIONS.platform.onboarding.nodiAlt })).toBeInTheDocument();
+        expect(screen.getByRole('dialog')).toHaveTextContent(TRANSLATIONS.platform.onboarding.nodiIntro);
+        expect(screen.getByRole('dialog')).toHaveTextContent(TRANSLATIONS.platform.onboarding.offerBody);
+        expect(screen.getByRole('dialog')).toHaveTextContent(TRANSLATIONS.platform.onboarding.offerLater);
+      });
+
+      test('THEN the dialog is named by its title', () => {
+        expect(screen.getByRole('dialog', { name: TRANSLATIONS.platform.onboarding.offerTitle })).toBeInTheDocument();
       });
     });
 
     describe('WHEN the tour is accepted', () => {
       beforeEach(() => {
         render(<TourOffer />);
-        fireEvent.click(screen.getByRole('button', { name: copy.offerAccept }));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.onboarding.offerAccept }));
       });
 
       test('THEN the first canvas guide starts at its first step and the offer counts as answered', () => {
@@ -50,7 +52,7 @@ describe('TourOffer', () => {
     describe('WHEN the tour is declined', () => {
       beforeEach(() => {
         render(<TourOffer />);
-        fireEvent.click(screen.getByRole('button', { name: copy.offerDecline }));
+        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.platform.onboarding.offerDecline }));
       });
 
       test('THEN the offer closes as answered and a hint points at the help menu', () => {
@@ -66,7 +68,7 @@ describe('TourOffer', () => {
     describe('WHEN the offer is closed without a choice', () => {
       beforeEach(() => {
         render(<TourOffer />);
-        fireEvent.click(screen.getByRole('button', { name: TRANSLATIONS.common.close }));
+        fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: TRANSLATIONS.common.close }));
       });
 
       test('THEN it counts as declined', () => {

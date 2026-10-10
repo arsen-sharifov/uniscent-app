@@ -18,7 +18,7 @@ export const TickerNumber = ({ value }: ITickerNumberProps) => {
     const element = spanRef.current;
     if (!element || reducedMotion) return;
 
-    let frame: number | null = null;
+    let animationFrameId: number | null = null;
     const observer = new IntersectionObserver(
       (entries) => {
         if (!entries.some((entry) => entry.isIntersecting)) return;
@@ -28,10 +28,10 @@ export const TickerNumber = ({ value }: ITickerNumberProps) => {
         const step = (now: number) => {
           const elapsed = Math.min((now - startedAt) / TICKER_DURATION_MS, 1);
           setProgress(1 - Math.pow(1 - elapsed, 3));
-          if (elapsed < 1) frame = requestAnimationFrame(step);
+          if (elapsed < 1) animationFrameId = requestAnimationFrame(step);
         };
         setProgress(0);
-        frame = requestAnimationFrame(step);
+        animationFrameId = requestAnimationFrame(step);
       },
       { threshold: 0.6 },
     );
@@ -40,7 +40,7 @@ export const TickerNumber = ({ value }: ITickerNumberProps) => {
 
     return () => {
       observer.disconnect();
-      if (frame !== null) cancelAnimationFrame(frame);
+      if (animationFrameId !== null) cancelAnimationFrame(animationFrameId);
     };
   }, [value, reducedMotion]);
 

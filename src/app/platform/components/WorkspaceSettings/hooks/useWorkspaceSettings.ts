@@ -30,9 +30,17 @@ import { event } from '@/lib/events';
 import { usePermissionsStore } from '@/lib/stores';
 import { roleLabel } from '@/lib/utils';
 
+const runAction = (action: Promise<unknown>, title: string, context: string): Promise<boolean> =>
+  action
+    .then(() => true)
+    .catch((error: unknown) => {
+      event.error(error, { title, context });
+
+      return false;
+    });
+
 export const useWorkspaceSettings = (workspaceId: string, onWorkspacesChanged?: () => void) => {
   const t = useTranslations();
-  const ws = t.platform.workspaceSettings;
 
   const [loading, setLoading] = useState(true);
   const [workspace, setWorkspace] = useState<IWorkspace | null>(null);
@@ -45,11 +53,14 @@ export const useWorkspaceSettings = (workspaceId: string, onWorkspacesChanged?: 
     () => members.find((member) => member.userId === currentUserId) ?? null,
     [members, currentUserId],
   );
-  const myRole = useMemo(() => roles.find((role) => role.id === currentMember?.roleId) ?? null, [roles, currentMember]);
+  const currentRole = useMemo(
+    () => roles.find((role) => role.id === currentMember?.roleId) ?? null,
+    [roles, currentMember],
+  );
 
-  const canManageMembers = myRole?.canManageMembers ?? false;
-  const canManageRoles = myRole?.canManageRoles ?? false;
-  const canManageWorkspace = myRole?.canManageWorkspace ?? false;
+  const canManageMembers = currentRole?.canManageMembers ?? false;
+  const canManageRoles = currentRole?.canManageRoles ?? false;
+  const canManageWorkspace = currentRole?.canManageWorkspace ?? false;
   const currentRoleName = currentMember ? roleLabel(currentMember.roleKey, currentMember.roleName, t) : null;
 
   const refreshMembers = useCallback(
@@ -80,9 +91,11 @@ export const useWorkspaceSettings = (workspaceId: string, onWorkspacesChanged?: 
     if (usePermissionsStore.getState().workspaceId !== workspaceId) return;
 
     await Promise.all([getUser(), getMyWorkspacePermissions(workspaceId)])
-      .then(([{ data }, access]) =>
-        usePermissionsStore.getState().setAccess(workspaceId, data.user?.id ?? null, access),
-      )
+      .then(([{ data }, access]) => {
+        if (usePermissionsStore.getState().workspaceId !== workspaceId) return;
+
+        usePermissionsStore.getState().setAccess(workspaceId, data.user?.id ?? null, access);
+      })
       .catch((error) => event.error(error, { toast: false, context: 'workspaceSettings.refreshAccess' }));
   }, [workspaceId]);
 
@@ -109,14 +122,16 @@ export const useWorkspaceSettings = (workspaceId: string, onWorkspacesChanged?: 
 
       if (cancelled) return;
 
-      const uid = data.user?.id ?? null;
-      setCurrentUserId(uid);
+      const loadedUserId = data.user?.id ?? null;
+      setCurrentUserId(loadedUserId);
       setWorkspace(workspaceData);
       setRoles(roleList);
       setMembers(memberList);
 
-      const mine = roleList.find((role) => role.id === memberList.find((member) => member.userId === uid)?.roleId);
-      if (mine?.canManageMembers) {
+      const loadedRole = roleList.find(
+        (role) => role.id === memberList.find((member) => member.userId === loadedUserId)?.roleId,
+      );
+      if (loadedRole?.canManageMembers) {
         const inviteList = await getWorkspaceInvitations(workspaceId).catch((error) => {
           event.error(error, { toast: false, context: 'workspaceSettings.loadInvitations' });
 
@@ -142,150 +157,155 @@ export const useWorkspaceSettings = (workspaceId: string, onWorkspacesChanged?: 
   const assignRole = useCallback(
     async (userId: string, roleId: string) => {
       const target = roles.find((role) => role.id === roleId);
-      setMembers((prev) =>
-        prev.map((member) =>
+      setMembers((previous) =>
+        previous.map((member) =>
           member.userId === userId
             ? { ...member, roleId, roleKey: target?.key ?? null, roleName: target?.name ?? member.roleName }
             : member,
         ),
       );
 
-      try {
-        await setMemberRole(workspaceId, userId, roleId);
-        await refreshRoles();
-        await syncMyAccess(userId === currentUserId);
-        event.success(ws.members.roleChanged);
-      } catch (error) {
-        event.error(error, { title: ws.members.roleChangeFailed, context: 'workspaceSettings.assignRole' });
+      const assigned = await runAction(
+        setMemberRole(workspaceId, userId, roleId),
+        t.platform.workspaceSettings.members.roleChangeFailed,
+        'workspaceSettings.assignRole',
+      );
+      if (!assigned) {
         await Promise.all([refreshMembers(), refreshRoles()]);
+
+        return;
       }
+
+      await refreshRoles();
+      await syncMyAccess(userId === currentUserId);
+      event.success(t.platform.workspaceSettings.members.roleChanged);
     },
-    [workspaceId, roles, currentUserId, refreshMembers, refreshRoles, syncMyAccess, ws],
+    [workspaceId, roles, currentUserId, refreshMembers, refreshRoles, syncMyAccess, t],
   );
 
   const removeMember = useCallback(
     async (userId: string) => {
-      setMembers((prev) => prev.filter((member) => member.userId !== userId));
+      setMembers((previous) => previous.filter((member) => member.userId !== userId));
 
-      try {
-        await removeWorkspaceMember(workspaceId, userId);
-        await refreshRoles();
-        event.success(ws.members.removed);
-      } catch (error) {
-        event.error(error, { title: ws.members.removeFailed, context: 'workspaceSettings.removeMember' });
+      const removed = await runAction(
+        removeWorkspaceMember(workspaceId, userId),
+        t.platform.workspaceSettings.members.removeFailed,
+        'workspaceSettings.removeMember',
+      );
+      if (!removed) {
         await refreshMembers();
+
+        return;
       }
+
+      await refreshRoles();
+      event.success(t.platform.workspaceSettings.members.removed);
     },
-    [workspaceId, refreshMembers, refreshRoles, ws],
+    [workspaceId, refreshMembers, refreshRoles, t],
   );
 
   const transferOwnership = useCallback(
     async (userId: string) => {
-      const ok = await transferWorkspaceOwnership(workspaceId, userId)
-        .then(() => true)
-        .catch((error) => {
-          event.error(error, { title: ws.members.transferFailed, context: 'workspaceSettings.transferOwnership' });
-
-          return false;
-        });
-      if (!ok) return;
+      const transferred = await runAction(
+        transferWorkspaceOwnership(workspaceId, userId),
+        t.platform.workspaceSettings.members.transferFailed,
+        'workspaceSettings.transferOwnership',
+      );
+      if (!transferred) return;
 
       await Promise.all([refreshMembers(), refreshRoles(), refreshMyAccess()]);
       onWorkspacesChanged?.();
-      event.success(ws.members.transferred);
+      event.success(t.platform.workspaceSettings.members.transferred);
     },
-    [workspaceId, refreshMembers, refreshRoles, refreshMyAccess, onWorkspacesChanged, ws],
+    [workspaceId, refreshMembers, refreshRoles, refreshMyAccess, onWorkspacesChanged, t],
   );
 
   const invite = useCallback(
     async (email: string, roleId: string): Promise<boolean> => {
-      const ok = await createWorkspaceInvitation(workspaceId, email, roleId)
-        .then(() => true)
-        .catch((error) => {
-          event.error(error, { title: ws.members.inviteFailed, context: 'workspaceSettings.invite' });
-
-          return false;
-        });
-      if (!ok) return false;
+      const invited = await runAction(
+        createWorkspaceInvitation(workspaceId, email, roleId),
+        t.platform.workspaceSettings.members.inviteFailed,
+        'workspaceSettings.invite',
+      );
+      if (!invited) return false;
 
       await refreshInvitations();
-      event.success(ws.members.invited);
+      event.success(t.platform.workspaceSettings.members.invited);
 
       return true;
     },
-    [workspaceId, refreshInvitations, ws],
+    [workspaceId, refreshInvitations, t],
   );
 
   const revokeInvitation = useCallback(
     async (invitationId: string) => {
-      setInvitations((prev) => prev.filter((invitation) => invitation.id !== invitationId));
+      setInvitations((previous) => previous.filter((invitation) => invitation.id !== invitationId));
 
-      try {
-        await revokeWorkspaceInvitation(invitationId);
-        event.success(ws.members.revoked);
-      } catch (error) {
-        event.error(error, { title: ws.members.revokeFailed, context: 'workspaceSettings.revokeInvitation' });
+      const revoked = await runAction(
+        revokeWorkspaceInvitation(invitationId),
+        t.platform.workspaceSettings.members.revokeFailed,
+        'workspaceSettings.revokeInvitation',
+      );
+      if (!revoked) {
         await refreshInvitations();
+
+        return;
       }
+
+      event.success(t.platform.workspaceSettings.members.revoked);
     },
-    [refreshInvitations, ws],
+    [refreshInvitations, t],
   );
 
   const createRole = useCallback(
     async (name: string, icon: string, permissions: IWorkspaceRolePermissions): Promise<boolean> => {
-      const ok = await createWorkspaceRole(workspaceId, name, icon, permissions)
-        .then(() => true)
-        .catch((error) => {
-          event.error(error, { title: ws.roles.createFailed, context: 'workspaceSettings.createRole' });
-
-          return false;
-        });
-      if (!ok) return false;
+      const created = await runAction(
+        createWorkspaceRole(workspaceId, name, icon, permissions),
+        t.platform.workspaceSettings.roles.createFailed,
+        'workspaceSettings.createRole',
+      );
+      if (!created) return false;
 
       await refreshRoles();
-      event.success(ws.roles.created);
+      event.success(t.platform.workspaceSettings.roles.created);
 
       return true;
     },
-    [workspaceId, refreshRoles, ws],
+    [workspaceId, refreshRoles, t],
   );
 
   const updateRole = useCallback(
     async (roleId: string, name: string, icon: string, permissions: IWorkspaceRolePermissions): Promise<boolean> => {
-      const ok = await updateWorkspaceRole(roleId, name, icon, permissions)
-        .then(() => true)
-        .catch((error) => {
-          event.error(error, { title: ws.roles.updateFailed, context: 'workspaceSettings.updateRole' });
-
-          return false;
-        });
-      if (!ok) return false;
+      const updated = await runAction(
+        updateWorkspaceRole(roleId, name, icon, permissions),
+        t.platform.workspaceSettings.roles.updateFailed,
+        'workspaceSettings.updateRole',
+      );
+      if (!updated) return false;
 
       await refreshRoles();
       await syncMyAccess(roleId === currentMember?.roleId);
-      event.success(ws.roles.updated);
+      event.success(t.platform.workspaceSettings.roles.updated);
 
       return true;
     },
-    [refreshRoles, syncMyAccess, currentMember, ws],
+    [refreshRoles, syncMyAccess, currentMember, t],
   );
 
   const deleteRole = useCallback(
     async (roleId: string) => {
-      const ok = await deleteWorkspaceRole(roleId)
-        .then(() => true)
-        .catch((error) => {
-          event.error(error, { title: ws.roles.deleteFailed, context: 'workspaceSettings.deleteRole' });
-
-          return false;
-        });
-      if (!ok) return;
+      const deleted = await runAction(
+        deleteWorkspaceRole(roleId),
+        t.platform.workspaceSettings.roles.deleteFailed,
+        'workspaceSettings.deleteRole',
+      );
+      if (!deleted) return;
 
       await Promise.all([refreshRoles(), refreshMembers()]);
       await syncMyAccess(roleId === currentMember?.roleId);
-      event.success(ws.roles.deleted);
+      event.success(t.platform.workspaceSettings.roles.deleted);
     },
-    [refreshRoles, refreshMembers, syncMyAccess, currentMember, ws],
+    [refreshRoles, refreshMembers, syncMyAccess, currentMember, t],
   );
 
   return {
@@ -295,6 +315,7 @@ export const useWorkspaceSettings = (workspaceId: string, onWorkspacesChanged?: 
     roles,
     invitations,
     currentUserId,
+    currentRole,
     canManageMembers,
     canManageRoles,
     canManageWorkspace,

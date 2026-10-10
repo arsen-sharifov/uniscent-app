@@ -8,6 +8,7 @@
       "submit": "Se connecter",
       "submitting": "Connexion en cours…",
       "emailSent": "Vérifiez votre email pour confirmer votre compte.",
+      "invalidLink": "Ce lien est invalide ou a expiré. Essayez de vous connecter ou demandez un nouveau lien.",
       "noAccount": "Pas de compte ?",
       "signUpLink": "S'inscrire"
     },
@@ -49,13 +50,25 @@
       "inviteHeading": "Configurez votre compte",
       "inviteSubtitle": "Vous rejoignez votre équipe sur Uniscept"
     },
+    "join": {
+      "heading": "Vous êtes invité",
+      "subtitle": "Acceptez l'invitation pour configurer votre compte sur Uniscept.",
+      "accept": "Accepter l'invitation",
+      "accepting": "Acceptation…",
+      "signedInAs": "Vous êtes connecté en tant que {email}. Pour accepter l'invitation, vous serez d'abord déconnecté de ce compte.",
+      "switchAccount": "Se déconnecter et accepter",
+      "stay": "Rester connecté"
+    },
     "placeholders": {
       "name": "Jean Dupont",
-      "email": "vous@exemple.com",
+      "email": "name@example.com",
       "password": "••••••••"
     },
     "errors": {
-      "invalidInviteCode": "Code d'invitation invalide"
+      "invalidInviteCode": "Code d'invitation invalide",
+      "signInFailed": "Impossible de se connecter",
+      "signUpFailed": "Impossible de créer le compte",
+      "joinFailed": "Impossible de configurer le compte"
     },
     "confirmed": {
       "heading": "Email confirmé",
@@ -68,8 +81,9 @@
     }
   },
   "common": {
-    "loading": "Chargement",
     "close": "Fermer",
+    "moreInfo": "Plus d'infos",
+    "completed": "Terminé",
     "userAvatar": "Utilisateur",
     "notifications": "Notifications",
     "errors": {
@@ -77,6 +91,7 @@
       "permission": "Vous n'avez pas la permission de faire cela.",
       "notFound": "Nous n'avons pas pu retrouver cet élément.",
       "rateLimit": "Trop de tentatives. Veuillez patienter un instant.",
+      "limitReached": "Limite atteinte. Supprimez quelques éléments et réessayez.",
       "validation": "Certaines informations semblent invalides. Veuillez vérifier et réessayer.",
       "auth": "Votre session a expiré. Veuillez vous reconnecter.",
       "unknown": "Une erreur s'est produite. Veuillez réessayer.",
@@ -84,10 +99,10 @@
       "emailNotConfirmed": "Confirmez votre email avant de vous connecter.",
       "emailTaken": "Un compte avec cet email existe déjà.",
       "invalidEmail": "Cette adresse email ne semble pas valide.",
-      "weakPassword": "Mot de passe trop faible. Utilisez au moins 6 caractères.",
-      "samePassword": "Le nouveau mot de passe doit être différent de l'actuel."
+      "weakPassword": "Mot de passe trop faible. Utilisez au moins 8 caractères.",
+      "samePassword": "Le nouveau mot de passe doit être différent de l'actuel.",
+      "ownsSharedWorkspaces": "Transférez ou supprimez les espaces que vous partagez avec d'autres personnes avant de supprimer votre compte."
     },
-    "noPermission": "Vous n'avez pas la permission",
     "errorTitles": {
       "createFailed": "Impossible de créer",
       "renameFailed": "Impossible de renommer",
@@ -105,6 +120,9 @@
       "errorTitle": "Quelque chose a cassé",
       "errorHint": "Une erreur inattendue s'est produite. Vous pouvez réessayer.",
       "retry": "Réessayer"
+    },
+    "metadata": {
+      "description": "Une plateforme pour des discussions structurées et la cartographie d'arguments"
     }
   },
   "platform": {
@@ -138,6 +156,11 @@
       "structure": "Structure",
       "newThread": "Nouveau fil",
       "newFolder": "Nouveau dossier",
+      "defaultNames": {
+        "workspace": "Nouvel espace",
+        "folder": "Nouveau dossier",
+        "thread": "Nouveau fil"
+      },
       "signOut": "Déconnexion",
       "deleteWorkspaceTitle": "Supprimer l'espace",
       "deleteFolderTitle": "Supprimer le dossier",
@@ -151,13 +174,15 @@
       "treeAriaLabel": "Navigation",
       "dragToReorder": "Glisser pour réorganiser",
       "resolved": "Résolu",
-      "itemsSelected": "éléments sélectionnés",
-      "workspacesSelected": "espaces sélectionnés",
+      "itemsSelected": "{count, plural, one {élément sélectionné} other {éléments sélectionnés}}",
+      "workspacesSelected": "{count, plural, one {espace sélectionné} other {espaces sélectionnés}}",
       "moveToFolder": "Déplacer vers un dossier",
+      "structureLocked": "Nécessite l'autorisation « Gérer les fils et dossiers »",
       "rootLevel": "Niveau racine",
       "bulkDeleteTitle": "Supprimer les éléments",
       "bulkDeleteConfirm": "Êtes-vous sûr de vouloir supprimer ces éléments ? Cette action est irréversible.",
       "searchPlaceholder": "Rechercher…",
+      "clearSearch": "Effacer la recherche",
       "noSearchResults": "Aucun résultat",
       "emptyStructureTitle": "Rien ici pour l'instant",
       "emptyStructureHint": "Créez un fil ou un dossier pour commencer à organiser votre travail.",
@@ -170,9 +195,9 @@
       "export": {
         "label": "Exporter le canevas",
         "description": "Le graphe entier, dans le thème actuel, avec une petite marque Uniscept.",
-        "loading": "Préparation de l’export…",
-        "unavailable": "Ouvrez un canevas pour l’exporter.",
-        "tooLarge": "Ce graphe est trop grand pour une image nette. Choisissez SVG pour l’exporter à n’importe quelle taille.",
+        "loading": "Préparation de l'export…",
+        "unavailable": "Ouvrez un canevas pour l'exporter.",
+        "tooLarge": "Ce graphe est trop grand pour une image nette. Choisissez SVG pour l'exporter à n'importe quelle taille.",
         "formats": {
           "png": "Image de haute qualité",
           "jpg": "Fichier image plus léger",
@@ -189,7 +214,7 @@
         "actionClose": "fermer"
       },
       "tools": {
-        "ariaLabel": "Outils du canvas",
+        "ariaLabel": "Outils du canevas",
         "groups": {
           "navigate": "Navigation",
           "history": "Historique",
@@ -200,7 +225,7 @@
         "items": {
           "select": {
             "label": "Sélectionner",
-            "description": "Sélectionnez et déplacez les nœuds sur le canvas."
+            "description": "Sélectionnez et déplacez les nœuds sur le canevas."
           },
           "pan": {
             "label": "Déplacer",
@@ -216,7 +241,7 @@
           },
           "addNode": {
             "label": "Ajouter un nœud",
-            "description": "Cliquez n'importe où sur le canvas pour ajouter un nouveau nœud."
+            "description": "Cliquez n'importe où sur le canevas pour ajouter un nouveau nœud."
           },
           "connect": {
             "label": "Connecter",
@@ -240,7 +265,7 @@
           },
           "crossReference": {
             "label": "Référence croisée",
-            "description": "Placez une référence vers un nœud d'un autre canvas."
+            "description": "Placez une référence vers un nœud d'un autre canevas."
           },
           "undo": {
             "label": "Annuler",
@@ -253,8 +278,8 @@
         }
       },
       "loadError": {
-        "title": "Backend du canvas inaccessible",
-        "hint": "Impossible d'atteindre Supabase pour charger ce canvas. Vérifiez que l'instance locale Supabase est en cours d'exécution puis réessayez.",
+        "title": "Impossible de charger ce canevas",
+        "hint": "Vérifiez votre connexion puis réessayez.",
         "retry": "Réessayer"
       },
       "node": {
@@ -271,7 +296,8 @@
         "sendComment": "Envoyer le commentaire",
         "closeComments": "Fermer",
         "commentsHeader": "Commentaires",
-        "noComments": "Aucun commentaire pour le moment. Lancez la conversation."
+        "noComments": "Aucun commentaire pour le moment. Lancez la conversation.",
+        "labelAriaLabel": "Texte du nœud"
       },
       "question": {
         "badge": "Question",
@@ -304,11 +330,11 @@
         "discardAriaLabel": "Abandonner les modifications échouées"
       },
       "context": {
-        "ariaLabel": "Actions du canvas",
+        "ariaLabel": "Actions du canevas",
         "addNode": "Ajouter un nœud",
         "addReference": "Ajouter une référence",
         "deleteEdge": "Supprimer l'arête",
-        "openReferenced": "Ouvrir le canvas référencé",
+        "openReferenced": "Ouvrir le canevas référencé",
         "deleteReference": "Supprimer la référence",
         "markValid": "Marquer valide",
         "unmarkValid": "Désmarquer comme valide",
@@ -319,7 +345,12 @@
         "needsValidParent": "Nécessite la question ou une étape valide en amont",
         "comment": "Commenter",
         "duplicate": "Dupliquer",
-        "delete": "Supprimer"
+        "delete": "Supprimer",
+        "deleteNotAllowed": "Seuls son auteur ou le propriétaire de l'espace peuvent le supprimer"
+      },
+      "deleteBlocked": {
+        "foreignNodes": "Rien n'a été supprimé. Certains nœuds sélectionnés ne peuvent être supprimés que par leur auteur ou le propriétaire de l'espace.",
+        "question": "Rien n'a été supprimé. La question ne peut pas être supprimée. Désélectionnez-la et réessayez."
       },
       "shortcuts": {
         "title": "Raccourcis clavier",
@@ -621,7 +652,7 @@
           "body": "Cette section règle le comportement du canevas pendant que vous travaillez."
         },
         "settingsTune": {
-          "title": "Changez l'un des réglages",
+          "title": "Changez l'un des paramètres",
           "body": "Aimanter à la grille, guides intelligents, ou le zoom d'ouverture d'un canevas. Basculez-en un et le canevas suit immédiatement."
         },
         "settingsPlan": {
@@ -803,7 +834,6 @@
       "close": "Fermer les paramètres",
       "comingSoon": "Bientôt disponible",
       "languageSaving": "Enregistrement de la langue…",
-      "languageSaveFailed": "Impossible d'enregistrer la langue. Veuillez réessayer.",
       "groups": {
         "account": "Compte",
         "preferences": "Préférences",
@@ -832,8 +862,9 @@
         "emailInvalid": "Veuillez saisir une adresse email valide.",
         "namePlaceholder": "Comment les autres vous voient",
         "avatarTitle": "Avatar",
-        "avatarOptions": "options",
+        "avatarOptionCount": "{count, plural, one {# option} other {# options}}",
         "badgesTitle": "Insignes",
+        "badgeEarned": "Nouvel insigne : {name}",
         "initialsLabel": "Initiales",
         "avatarIcons": {
           "avatarIconCat": "Chat",
@@ -864,34 +895,32 @@
           "initiateUnlock": "Terminez la visite et tous les guides.",
           "badgeFirstSteps": "Premiers pas",
           "firstStepsUnlock": "Créez votre premier canevas.",
+          "badgeWorkspaceBuilder": "Bâtisseur",
+          "workspaceBuilderUnlock": "Créez votre premier espace de travail.",
           "badgeArchitect": "Architecte",
           "architectUnlock": "Construisez un canevas avec 25 nœuds ou plus.",
           "badgeConnector": "Connecteur",
-          "connectorUnlock": "Effectuez 50 connexions entre nœuds.",
+          "connectorUnlock": "Tracez 15 connexions sur un même canevas.",
           "badgeCritic": "Critique",
-          "criticUnlock": "Marquez 25 chemins comme valides ou invalides.",
-          "badgeLinguist": "Linguiste",
-          "linguistUnlock": "Changez la langue de l'interface.",
-          "badgeCurator": "Conservateur",
-          "curatorUnlock": "Utilisez une référence inter-canevas.",
-          "badgeVoice": "Voix",
-          "voiceUnlock": "Publiez votre premier commentaire.",
-          "badgeExplorer": "Explorateur",
-          "explorerUnlock": "Ouvrez 10 canevas différents.",
-          "badgeStoryteller": "Conteur",
-          "storytellerUnlock": "Créez 5 fils de discussion.",
-          "badgeWorkspaceBuilder": "Bâtisseur",
-          "workspaceBuilderUnlock": "Créez votre premier espace de travail.",
-          "badgeNightOwl": "Noctambule",
-          "nightOwlUnlock": "Travaillez après minuit pendant une semaine.",
-          "badgeMarathoner": "Marathonien",
-          "marathonerUnlock": "Restez actif 30 jours d'affilée.",
-          "badgeCollaborator": "Collaborateur",
-          "collaboratorUnlock": "Rejoignez un espace partagé.",
+          "criticUnlock": "Marquez un chemin comme invalide.",
           "badgeWeaver": "Tisserand",
           "weaverUnlock": "Mêlez chemins valides et invalides sur un même canevas.",
-          "badgeSage": "Sage",
-          "sageUnlock": "Laissez 100 commentaires réfléchis."
+          "badgeVerdict": "Verdict",
+          "verdictUnlock": "Marquez un nœud comme réponse finale.",
+          "badgeVoice": "Voix",
+          "voiceUnlock": "Publiez votre premier commentaire.",
+          "badgeCurator": "Conservateur",
+          "curatorUnlock": "Utilisez une référence inter-canevas.",
+          "badgeCollaborator": "Collaborateur",
+          "collaboratorUnlock": "Rejoignez un espace partagé.",
+          "badgeLinguist": "Linguiste",
+          "linguistUnlock": "Changez la langue de l'interface.",
+          "badgeStylist": "Styliste",
+          "stylistUnlock": "Passez à un autre thème.",
+          "badgeCartographer": "Cartographe",
+          "cartographerUnlock": "Exportez un canevas en image.",
+          "badgeNightOwl": "Noctambule",
+          "nightOwlUnlock": "Ajoutez un nœud entre minuit et 5 h."
         }
       },
       "security": {
@@ -917,6 +946,8 @@
         "deleteAccount": "Supprimer le compte",
         "deleteAccountCaption": "Efface tous vos espaces, fils et canevas",
         "deleteConfirm": "Êtes-vous sûr ? Cette action est irréversible. Toutes vos données seront définitivement supprimées.",
+        "deletePassword": "Confirmez avec votre mot de passe",
+        "deleteBlocked": "Vous êtes propriétaire d'espaces que d'autres personnes utilisent. Transférez-en la propriété ou supprimez-les avant de supprimer votre compte.",
         "deleteButton": "Supprimer mon compte",
         "deleting": "Suppression…",
         "cancel": "Annuler",
@@ -945,7 +976,6 @@
         "themeBloom": "Bloom",
         "bloomDesc": "Porcelaine chaude, action magenta",
         "autoDesc": "Associe Daybreak et Eclipse",
-        "adaptive": "Adaptatif",
         "canvas": "Canevas",
         "canvasIntro": "Quatre textures",
         "canvasBlurb": "Choisissez la surface où vivent vos idées — du papier calme à une grille tracée.",
@@ -1020,6 +1050,20 @@
         "member": "Membre",
         "viewer": "Lecteur"
       },
+      "roleIcons": {
+        "shield": "Bouclier",
+        "star": "Étoile",
+        "flag": "Drapeau",
+        "sparkles": "Étincelles",
+        "target": "Cible",
+        "zap": "Éclair",
+        "rocket": "Fusée",
+        "award": "Récompense",
+        "compass": "Boussole",
+        "crown": "Couronne",
+        "penTool": "Plume",
+        "eye": "Œil"
+      },
       "general": {
         "nameLabel": "Nom de l'espace de travail",
         "namePlaceholder": "Nommez cet espace de travail",
@@ -1049,7 +1093,7 @@
         "cancel": "Annuler",
         "inviteTitle": "Inviter des personnes",
         "inviteHint": "Elles rejoignent à leur prochaine ouverture d'Uniscept.",
-        "emailPlaceholder": "nom@entreprise.com",
+        "emailPlaceholder": "name@example.com",
         "sendInvite": "Envoyer l'invitation",
         "sending": "Envoi…",
         "invited": "Invitation prête",
@@ -1061,7 +1105,7 @@
       },
       "roles": {
         "hint": "Chacun a un seul rôle. Les rôles déterminent ce qu'une personne peut faire.",
-        "membersSuffix": "membres",
+        "memberCount": "{count, plural, one {# membre} other {# membres}}",
         "newRole": "Nouveau rôle",
         "nameLabel": "Nom du rôle",
         "namePlaceholder": "ex. Relecteur",
@@ -1160,19 +1204,19 @@
       "subtitle": "Des outils superficiels engendrent une pensée superficielle.",
       "stream": {
         "channel": "#product-decisions",
-        "live": "live",
+        "live": "en direct",
         "stamp": "Enterré",
         "decision": "DÉCISION : on livre la réécriture v2 au T4",
         "lines": [
           "ok je pousse le hotfix",
-          "quelqu’un a vérifié le staging ?",
+          "quelqu'un a vérifié le staging ?",
           "attends, on est sur quelle config",
           "voir le fil ↑",
           "je renvoie le lien du doc",
           "qui gère la rétention maintenant ?",
-          "déjeuner d’abord ?",
+          "déjeuner d'abord ?",
           "je redémarre le pod de démo",
-          "quelqu’un peut réexpliquer le plan"
+          "quelqu'un peut réexpliquer le plan"
         ]
       },
       "exhibits": {
@@ -1224,7 +1268,7 @@
         "structuredClaimB": "US : marché précoce plus large",
         "validationPremise": "Les coûts restent stables à l'échelle",
         "validationConclusion": "L'économie unitaire tient",
-        "validationSafe": "La rétention tient à l’échelle",
+        "validationSafe": "La rétention tient à l'échelle",
         "referencesCanvasA": "Canevas · Tarifs",
         "referencesCanvasB": "Canevas · Stratégie",
         "referencesSource": "Retour CAC sous 12 mois",
@@ -1279,7 +1323,7 @@
           "name": "Démo",
           "description": "Le temps d'une session",
           "features": [
-            "Essayez le canvas",
+            "Essayez le canevas",
             "Aucun compte requis",
             "Explorez les fonctionnalités",
             "Stockage de session"
@@ -1287,7 +1331,7 @@
         },
         "lite": {
           "name": "Lite",
-          "features": ["Canvas illimités", "Utilisateur unique", "Stockage cloud", "Options d'export"]
+          "features": ["Canevas illimités", "Utilisateur unique", "Stockage cloud", "Options d'export"]
         },
         "standard": {
           "name": "Standard",

@@ -4,12 +4,13 @@ import { fn } from 'storybook/test';
 
 import type { IToolGroup } from '@interfaces';
 
-import { ECanvasTool, type IToolbarProps, Toolbar, buildCanvasToolGroups, buildCanvasTools } from '@/components';
+import { ECanvasTool, type IToolbarProps, Toolbar, buildCanvasTools } from '@/components';
 
 import {
   DENSE_DISABLED_TOOL_IDS,
   EXPORT_THREAD_ID,
   EXPORT_THREAD_NAME,
+  HISTORY_TOOL_IDS,
   READ_ONLY_DISABLED_TOOL_IDS,
   exportMenuNodes,
 } from './consts';
@@ -21,7 +22,6 @@ const meta: Meta<typeof Toolbar> = {
   title: 'Components/Toolbar',
   component: Toolbar,
   parameters: {
-    layout: 'fullscreen',
     docs: {
       description: {
         component:
@@ -87,6 +87,14 @@ const renderToolbar = (
     );
   };
 
+const disableTools =
+  (ids: ReadonlySet<string>) =>
+  (groups: IToolGroup[]): IToolGroup[] =>
+    groups.map((group) => ({
+      ...group,
+      tools: group.tools.map((tool) => (ids.has(tool.id) ? { ...tool, disabled: true } : tool)),
+    }));
+
 export const Default: Story = {
   render: renderToolbar(),
 };
@@ -130,15 +138,7 @@ export const WithDisabledTools: Story = {
       },
     },
   },
-  render: renderToolbar({
-    mapGroups: (groups) =>
-      groups.map((group) => ({
-        ...group,
-        tools: group.tools.map((tool) =>
-          tool.id === ECanvasTool.Undo || tool.id === ECanvasTool.Redo ? { ...tool, disabled: true } : tool,
-        ),
-      })),
-  }),
+  render: renderToolbar({ mapGroups: disableTools(HISTORY_TOOL_IDS) }),
 };
 
 export const ReadOnly: Story = {
@@ -150,15 +150,7 @@ export const ReadOnly: Story = {
       },
     },
   },
-  render: renderToolbar({
-    buildGroups: (t) =>
-      buildCanvasToolGroups(t.platform.canvas.tools).map((group) => ({
-        ...group,
-        tools: group.tools.map((tool) =>
-          READ_ONLY_DISABLED_TOOL_IDS.has(tool.id) ? { ...tool, disabled: true } : tool,
-        ),
-      })),
-  }),
+  render: renderToolbar({ mapGroups: disableTools(READ_ONLY_DISABLED_TOOL_IDS) }),
 };
 
 export const Empty: Story = {
@@ -215,13 +207,7 @@ export const DenseGroups: Story = {
       },
     },
   },
-  render: renderToolbar({
-    mapGroups: (groups) =>
-      groups.map((group) => ({
-        ...group,
-        tools: group.tools.map((tool) => (DENSE_DISABLED_TOOL_IDS.has(tool.id) ? { ...tool, disabled: true } : tool)),
-      })),
-  }),
+  render: renderToolbar({ mapGroups: disableTools(DENSE_DISABLED_TOOL_IDS) }),
 };
 
 export const MinimalSingleGroup: Story = {

@@ -9,7 +9,6 @@ import { TourStepCard } from '@/components/Tour';
 
 vi.mock('@/i18n', () => import('@mocks/i18n'));
 
-const copy = TRANSLATIONS.platform.onboarding;
 const onQuit = vi.fn();
 const onNext = vi.fn();
 
@@ -59,21 +58,27 @@ describe('TourStepCard', () => {
       });
 
       test('THEN it names the step, counts it, and waits without a next button', () => {
-        expect(card(copy.steps.baseThread.title)).toHaveTextContent(copy.steps.baseThread.body);
-        expect(card(copy.steps.baseThread.title)).toHaveTextContent('step 3 of 16');
-        expect(card(copy.steps.baseThread.title)).toHaveTextContent(copy.stepWaiting);
-        expect(button(copy.stepNext)).not.toBeInTheDocument();
+        expect(card(TRANSLATIONS.platform.onboarding.steps.baseThread.title)).toHaveTextContent(
+          TRANSLATIONS.platform.onboarding.steps.baseThread.body,
+        );
+        expect(card(TRANSLATIONS.platform.onboarding.steps.baseThread.title)).toHaveTextContent('step 3 of 16');
+        expect(card(TRANSLATIONS.platform.onboarding.steps.baseThread.title)).toHaveTextContent(
+          TRANSLATIONS.platform.onboarding.stepWaiting,
+        );
+        expect(button(TRANSLATIONS.platform.onboarding.stepNext)).not.toBeInTheDocument();
       });
     });
 
     describe('WHEN the step was already satisfied on arrival', () => {
       beforeEach(() => {
         renderCard({ done: true, onNext });
-        fireEvent.click(button(copy.stepNext)!);
+        fireEvent.click(button(TRANSLATIONS.platform.onboarding.stepNext)!);
       });
 
       test('THEN it says so and lets the user move on', () => {
-        expect(card(copy.steps.baseThread.title)).toHaveTextContent(copy.stepDone);
+        expect(card(TRANSLATIONS.platform.onboarding.steps.baseThread.title)).toHaveTextContent(
+          TRANSLATIONS.platform.onboarding.stepDone,
+        );
         expect(onNext).toHaveBeenCalledTimes(1);
       });
     });
@@ -84,7 +89,9 @@ describe('TourStepCard', () => {
       });
 
       test('THEN it warns that the target is missing', () => {
-        expect(card(copy.steps.baseThread.title)).toHaveTextContent(copy.stepLostTarget);
+        expect(card(TRANSLATIONS.platform.onboarding.steps.baseThread.title)).toHaveTextContent(
+          TRANSLATIONS.platform.onboarding.stepLostTarget,
+        );
       });
     });
 
@@ -94,16 +101,20 @@ describe('TourStepCard', () => {
       });
 
       test('THEN it asks to close the cover instead and offers no next button', () => {
-        expect(card(copy.blockedTitle)).toHaveTextContent(copy.blockedBody);
-        expect(card(copy.blockedTitle)).toHaveTextContent(copy.blockedStatus);
-        expect(button(copy.stepNext)).not.toBeInTheDocument();
+        expect(card(TRANSLATIONS.platform.onboarding.blockedTitle)).toHaveTextContent(
+          TRANSLATIONS.platform.onboarding.blockedBody,
+        );
+        expect(card(TRANSLATIONS.platform.onboarding.blockedTitle)).toHaveTextContent(
+          TRANSLATIONS.platform.onboarding.blockedStatus,
+        );
+        expect(button(TRANSLATIONS.platform.onboarding.stepNext)).not.toBeInTheDocument();
       });
     });
 
     describe('WHEN the user leaves the tour from it', () => {
       beforeEach(() => {
         renderCard();
-        fireEvent.click(button(copy.quit)!);
+        fireEvent.click(button(TRANSLATIONS.platform.onboarding.quit)!);
       });
 
       test('THEN the quit handler runs', () => {
@@ -119,8 +130,10 @@ describe('TourStepCard', () => {
       });
 
       test('THEN it carries no status and moves on with next', () => {
-        expect(card(copy.steps.baseIntro.title)).not.toHaveTextContent(copy.stepWaiting);
-        expect(button(copy.stepNext)).toBeInTheDocument();
+        expect(card(TRANSLATIONS.platform.onboarding.steps.baseIntro.title)).not.toHaveTextContent(
+          TRANSLATIONS.platform.onboarding.stepWaiting,
+        );
+        expect(button(TRANSLATIONS.platform.onboarding.stepNext)).toBeInTheDocument();
       });
     });
   });
@@ -132,9 +145,11 @@ describe('TourStepCard', () => {
       });
 
       test('THEN the friend stands in for Nodi and is named before the step counter', () => {
-        expect(screen.getByRole('img', { name: copy.ergoAlt })).toBeInTheDocument();
-        expect(screen.queryByRole('img', { name: copy.nodiAlt })).not.toBeInTheDocument();
-        expect(card(copy.steps.exampleCapsule.title)).toHaveTextContent(`${copy.ergoName}/step 3 of 16`);
+        expect(screen.getByRole('img', { name: TRANSLATIONS.platform.onboarding.ergoAlt })).toBeInTheDocument();
+        expect(screen.queryByRole('img', { name: TRANSLATIONS.platform.onboarding.nodiAlt })).not.toBeInTheDocument();
+        expect(card(TRANSLATIONS.platform.onboarding.steps.exampleCapsule.title)).toHaveTextContent(
+          `${TRANSLATIONS.platform.onboarding.ergoName}/step 3 of 16`,
+        );
       });
     });
 
@@ -144,7 +159,7 @@ describe('TourStepCard', () => {
       });
 
       test('THEN next waits for the scene to finish', () => {
-        expect(button(copy.stepNext)).toBeDisabled();
+        expect(button(TRANSLATIONS.platform.onboarding.stepNext)).toBeDisabled();
       });
     });
 
@@ -155,7 +170,7 @@ describe('TourStepCard', () => {
 
       test('THEN the choices replace the next button', () => {
         expect(button('choose')).toBeInTheDocument();
-        expect(button(copy.stepNext)).not.toBeInTheDocument();
+        expect(button(TRANSLATIONS.platform.onboarding.stepNext)).not.toBeInTheDocument();
       });
     });
   });

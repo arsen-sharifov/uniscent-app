@@ -1,58 +1,61 @@
 'use client';
 
-import type { Node } from '@xyflow/react';
-import { useRouter, useParams } from 'next/navigation';
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
+import type { IMyInvitation, IWorkspaceItem, TNavItem, TNavItemType } from '@interfaces';
 import {
-  ECanvasNodeType,
-  type ICanvasNodeData,
-  type TNavItem,
-  type TNavItemType,
-  type IWorkspaceItem,
-  type IMyInvitation,
-} from '@interfaces';
-import {
-  getMyWorkspaces,
-  getMyWorkspacePermissions,
-  getUser,
-  createWorkspace,
-  updateWorkspaceName,
-  deleteWorkspace,
-  deleteWorkspaces,
-  moveWorkspace,
-  getFolders,
-  getThreads,
+  acceptWorkspaceInvitation,
   createFolder,
   createThread,
-  updateFolderName,
-  updateThreadName,
+  createWorkspace,
+  declineWorkspaceInvitation,
   deleteFolder,
-  deleteThread,
   deleteFolders,
+  deleteThread,
   deleteThreads,
+  deleteWorkspace,
+  deleteWorkspaces,
+  getFolders,
+  getMyInvitations,
+  getMyWorkspaces,
+  getThreads,
   moveFolder,
   moveThread,
-  getMyInvitations,
-  acceptWorkspaceInvitation,
-  declineWorkspaceInvitation,
+  moveWorkspace,
+  updateFolderName,
+  updateThreadName,
+  updateWorkspaceName,
 } from '@api/client';
 import {
   buildNavTree,
   containsThread,
   findFirstThread,
   findInTree,
+  findOutermostItems,
   findParentId,
   getSiblings,
   insertIntoTree,
   removeFromTree,
-  setThreadAnswered,
   updateNavItemName,
-} from '@/components/Sidebar/utils';
+} from '@/components/Sidebar';
 import { useTranslations } from '@/i18n';
+import { awardBadge } from '@/lib/badges';
 import { event } from '@/lib/events';
-import { useCanvasStore, usePermissionsStore } from '@/lib/stores';
+import { usePermissionsStore } from '@/lib/stores';
 import { createClient } from '@/lib/supabase';
+
+import { useThreadResolutionSync } from './useThreadResolutionSync';
+import { useWorkspaceAccess } from './useWorkspaceAccess';
+
+const canManageWorkspace = (workspaces: IWorkspaceItem[], id: string): boolean =>
+  workspaces.some((workspace) => workspace.id === id && workspace.canManageWorkspace);
+
+const moveNavItem = (type: TNavItemType, id: string, parentId: string | null, position: number) =>
+  type === 'folder' ? moveFolder(id, parentId, position) : moveThread(id, parentId, position);
+
+const findFailedWrite = async (writes: Promise<unknown>[]) =>
+  (await Promise.allSettled(writes)).find((result) => result.status === 'rejected');
 
 export const useWorkspaceManager = () => {
   const router = useRouter();
@@ -71,13 +74,22 @@ export const useWorkspaceManager = () => {
   const [editingWorkspaceId, setEditingWorkspaceId] = useState<string | null>(null);
   const [invitations, setInvitations] = useState<IMyInvitation[]>([]);
 
-  const initialized = useRef(false);
-  const justCreatedIds = useRef<Set<string>>(new Set());
+  const initializedRef = useRef(false);
+  const justCreatedIdsRef = useRef<Set<string>>(new Set());
+  const activeWorkspaceRef = useRef<string | null>(null);
+  const routeWorkspaceRef = useRef(workspaceIdParam);
 
   if (redirecting && threadIdParam) setRedirecting(false);
 
-  const loadWorkspaceContent = useCallback(async (workspaceId: string): Promise<TNavItem[]> => {
+  const activateWorkspace = useCallback((id: string | null) => {
+    activeWorkspaceRef.current = id;
+    setActiveWorkspaceId(id);
+  }, []);
+
+  const loadWorkspaceContent = useCallback(async (workspaceId: string): Promise<TNavItem[] | null> => {
     const [folders, threads] = await Promise.all([getFolders(workspaceId), getThreads(workspaceId)]);
+    if (activeWorkspaceRef.current !== workspaceId) return null;
+
     const tree = buildNavTree(folders, threads);
     setNavItems(tree);
 
@@ -93,8 +105,8 @@ export const useWorkspaceManager = () => {
   );
 
   useEffect(() => {
-    if (initialized.current) return;
-    initialized.current = true;
+    if (initializedRef.current) return;
+    initializedRef.current = true;
 
     const init = async () => {
       const [, workspaceList] = await Promise.all([createClient().auth.getSession(), getMyWorkspaces()]);
@@ -105,10 +117,10 @@ export const useWorkspaceManager = () => {
         : workspaceList[0]?.id;
 
       if (targetWorkspaceId) {
-        setActiveWorkspaceId(targetWorkspaceId);
+        activateWorkspace(targetWorkspaceId);
         const tree = await loadWorkspaceContent(targetWorkspaceId);
 
-        if (!threadIdParam) {
+        if (tree && !threadIdParam) {
           const firstThreadId = findFirstThread(tree);
           if (firstThreadId) {
             setRedirecting(true);
@@ -124,60 +136,56 @@ export const useWorkspaceManager = () => {
       event.error(error, { context: 'sidebar.loadWorkspaces' });
       setLoading(false);
     });
-  }, [workspaceIdParam, threadIdParam, loadWorkspaceContent, router]);
+  }, [workspaceIdParam, threadIdParam, activateWorkspace, loadWorkspaceContent, router]);
+
+  useThreadResolutionSync(setNavItems);
+  useWorkspaceAccess(activeWorkspaceId);
 
   useEffect(() => {
-    const hasAnswerOf = (nodes: Node[]) =>
-      nodes.some((node) => node.type === ECanvasNodeType.Canvas && (node.data as ICanvasNodeData).isAnswer);
+    if (workspaceIdParam && !workspaces.some((workspace) => workspace.id === workspaceIdParam)) return;
 
-    let lastThreadId = useCanvasStore.getState().threadId;
-    let lastHasAnswer = hasAnswerOf(useCanvasStore.getState().nodes);
+    const previousRouteWorkspaceId = routeWorkspaceRef.current;
+    routeWorkspaceRef.current = workspaceIdParam;
+    if (!workspaceIdParam || workspaceIdParam === previousRouteWorkspaceId) return;
+    if (workspaceIdParam === activeWorkspaceRef.current) return;
 
-    return useCanvasStore.subscribe((state) => {
-      const { threadId, nodes } = state;
-      if (!threadId) return;
+    const followRoute = async () => {
+      activateWorkspace(workspaceIdParam);
+      setEditingItemId(null);
+      setEditingWorkspaceId(null);
+      setLoading(true);
+      const tree = await loadWorkspaceContent(workspaceIdParam).catch((error: unknown) => {
+        event.error(error, { title: t.common.errorTitles.loadFailed, context: 'sidebar.followRoute' });
 
-      const hasAnswer = hasAnswerOf(nodes);
-      if (threadId === lastThreadId && hasAnswer === lastHasAnswer) return;
-
-      lastThreadId = threadId;
-      lastHasAnswer = hasAnswer;
-      setNavItems((prev) => setThreadAnswered(prev, threadId, hasAnswer));
-    });
-  }, []);
-
-  useEffect(() => {
-    usePermissionsStore.getState().clearAccess(activeWorkspaceId);
-    if (!activeWorkspaceId) return;
-
-    let cancelled = false;
-
-    Promise.all([getUser(), getMyWorkspacePermissions(activeWorkspaceId)])
-      .then(([{ data }, access]) => {
-        if (cancelled) return;
-        usePermissionsStore.getState().setAccess(activeWorkspaceId, data.user?.id ?? null, access);
-      })
-      .catch((error) => {
-        if (cancelled) return;
-        usePermissionsStore.getState().setAccess(activeWorkspaceId, null, null);
-        event.error(error, { title: t.common.errorTitles.loadFailed, context: 'sidebar.loadPermissions' });
+        return null;
       });
+      if (activeWorkspaceRef.current !== workspaceIdParam) return;
 
-    return () => {
-      cancelled = true;
+      setLoading(false);
+      if (!tree) setNavItems([]);
     };
-  }, [activeWorkspaceId, t]);
+
+    followRoute();
+  }, [workspaceIdParam, workspaces, activateWorkspace, loadWorkspaceContent, t]);
 
   const handleWorkspaceSelect = useCallback(
     async (id: string) => {
+      if (id === activeWorkspaceId) {
+        await loadWorkspaceContent(id).catch((error: unknown) => {
+          event.error(error, { title: t.common.errorTitles.loadFailed, context: 'sidebar.selectWorkspace' });
+        });
+
+        return;
+      }
+
       const previousWorkspaceId = activeWorkspaceId;
-      setActiveWorkspaceId(id);
+      activateWorkspace(id);
       setEditingItemId(null);
       setEditingWorkspaceId(null);
       setLoading(true);
       const tree = await loadWorkspaceContent(id).catch((error: unknown) => {
         event.error(error, { title: t.common.errorTitles.loadFailed, context: 'sidebar.selectWorkspace' });
-        setActiveWorkspaceId(previousWorkspaceId);
+        if (activeWorkspaceRef.current === id) activateWorkspace(previousWorkspaceId);
 
         return null;
       });
@@ -187,11 +195,21 @@ export const useWorkspaceManager = () => {
       const firstThreadId = findFirstThread(tree);
       router.push(firstThreadId ? `/platform/${id}/${firstThreadId}` : '/platform');
     },
-    [activeWorkspaceId, router, loadWorkspaceContent, t],
+    [activeWorkspaceId, router, activateWorkspace, loadWorkspaceContent, t],
+  );
+
+  const activateFirstWorkspace = useCallback(
+    (remaining: IWorkspaceItem[]) => {
+      const next = remaining[0];
+      activateWorkspace(next?.id ?? null);
+      setNavItems([]);
+      if (next) reloadWorkspaceContent(next.id);
+    },
+    [activateWorkspace, reloadWorkspaceContent],
   );
 
   const handleCreateWorkspace = useCallback(async () => {
-    const created = await createWorkspace('New Workspace').catch((error: unknown) => {
+    const created = await createWorkspace(t.platform.sidebar.defaultNames.workspace).catch((error: unknown) => {
       event.error(error, { title: t.common.errorTitles.createFailed, context: 'sidebar.createWorkspace' });
 
       return null;
@@ -203,14 +221,15 @@ export const useWorkspaceManager = () => {
       name: created.name,
       canManageWorkspace: true,
     };
-    setWorkspaces((prev) => [...prev, newWorkspace]);
-    setActiveWorkspaceId(created.id);
+    setWorkspaces((previous) => [...previous, newWorkspace]);
+    activateWorkspace(created.id);
     setEditingWorkspaceId(created.id);
-    justCreatedIds.current.add(created.id);
+    justCreatedIdsRef.current.add(created.id);
     setNavItems([]);
-    router.push(`/platform`);
+    router.push('/platform');
     event.success(t.platform.sidebar.workspaceCreated);
-  }, [router, t]);
+    awardBadge('workspaceBuilder');
+  }, [activateWorkspace, router, t]);
 
   const reloadWorkspaces = useCallback(async () => {
     const workspaceList = await getMyWorkspaces().catch((error: unknown) => {
@@ -249,9 +268,10 @@ export const useWorkspaceManager = () => {
         return;
       }
 
-      setInvitations((prev) => prev.filter((item) => item.id !== invitation.id));
+      setInvitations((previous) => previous.filter((item) => item.id !== invitation.id));
       await reloadWorkspaces();
       event.success(t.platform.sidebar.invitations.accepted);
+      awardBadge('collaborator');
       handleWorkspaceSelect(invitation.workspaceId);
     },
     [reloadWorkspaces, handleWorkspaceSelect, t],
@@ -270,7 +290,7 @@ export const useWorkspaceManager = () => {
         return;
       }
 
-      setInvitations((prev) => prev.filter((item) => item.id !== invitation.id));
+      setInvitations((previous) => previous.filter((item) => item.id !== invitation.id));
       event.success(t.platform.sidebar.invitations.declined);
     },
     [t],
@@ -278,10 +298,12 @@ export const useWorkspaceManager = () => {
 
   const handleRenameWorkspace = useCallback(
     async (id: string, name: string) => {
-      if (!workspaces.find((workspace) => workspace.id === id)?.canManageWorkspace) return;
+      if (!canManageWorkspace(workspaces, id)) return;
 
-      const wasJustCreated = justCreatedIds.current.delete(id);
-      setWorkspaces((prev) => prev.map((workspace) => (workspace.id === id ? { ...workspace, name } : workspace)));
+      const wasJustCreated = justCreatedIdsRef.current.delete(id);
+      setWorkspaces((previous) =>
+        previous.map((workspace) => (workspace.id === id ? { ...workspace, name } : workspace)),
+      );
       try {
         await updateWorkspaceName(id, name);
         if (!wasJustCreated) event.success(t.platform.sidebar.workspaceRenamed);
@@ -295,7 +317,7 @@ export const useWorkspaceManager = () => {
 
   const handleDeleteWorkspace = useCallback(
     async (id: string) => {
-      if (!workspaces.find((workspace) => workspace.id === id)?.canManageWorkspace) return;
+      if (!canManageWorkspace(workspaces, id)) return;
 
       try {
         await deleteWorkspace(id);
@@ -305,26 +327,15 @@ export const useWorkspaceManager = () => {
         return;
       }
 
-      setWorkspaces((prev) => {
-        const remaining = prev.filter((workspace) => workspace.id !== id);
-        if (activeWorkspaceId === id) {
-          const next = remaining[0];
-          if (next) {
-            setActiveWorkspaceId(next.id);
-            reloadWorkspaceContent(next.id);
-          } else {
-            setActiveWorkspaceId(null);
-            setNavItems([]);
-          }
-        }
+      setWorkspaces((previous) => previous.filter((workspace) => workspace.id !== id));
+      if (activeWorkspaceRef.current === id) {
+        activateFirstWorkspace(workspaces.filter((workspace) => workspace.id !== id));
+        router.push('/platform');
+      }
 
-        return remaining;
-      });
-
-      router.push('/platform');
       event.success(t.platform.sidebar.workspaceDeleted);
     },
-    [workspaces, activeWorkspaceId, router, reloadWorkspaceContent, t],
+    [workspaces, router, activateFirstWorkspace, t],
   );
 
   const handleCreateThread = useCallback(
@@ -332,25 +343,34 @@ export const useWorkspaceManager = () => {
       if (!activeWorkspaceId) return null;
       if (!usePermissionsStore.getState().canManageStructure) return null;
 
-      const thread = await createThread(activeWorkspaceId, folderId, name).catch((error: unknown) => {
+      const thread = await createThread(
+        activeWorkspaceId,
+        folderId,
+        name ?? t.platform.sidebar.defaultNames.thread,
+      ).catch((error: unknown) => {
         event.error(error, { title: t.common.errorTitles.createFailed, context: 'sidebar.createThread' });
 
         return null;
       });
       if (!thread) return null;
 
+      event.success(t.platform.sidebar.threadCreated);
+      if (!name) awardBadge('firstSteps');
+      if (activeWorkspaceRef.current !== activeWorkspaceId) return null;
+
       const newItem: TNavItem = {
         type: 'thread',
         id: thread.id,
         name: thread.name,
       };
-      setNavItems((prev) => (folderId ? insertIntoTree(prev, newItem, folderId, Infinity) : [...prev, newItem]));
+      setNavItems((previous) =>
+        folderId ? insertIntoTree(previous, newItem, folderId, Infinity) : [...previous, newItem],
+      );
       if (!name) {
         setEditingItemId(thread.id);
-        justCreatedIds.current.add(thread.id);
+        justCreatedIdsRef.current.add(thread.id);
       }
       router.push(`/platform/${activeWorkspaceId}/${thread.id}`);
-      event.success(t.platform.sidebar.threadCreated);
 
       return thread.id;
     },
@@ -361,17 +381,21 @@ export const useWorkspaceManager = () => {
     if (!activeWorkspaceId) return;
     if (!usePermissionsStore.getState().canManageStructure) return;
 
-    const folder = await createFolder(activeWorkspaceId).catch((error: unknown) => {
-      event.error(error, { title: t.common.errorTitles.createFailed, context: 'sidebar.createFolder' });
+    const folder = await createFolder(activeWorkspaceId, undefined, t.platform.sidebar.defaultNames.folder).catch(
+      (error: unknown) => {
+        event.error(error, { title: t.common.errorTitles.createFailed, context: 'sidebar.createFolder' });
 
-      return null;
-    });
+        return null;
+      },
+    );
     if (!folder) return;
 
-    setNavItems((prev) => [...prev, { type: 'folder', id: folder.id, name: folder.name, items: [] }]);
-    setEditingItemId(folder.id);
-    justCreatedIds.current.add(folder.id);
     event.success(t.platform.sidebar.folderCreated);
+    if (activeWorkspaceRef.current !== activeWorkspaceId) return;
+
+    setNavItems((previous) => [...previous, { type: 'folder', id: folder.id, name: folder.name, items: [] }]);
+    setEditingItemId(folder.id);
+    justCreatedIdsRef.current.add(folder.id);
   }, [activeWorkspaceId, t]);
 
   const handleDeleteItem = useCallback(
@@ -394,13 +418,15 @@ export const useWorkspaceManager = () => {
         return;
       }
 
-      setNavItems((prev) => removeFromTree(prev, id));
       event.success(item.type === 'folder' ? t.platform.sidebar.folderDeleted : t.platform.sidebar.threadDeleted);
+      if (activeWorkspaceRef.current !== activeWorkspaceId) return;
+
+      setNavItems((previous) => removeFromTree(previous, id));
 
       const shouldNavigate =
         item.type === 'thread' ? threadIdParam === id : threadIdParam && containsThread(item, threadIdParam);
       if (shouldNavigate) {
-        router.push(`/platform`);
+        router.push('/platform');
       }
     },
     [activeWorkspaceId, navItems, threadIdParam, router, t],
@@ -413,8 +439,8 @@ export const useWorkspaceManager = () => {
       const item = findInTree(navItems, id);
       if (!item) return;
 
-      const wasJustCreated = justCreatedIds.current.delete(id);
-      setNavItems((prev) => updateNavItemName(prev, id, name));
+      const wasJustCreated = justCreatedIdsRef.current.delete(id);
+      setNavItems((previous) => updateNavItemName(previous, id, name));
 
       try {
         if (item.type === 'folder') {
@@ -433,71 +459,60 @@ export const useWorkspaceManager = () => {
     [navItems, activeWorkspaceId, reloadWorkspaceContent, t],
   );
 
-  const handleMoveItem = useCallback(
-    async (id: string, type: TNavItemType, parentId: string | null, position: number) => {
+  const moveItems = useCallback(
+    async (ids: ReadonlySet<string>, targetParentId: string | null, position: number, context: string) => {
       if (!activeWorkspaceId) return;
       if (!usePermissionsStore.getState().canManageStructure) return;
 
-      const oldParentId = findParentId(navItems, id) ?? null;
+      const itemsToMove = findOutermostItems(navItems, ids);
+      const siblings = getSiblings(navItems, targetParentId);
+      const stayingSiblings = siblings.filter((sibling) => !ids.has(sibling.id));
+      const insertAt = Math.min(position, stayingSiblings.length);
+      const targetItems = [...stayingSiblings.slice(0, insertAt), ...itemsToMove, ...stayingSiblings.slice(insertAt)];
+      const sourceParentIds = new Set(itemsToMove.map((item) => findParentId(navItems, item.id) ?? null));
+      sourceParentIds.delete(targetParentId);
+      if (sourceParentIds.size === 0 && targetItems.every((item, index) => item.id === siblings[index]?.id)) return;
 
-      const targetSiblings = getSiblings(navItems, parentId);
-      const siblingEntries = targetSiblings.map((sibling, index) => ({
-        id: sibling.id,
-        type: sibling.type,
-        oldPos: index,
-      }));
-      const draggedOldPos = siblingEntries.find((sibling) => sibling.id === id)?.oldPos ?? -1;
+      setNavItems((previous) => {
+        const removed = itemsToMove.reduce((accumulator, item) => removeFromTree(accumulator, item.id), previous);
 
-      setNavItems((prev) => {
-        const item = findInTree(prev, id);
-        if (!item) return prev;
-        const without = removeFromTree(prev, id);
-
-        return insertIntoTree(without, item, parentId, position);
+        return itemsToMove.reduce(
+          (accumulator, item, index) => insertIntoTree(accumulator, item, targetParentId, insertAt + index),
+          removed,
+        );
       });
 
-      const withoutDragged = siblingEntries.filter((sibling) => sibling.id !== id);
-      withoutDragged.splice(position, 0, { id, type, oldPos: draggedOldPos });
+      const reorderedLists = [
+        { parentId: targetParentId, items: targetItems },
+        ...[...sourceParentIds].map((parentId) => ({
+          parentId,
+          items: getSiblings(navItems, parentId).filter((sibling) => !ids.has(sibling.id)),
+        })),
+      ];
 
-      const newParentUpdates = withoutDragged
-        .map((sibling, index) => ({
-          ...sibling,
-          newPos: index,
-          targetParentId: parentId,
-        }))
-        .filter((update) => update.oldPos !== update.newPos);
+      const failedWrite = await findFailedWrite(
+        reorderedLists.flatMap(({ parentId, items }) =>
+          items.map((item, index) => moveNavItem(item.type, item.id, parentId, index)),
+        ),
+      );
+      if (!failedWrite) return;
 
-      const allUpdates = [...newParentUpdates];
-
-      if (oldParentId !== parentId) {
-        const oldSiblings = getSiblings(navItems, oldParentId);
-        const removedIndex = oldSiblings.findIndex((sibling) => sibling.id === id);
-        if (removedIndex !== -1) {
-          const compactUpdates = oldSiblings.slice(removedIndex + 1).map((sibling, index) => ({
-            id: sibling.id,
-            type: sibling.type,
-            oldPos: -1,
-            newPos: removedIndex + index,
-            targetParentId: oldParentId,
-          }));
-          allUpdates.push(...compactUpdates);
-        }
-      }
-
-      try {
-        await Promise.all(
-          allUpdates.map((update) =>
-            update.type === 'folder'
-              ? moveFolder(update.id, update.targetParentId, update.newPos)
-              : moveThread(update.id, update.targetParentId, update.newPos),
-          ),
-        );
-      } catch (error) {
-        event.error(error, { title: t.common.errorTitles.moveFailed, context: 'sidebar.moveItem' });
-        if (activeWorkspaceId) await reloadWorkspaceContent(activeWorkspaceId);
-      }
+      event.error(failedWrite.reason, { title: t.common.errorTitles.moveFailed, context });
+      await reloadWorkspaceContent(activeWorkspaceId);
     },
     [activeWorkspaceId, navItems, reloadWorkspaceContent, t],
+  );
+
+  const handleMoveItem = useCallback(
+    (id: string, parentId: string | null, position: number) =>
+      moveItems(new Set([id]), parentId, position, 'sidebar.moveItem'),
+    [moveItems],
+  );
+
+  const handleBulkMove = useCallback(
+    (ids: Set<string>, targetParentId: string | null, position: number) =>
+      moveItems(ids, targetParentId, position, 'sidebar.bulkMove'),
+    [moveItems],
   );
 
   const handleBulkDelete = useCallback(
@@ -509,33 +524,26 @@ export const useWorkspaceManager = () => {
       const folderIds = resolved.filter((item) => item.type === 'folder').map((item) => item.id);
       const threadIds = resolved.filter((item) => item.type === 'thread').map((item) => item.id);
 
-      setNavItems((prev) => [...ids].reduce((acc, id) => removeFromTree(acc, id), prev));
+      setNavItems((previous) => [...ids].reduce((accumulator, id) => removeFromTree(accumulator, id), previous));
 
-      const promises: Promise<unknown>[] = [];
-      if (folderIds.length > 0) promises.push(deleteFolders(folderIds));
-      if (threadIds.length > 0) promises.push(deleteThreads(threadIds));
       try {
-        await Promise.all(promises);
+        if (folderIds.length > 0) await deleteFolders(folderIds);
+        if (threadIds.length > 0) await deleteThreads(threadIds);
       } catch (error) {
         event.error(error, { title: t.common.errorTitles.deleteFailed, context: 'sidebar.bulkDelete' });
-
-        if (activeWorkspaceId) {
-          await reloadWorkspaceContent(activeWorkspaceId);
-        }
+        const tree = await reloadWorkspaceContent(activeWorkspaceId);
+        if (tree && threadIdParam && !findInTree(tree, threadIdParam)) router.push('/platform');
 
         return;
       }
 
       event.success(t.platform.sidebar.itemsDeleted);
+      if (activeWorkspaceRef.current !== activeWorkspaceId) return;
 
       const shouldNavigate =
         !!threadIdParam &&
         (ids.has(threadIdParam) ||
-          folderIds.some((folderId) => {
-            const folder = findInTree(navItems, folderId);
-
-            return !!folder && containsThread(folder, threadIdParam);
-          }));
+          resolved.some((item) => item.type === 'folder' && containsThread(item, threadIdParam)));
       if (shouldNavigate) {
         router.push('/platform');
       }
@@ -545,9 +553,7 @@ export const useWorkspaceManager = () => {
 
   const handleBulkDeleteWorkspaces = useCallback(
     async (ids: Set<string>) => {
-      const manageableIds = new Set(
-        [...ids].filter((id) => workspaces.find((workspace) => workspace.id === id)?.canManageWorkspace),
-      );
+      const manageableIds = new Set([...ids].filter((id) => canManageWorkspace(workspaces, id)));
       const skippedCount = ids.size - manageableIds.size;
       if (manageableIds.size === 0) {
         if (skippedCount > 0) event.warning(t.platform.sidebar.workspacesDeleteSkipped);
@@ -555,27 +561,15 @@ export const useWorkspaceManager = () => {
         return;
       }
 
-      const idArr = [...manageableIds];
-
-      setWorkspaces((prev) => {
-        const remaining = prev.filter((workspace) => !manageableIds.has(workspace.id));
-        if (activeWorkspaceId && manageableIds.has(activeWorkspaceId)) {
-          const next = remaining[0];
-          if (next) {
-            setActiveWorkspaceId(next.id);
-            reloadWorkspaceContent(next.id);
-          } else {
-            setActiveWorkspaceId(null);
-            setNavItems([]);
-          }
-          router.push('/platform');
-        }
-
-        return remaining;
-      });
+      const remaining = workspaces.filter((workspace) => !manageableIds.has(workspace.id));
+      setWorkspaces(remaining);
+      if (activeWorkspaceId && manageableIds.has(activeWorkspaceId)) {
+        activateFirstWorkspace(remaining);
+        router.push('/platform');
+      }
 
       try {
-        await deleteWorkspaces(idArr);
+        await deleteWorkspaces([...manageableIds]);
         if (skippedCount > 0) {
           event.warning(t.platform.sidebar.workspacesDeleteSkipped);
         } else {
@@ -586,73 +580,27 @@ export const useWorkspaceManager = () => {
         await reloadWorkspaces();
       }
     },
-    [workspaces, activeWorkspaceId, router, reloadWorkspaceContent, reloadWorkspaces, t],
+    [workspaces, activeWorkspaceId, router, activateFirstWorkspace, reloadWorkspaces, t],
   );
 
   const handleMoveWorkspace = useCallback(
     async (id: string, position: number) => {
-      const oldIndex = workspaces.findIndex((workspace) => workspace.id === id);
-      if (oldIndex === -1 || oldIndex === position) return;
+      const moved = workspaces.find((workspace) => workspace.id === id);
+      if (!moved || workspaces.indexOf(moved) === position) return;
 
-      const reordered = [...workspaces];
-      const [moved] = reordered.splice(oldIndex, 1);
-      if (!moved) return;
-      reordered.splice(position, 0, moved);
-
+      const staying = workspaces.filter((workspace) => workspace.id !== id);
+      const reordered = [...staying.slice(0, position), moved, ...staying.slice(position)];
       setWorkspaces(reordered);
 
-      const from = Math.min(oldIndex, position);
-      const to = Math.max(oldIndex, position);
-      const updates = reordered.slice(from, to + 1).map((workspace, index) => ({
-        id: workspace.id,
-        position: from + index,
-      }));
+      const failedWrite = await findFailedWrite(
+        reordered.map((workspace, index) => moveWorkspace(workspace.id, index)),
+      );
+      if (!failedWrite) return;
 
-      try {
-        await Promise.all(updates.map((update) => moveWorkspace(update.id, update.position)));
-      } catch (error) {
-        event.error(error, { title: t.common.errorTitles.moveFailed, context: 'sidebar.moveWorkspace' });
-        await reloadWorkspaces();
-      }
+      event.error(failedWrite.reason, { title: t.common.errorTitles.moveFailed, context: 'sidebar.moveWorkspace' });
+      await reloadWorkspaces();
     },
     [workspaces, reloadWorkspaces, t],
-  );
-
-  const handleBulkMove = useCallback(
-    async (ids: Set<string>, targetParentId: string | null) => {
-      if (!activeWorkspaceId) return;
-      if (!usePermissionsStore.getState().canManageStructure) return;
-
-      const targetSiblings = getSiblings(navItems, targetParentId);
-      const existingCount = targetSiblings.filter((sibling) => !ids.has(sibling.id)).length;
-
-      const itemsToMove = [...ids]
-        .map((id) => findInTree(navItems, id))
-        .filter((item): item is TNavItem => item !== null)
-        .map((item) => ({ item, type: item.type }));
-
-      setNavItems((prev) => {
-        const removed = [...ids].reduce((acc, id) => removeFromTree(acc, id), prev);
-
-        return itemsToMove.reduce(
-          (acc, { item }, index) => insertIntoTree(acc, item, targetParentId, existingCount + index),
-          removed,
-        );
-      });
-
-      const promises = itemsToMove.map(({ item, type }, index) =>
-        type === 'folder'
-          ? moveFolder(item.id, targetParentId, existingCount + index)
-          : moveThread(item.id, targetParentId, existingCount + index),
-      );
-      try {
-        await Promise.all(promises);
-      } catch (error) {
-        event.error(error, { title: t.common.errorTitles.moveFailed, context: 'sidebar.bulkMove' });
-        if (activeWorkspaceId) await reloadWorkspaceContent(activeWorkspaceId);
-      }
-    },
-    [activeWorkspaceId, navItems, reloadWorkspaceContent, t],
   );
 
   const handleItemClick = useCallback(
@@ -667,6 +615,16 @@ export const useWorkspaceManager = () => {
 
   const activeThread = threadIdParam ? findInTree(navItems, threadIdParam) : null;
 
+  const clearEditingItemId = useCallback(() => {
+    justCreatedIdsRef.current.clear();
+    setEditingItemId(null);
+  }, []);
+
+  const clearEditingWorkspaceId = useCallback(() => {
+    justCreatedIdsRef.current.clear();
+    setEditingWorkspaceId(null);
+  }, []);
+
   return {
     workspaces,
     activeWorkspaceId,
@@ -674,15 +632,9 @@ export const useWorkspaceManager = () => {
     activeThreadId: threadIdParam,
     activeThreadName: activeThread?.name ?? null,
     editingItemId,
-    clearEditingItemId: useCallback(() => {
-      justCreatedIds.current.clear();
-      setEditingItemId(null);
-    }, []),
+    clearEditingItemId,
     editingWorkspaceId,
-    clearEditingWorkspaceId: useCallback(() => {
-      justCreatedIds.current.clear();
-      setEditingWorkspaceId(null);
-    }, []),
+    clearEditingWorkspaceId,
     loading: loading || redirecting,
     onWorkspaceSelect: handleWorkspaceSelect,
     onCreateWorkspace: handleCreateWorkspace,

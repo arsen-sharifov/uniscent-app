@@ -1,6 +1,6 @@
 import { describe, expect, test, vi } from 'vitest';
 
-import { createNodeComment, deleteNodeComment, getNodeComments } from '@api/client';
+import { createNodeComment, deleteNodeComment, getNodeComments, IDS_PER_REQUEST, ROWS_PER_PAGE } from '@api/client';
 import { nodeCommentRow } from '@mocks/rows';
 import { primeSupabase } from '@mocks/supabase';
 
@@ -79,10 +79,46 @@ describe('deleteNodeComment', () => {
 describe('getNodeComments', () => {
   describe('GIVEN comments stored for the nodes', () => {
     describe('WHEN the comments are fetched', () => {
-      test('THEN the rows are returned as is', async () => {
-        primeSupabase([{ data: [nodeCommentRow()] }]);
+      test('THEN the rows are returned as is in a stable order', async () => {
+        const { queries } = primeSupabase([{ data: [nodeCommentRow()] }]);
+        const order = vi.spyOn(queries[0]!, 'order');
 
         await expect(getNodeComments(['n1'])).resolves.toEqual([nodeCommentRow()]);
+        expect(order.mock.calls).toEqual([['created_at'], ['id']]);
+      });
+    });
+  });
+
+  describe('GIVEN comments for more nodes than one request may carry ids for', () => {
+    describe('WHEN the comments are fetched', () => {
+      test('THEN the node ids are split into bounded requests and the merged comments are unchanged', async () => {
+        const nodeIds = Array.from({ length: IDS_PER_REQUEST + 1 }, (_, index) => `n-${index}`);
+        const lastId = `n-${IDS_PER_REQUEST}`;
+        const comments = nodeIds.map((nodeId) => nodeCommentRow({ id: `c-${nodeId}`, node_id: nodeId }));
+        const { queries } = primeSupabase([
+          { data: comments.slice(0, IDS_PER_REQUEST) },
+          { data: comments.slice(IDS_PER_REQUEST) },
+        ]);
+        const filters = [vi.spyOn(queries[0]!, 'in'), vi.spyOn(queries[1]!, 'in')];
+
+        await expect(getNodeComments(nodeIds)).resolves.toEqual(comments);
+        expect(filters.map((filter) => filter.mock.calls)).toEqual([
+          [['node_id', nodeIds.slice(0, IDS_PER_REQUEST)]],
+          [['node_id', [lastId]]],
+        ]);
+      });
+    });
+  });
+
+  describe('GIVEN more comments than one page', () => {
+    describe('WHEN the comments are fetched', () => {
+      test('THEN the next page is read as well', async () => {
+        const firstPage = Array.from({ length: ROWS_PER_PAGE }, (_, index) => nodeCommentRow({ id: `c-${index}` }));
+        const { queries } = primeSupabase([{ data: firstPage }, { data: [nodeCommentRow({ id: 'c-last' })] }]);
+        const secondRange = vi.spyOn(queries[1]!, 'range');
+
+        await expect(getNodeComments(['n1'])).resolves.toHaveLength(ROWS_PER_PAGE + 1);
+        expect(secondRange).toHaveBeenCalledExactlyOnceWith(ROWS_PER_PAGE, 2 * ROWS_PER_PAGE - 1);
       });
     });
   });

@@ -1,6 +1,4 @@
-import type { TCanvasOperation } from '@interfaces';
-
-type TCanvasOperationListener = (operation: TCanvasOperation) => void;
+import type { TCanvasOperation, TCanvasOperationListener } from '@interfaces';
 
 const listeners = new Set<TCanvasOperationListener>();
 

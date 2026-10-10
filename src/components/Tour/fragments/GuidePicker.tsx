@@ -2,6 +2,7 @@
 
 import { clsx } from 'clsx';
 import { RotateCcw } from 'lucide-react';
+import { useId } from 'react';
 
 import type { ITourSnapshot } from '@interfaces';
 
@@ -19,7 +20,7 @@ interface IGuidePickerProps {
 
 export const GuidePicker = ({ snapshot }: IGuidePickerProps) => {
   const t = useTranslations();
-  const onboarding = t.platform.onboarding;
+  const titleId = useId();
   const open = useOnboardingStore((state) => state.pickerOpen);
   const closePicker = useOnboardingStore((state) => state.closePicker);
   const startGuide = useOnboardingStore((state) => state.startGuide);
@@ -29,11 +30,11 @@ export const GuidePicker = ({ snapshot }: IGuidePickerProps) => {
   const baseDone = completed.has(BASE_GUIDE_ID);
 
   return (
-    <TourDialog open={open} onClose={closePicker} width="max-w-lg">
-      <NodiHeading title={onboarding.pickerTitle} pose={baseDone ? 'idle' : 'point'} />
+    <TourDialog open={open} onClose={closePicker} width="max-w-lg" labelledBy={titleId}>
+      <NodiHeading title={t.platform.onboarding.pickerTitle} titleId={titleId} pose={baseDone ? 'idle' : 'point'} />
 
       <p className="mt-3 font-grotesk text-[13px] leading-relaxed text-pretty text-[color:var(--text-muted)]">
-        {onboarding.pickerBody}
+        {t.platform.onboarding.pickerBody}
       </p>
 
       <p className="mt-1 font-mono-ui text-[10.5px] tracking-[0.04em] text-[color:var(--text-label)] lowercase">
@@ -46,7 +47,7 @@ export const GuidePicker = ({ snapshot }: IGuidePickerProps) => {
           const locked = guide.id !== BASE_GUIDE_ID && !baseDone;
           const unmet = locked ? null : findUnmetRequirement(guide, snapshot);
           const disabled = locked || unmet !== null;
-          const hint = unmet ? onboarding.hints[unmet.hintKey] : onboarding.pickerLocked;
+          const hint = unmet ? t.platform.onboarding.hints[unmet.hintKey] : t.platform.onboarding.pickerLocked;
           const StatusIcon = GUIDE_STATUS_ICONS[resolveGuideStatus(isDone, disabled)];
 
           return (
@@ -78,18 +79,22 @@ export const GuidePicker = ({ snapshot }: IGuidePickerProps) => {
 
                 <span className="min-w-0 flex-1">
                   <span className="block font-grotesk text-[13px] font-semibold tracking-tight text-[color:var(--text-strong)]">
-                    {onboarding.guides[`${guide.id}Title`]}
+                    {t.platform.onboarding.guides[`${guide.id}Title`]}
                   </span>
                   <span className="block font-grotesk text-[11.5px] leading-snug text-[color:var(--text-muted)]">
-                    {disabled ? hint : onboarding.guides[`${guide.id}Summary`]}
+                    {disabled ? hint : t.platform.onboarding.guides[`${guide.id}Summary`]}
                   </span>
                 </span>
 
                 <span className="shrink-0 font-mono-ui text-[9.5px] tracking-[0.1em] text-[color:var(--text-subtle)] lowercase">
                   {isDone ? (
-                    <RotateCcw aria-label={onboarding.pickerReplay} className="h-3.5 w-3.5" strokeWidth={1.9} />
+                    <RotateCcw
+                      aria-label={t.platform.onboarding.pickerReplay}
+                      className="h-3.5 w-3.5"
+                      strokeWidth={1.9}
+                    />
                   ) : (
-                    onboarding.pickerStart
+                    t.platform.onboarding.pickerStart
                   )}
                 </span>
               </button>

@@ -1,8 +1,16 @@
 import { describe, expect, test, vi } from 'vitest';
 
-import { createFolder, deleteFolder, deleteFolders, getFolders, moveFolder, updateFolderName } from '@api/client';
+import {
+  createFolder,
+  deleteFolder,
+  deleteFolders,
+  getFolders,
+  IDS_PER_REQUEST,
+  moveFolder,
+  updateFolderName,
+} from '@api/client';
 import { folderRow } from '@mocks/rows';
-import { primeSupabase } from '@mocks/supabase';
+import { NO_ROW_ERROR, primeSupabase } from '@mocks/supabase';
 
 vi.mock('@/lib/supabase', () => import('@mocks/supabase'));
 
@@ -41,10 +49,14 @@ describe('getFolders', () => {
 });
 
 describe('createFolder', () => {
-  describe('GIVEN a root folder in a workspace with siblings', () => {
+  describe('GIVEN a root folder in a workspace whose root holds folders and threads', () => {
     describe('WHEN the folder is created', () => {
-      test('THEN the count is scoped to the root and the folder takes the next position', async () => {
-        const { queries } = primeSupabase([{ count: 2 }, { data: folderRow() }]);
+      test('THEN the folder takes the position after the last root item of either kind', async () => {
+        const { queries } = primeSupabase([
+          { data: { position: 1 } },
+          { data: { position: 2 } },
+          { data: folderRow() },
+        ]);
         const is = vi.spyOn(queries[0]!, 'is');
 
         await expect(createFolder('ws-1')).resolves.toEqual({
@@ -55,10 +67,10 @@ describe('createFolder', () => {
           position: 0,
         });
         expect(is).toHaveBeenCalledExactlyOnceWith('parent_folder_id', null);
-        expect(queries[1]!.insert).toHaveBeenCalledExactlyOnceWith({
+        expect(queries[2]!.insert).toHaveBeenCalledExactlyOnceWith({
           workspace_id: 'ws-1',
           parent_folder_id: null,
-          position: 2,
+          position: 3,
         });
       });
     });
@@ -66,23 +78,43 @@ describe('createFolder', () => {
 
   describe('GIVEN a nested folder under a parent', () => {
     describe('WHEN the folder is created', () => {
-      test('THEN the count is scoped to the parent and the folder takes the next position', async () => {
-        const { queries } = primeSupabase([{ count: 4 }, { data: folderRow({ parent_folder_id: 'folder-1' }) }]);
+      test('THEN the folder takes the position after the last item of the parent', async () => {
+        const { queries } = primeSupabase([
+          { data: { position: 4 } },
+          { data: null },
+          { data: folderRow({ parent_folder_id: 'folder-1' }) },
+        ]);
         const eq = vi.spyOn(queries[0]!, 'eq');
 
         await createFolder('ws-1', 'folder-1');
 
         expect(eq).toHaveBeenCalledWith('parent_folder_id', 'folder-1');
-        expect(queries[1]!.insert).toHaveBeenCalledExactlyOnceWith({
+        expect(queries[2]!.insert).toHaveBeenCalledExactlyOnceWith({
           workspace_id: 'ws-1',
           parent_folder_id: 'folder-1',
-          position: 4,
+          position: 5,
         });
       });
     });
   });
 
-  describe('GIVEN a failing count query', () => {
+  describe('GIVEN a name chosen up front', () => {
+    describe('WHEN the folder is created', () => {
+      test('THEN the name is written with the row instead of the default', async () => {
+        const { queries } = primeSupabase([{ data: null }, { data: null }, { data: folderRow({ name: 'Research' }) }]);
+
+        await expect(createFolder('ws-1', undefined, 'Research')).resolves.toMatchObject({ name: 'Research' });
+        expect(queries[2]!.insert).toHaveBeenCalledExactlyOnceWith({
+          workspace_id: 'ws-1',
+          parent_folder_id: null,
+          position: 0,
+          name: 'Research',
+        });
+      });
+    });
+  });
+
+  describe('GIVEN a failing position read', () => {
     describe('WHEN the folder is created', () => {
       test('THEN the error propagates', async () => {
         primeSupabase([{ error: new Error('db down') }]);
@@ -95,7 +127,7 @@ describe('createFolder', () => {
   describe('GIVEN a failing insert', () => {
     describe('WHEN the folder is created', () => {
       test('THEN the error propagates', async () => {
-        primeSupabase([{ count: 0 }, { error: new Error('db down') }]);
+        primeSupabase([{ data: null }, { data: null }, { error: new Error('db down') }]);
 
         await expect(createFolder('ws-1')).rejects.toThrow('db down');
       });
@@ -105,7 +137,7 @@ describe('createFolder', () => {
   describe('GIVEN an insert that returns no row', () => {
     describe('WHEN the folder is created', () => {
       test('THEN nothing is returned', async () => {
-        primeSupabase([{ count: 0 }, { data: null }]);
+        primeSupabase([{ data: null }, { data: null }, { data: null }]);
 
         await expect(createFolder('ws-1')).resolves.toBeNull();
       });
@@ -134,6 +166,17 @@ describe('updateFolderName', () => {
         primeSupabase([{ error: new Error('db down') }]);
 
         await expect(updateFolderName('folder-1', 'Renamed')).rejects.toThrow('db down');
+      });
+    });
+  });
+
+  describe('GIVEN a rename the database applies to no row', () => {
+    describe('WHEN the name is updated', () => {
+      test('THEN the missing row is reported instead of a silent success', async () => {
+        const { queries } = primeSupabase([{ data: [] }]);
+        vi.spyOn(queries[0]!, 'single').mockResolvedValue({ data: null, error: NO_ROW_ERROR, count: null });
+
+        await expect(updateFolderName('folder-1', 'Renamed')).rejects.toMatchObject({ code: 'PGRST116' });
       });
     });
   });
@@ -180,6 +223,23 @@ describe('deleteFolders', () => {
     });
   });
 
+  describe('GIVEN more folder ids than one request may carry', () => {
+    describe('WHEN the folders are deleted', () => {
+      test('THEN the ids are split into bounded delete requests', async () => {
+        const folderIds = Array.from({ length: IDS_PER_REQUEST + 1 }, (_, index) => `folder-${index}`);
+        const { queries } = primeSupabase([{ data: null }, { data: null }]);
+        const filters = [vi.spyOn(queries[0]!, 'in'), vi.spyOn(queries[1]!, 'in')];
+
+        await deleteFolders(folderIds);
+
+        expect(filters.map((filter) => filter.mock.calls)).toEqual([
+          [['id', folderIds.slice(0, IDS_PER_REQUEST)]],
+          [['id', [`folder-${IDS_PER_REQUEST}`]]],
+        ]);
+      });
+    });
+  });
+
   describe('GIVEN a failing delete', () => {
     describe('WHEN the folders are deleted', () => {
       test('THEN the error propagates', async () => {
@@ -212,6 +272,17 @@ describe('moveFolder', () => {
         primeSupabase([{ error: new Error('db down') }]);
 
         await expect(moveFolder('folder-2', 'folder-1', 5)).rejects.toThrow('db down');
+      });
+    });
+  });
+
+  describe('GIVEN a move the database applies to no row', () => {
+    describe('WHEN the folder is moved', () => {
+      test('THEN the missing row is reported instead of a silent success', async () => {
+        const { queries } = primeSupabase([{ data: [] }]);
+        vi.spyOn(queries[0]!, 'single').mockResolvedValue({ data: null, error: NO_ROW_ERROR, count: null });
+
+        await expect(moveFolder('folder-1', null, 2)).rejects.toMatchObject({ code: 'PGRST116' });
       });
     });
   });

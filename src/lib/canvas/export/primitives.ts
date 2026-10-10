@@ -17,6 +17,21 @@ export const svgElement = <T extends keyof SVGElementTagNameMap>(
   return element;
 };
 
+const isXmlCharacter = (character: string): boolean => {
+  const code = character.codePointAt(0) ?? 0;
+
+  return (
+    code === 0x9 ||
+    code === 0xa ||
+    code === 0xd ||
+    (code >= 0x20 && code <= 0xd7_ff) ||
+    (code >= 0xe0_00 && code <= 0xff_fd) ||
+    code >= 0x1_00_00
+  );
+};
+
+export const toXmlText = (text: string): string => Array.from(text).filter(isXmlCharacter).join('');
+
 export const getCanvasContext = (
   canvas: HTMLCanvasElement,
   settings?: CanvasRenderingContext2DSettings,

@@ -5,8 +5,8 @@ import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRef } from 'react';
 
-import { isAffected } from '@/components/Canvas/utils';
 import { useTranslations } from '@/i18n';
+import { isAffected } from '@/lib/canvas/utils';
 
 import { HeroStage } from './components';
 import { DESKTOP_QUERY, HERO_LOG_LINES, HERO_VISIBLE_LOG_LINES, LANDING_SURFACE_CLASSES } from './consts';
@@ -78,8 +78,7 @@ export const Hero = () => {
           </div>
         </div>
 
-        <div
-          role="group"
+        <section
           aria-label={t.landing.hero.demo.ariaDemo}
           onMouseMove={(event) => {
             const light = lightRef.current;
@@ -132,7 +131,7 @@ export const Hero = () => {
             aria-hidden
             className="panel-light pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover/panel:opacity-100"
           />
-        </div>
+        </section>
       </div>
     </section>
   );

@@ -36,7 +36,6 @@ export default defineConfig([
     'supabase/.branches/**',
     'supabase/.temp/**',
     'supabase/migrations/**',
-    'src/lib/supabase/database.types.ts',
   ]),
 
   codeStyleRules,

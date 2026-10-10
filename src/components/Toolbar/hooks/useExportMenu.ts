@@ -5,6 +5,7 @@ import { type MouseEvent, useState } from 'react';
 import type { IExportMenuModel, TCanvasExportFormat, TCanvasExportOutcome } from '@interfaces';
 
 import { useTranslations } from '@/i18n';
+import { awardBadge } from '@/lib/badges';
 import { event } from '@/lib/events';
 import { useOnboardingStore } from '@/lib/onboarding';
 import { useCanvasStore } from '@/lib/stores';
@@ -53,6 +54,7 @@ export const useExportMenu = (threadId: string, threadName: string): IExportMenu
     if (outcome !== 'downloaded') return;
 
     useOnboardingStore.getState().markSignal('canvasExported');
+    awardBadge('cartographer');
     if (menu.menuRef.current) close(true);
   };
 

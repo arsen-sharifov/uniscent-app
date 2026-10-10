@@ -2,7 +2,7 @@ import type { Decorator, Preview } from '@storybook/nextjs-vite';
 import { NextIntlClientProvider } from 'next-intl';
 import { useEffect } from 'react';
 
-import type { TTheme } from '@constants';
+import type { TTheme } from '@interfaces';
 
 import { mockPermissionsStore } from './utils';
 import en from '../src/locales/en.json';
@@ -84,7 +84,7 @@ const preview: Preview = {
           ['Colors', 'Typography', 'Themes', 'Patterns & Effects'],
           'Branding',
           'Components',
-          ['Canvas', 'CanvasNode', 'ReferenceNode', 'ContextMenu', 'ReferenceSearchPanel', '*'],
+          ['Canvas', '*'],
         ],
       },
     },
